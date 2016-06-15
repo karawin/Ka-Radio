@@ -1,4 +1,5 @@
 # ** ESP8266 & VS1053 Wifi WebRadio** #
+
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations
 ####Version: 1.0.4<br/>
@@ -7,6 +8,7 @@ Next and previous buttons,<br/>
 Autoplay check box<br/>
 "Now playing" removed, the title is now on the top of the page,<br/>
 A hardware panel can be built. See  ESP8266-WebRadio/Hardware/KiCAD/controles/controles.pdf ,<br/>
+If not used, ADC input must be grounded.<br/>
 Optimized software.<br/>
 <br/>
 This release is the end of the project.<br/>
@@ -50,8 +52,8 @@ First step, Final release done.
 - ...
 
 #### Loading the esp8266
-- https://github.com/karawin/Ka-Radio/blob/master/ESP8266-Firmware/bin/boot_v1.5.bin at 0x0000
-- https://github.com/karawin/Ka-Radio/blob/master/ESP8266-Firmware/bin/upgrade/user1.4096.new.6.bin at 0x1000
+- https://github.com/karawin/ESP8266-WebRadio/blob/master/ESP8266-Firmware/bin/boot_v1.5.bin at 0x0000
+- https://github.com/karawin/ESP8266-WebRadio/blob/master/ESP8266-Firmware/bin/upgrade/user1.4096.new.6.bin at 0x1000
 
 #### First use
 - If the acces point of your router is not known, the webradio inits itself as an AP. Connect your wifi to the ssid "WifiWebRadio",  
@@ -90,7 +92,7 @@ The second step will add some hardware buttons (vol + -, station + -, play ...)<
 - Wiring: <br />
 From ESP8266_ESP12( 3.3 v) to VS1053 (5 v)<br />
 REST<br />
-ADC<br />
+ADC   if control panel nut used, this input must be grounded.<br />
 CH_PD to 3.3v<br />
 GPIO16 (a 1Hz output)<br />
 GPIO14 to VS1053 SCK<br />
@@ -106,62 +108,8 @@ GPIO02<br />
 GPIO15 to VS1053 XCS<br />
 <br />
 ##Used hardware
-WiFi and main MCU: ESP8266 (ESP-12 with 32Mbits flash)<br />
+WiFi : ESP8266 (ESP-12 with 32Mbits flash)<br />
 Additional MCU (as a bridge UART<=>UI): AVR<br />
 Audio decoder: VS1053<br />
-##TODO list
-###ESP8266
--**[NORMAL]**Metadata processing<br />
--**[LOW]**External SRAM implementation<br />
--**[LOW]**Code cleanup and optimization
-###AVR
--Hardware design<br />
--Code
-##Changelog
-###v0.13
--**[ESP8266]**Some kind of beta version of web interface is ready.<br />
--**[ESP8266]**Works saving and loading stations and settings to/from flash<br />
--**[ESP8266]**Added "How to run" document
-###v0.12
--**[ESP8266]**Development of functions for saving and reading settings from flash "eeprom"<br />
--**[ESP8266]**Functions for driving GPIO16<br />
--**[ESP8266]**Development of webinterface<br />
--**[ESP8266]**Webclient is using socket
-###v0.11
--**[Hardware]**Finished first revision of schematic (main board) and PCB<br />
--**[Hardware]**Added GERBER files for main board (NOT TESTED YET)<br />
--**[Hardware]**AVR is going to be only an interface between UART in ESP8266 and UI (which is LCD, encoder and buttons)
-###v0.10
--**[ESP8266]**Support for user data (stations, config, etc.) storage in last 64kb of flash
--**[Hardware]**Schematic of main board
-###v0.9
--**[ESP8266]**Sound settings through web interface<br />
--**[ESP8266]**Web interface improvements
-###v0.8
--**[ESP8266]**Webserver uses sockets - improved stability<br />
--**[ESP8266]**Improvments of webinterface (now supports Instant Play)<br />
--**[ESP8266]**Improvments of webserver (simple POST parser)<br />
--**[ESP8266]**DNS lookup
-###v0.7
--**[ESP8266]**Simple and rough sketch of VS1053 driver (working)<br />
--**[ESP8266]**Rough sketch of webclient is working<br />
--I can say that alpha version of player works for now, because I can listen to some SHOUTcast streams.
-###v0.6
--**[ESP8266]**Started making new firmware based on esp_iot_rtos_sdk with bare LwIP and freeRTOS<br />
--**[Hardware]**New conception of hardware, where main MCU is ESP8266 and some small AVR is only to provide user interface (LCD, etc.) and configure ESP via UART<br />
--First tests of new firmware are very promising, because HTTP server based on Netconn is very responsive (much better than previous version of firmware)
-###v0.5
--**[ESP8266]**Improved: HTTP server configuration<br />
--**[ESP8266]**Added: HTTP client UART output<br />
--**[STM32]**Added: Unclean sketch of firmware for basic testing purposes
-###v0.4
--**[ESP8266]**Added: Simple CGI parser<br />
--**[ESP8266]**Added: ICY header parser
-###v0.3
--**[ESP8266]**Added: Simple admin panel mockup<br />
--**[ESP8266]**Added: Connecting to client
-###v0.2
--**[ESP8266]**Added: Running simple http server on port 80<br />
--**[ESP8266]**Added: Simple UART command parser for wifi configuration
-###v0.1
--**[ESP8266]**Initial release - ESP8266 firmware based on cleaned nodemcu source (deleted lua, flash-fs, etc.)
+
+
