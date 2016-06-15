@@ -505,7 +505,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			pvParams->buf = pbuf;
 			pvParams->len = buflen;
 //			printf("GET websocket\n");
-			while (xTaskCreate( websocketTask,"t11",300,(void *) pvParams,4, NULL )!= pdPASS)  //280
+			while (xTaskCreate( websocketTask,"t11",310,(void *) pvParams,4, NULL )!= pdPASS)  //280
 			{
 				printf("ws xTaskCreate  failed. Retry\n");
 				vTaskDelay(100);

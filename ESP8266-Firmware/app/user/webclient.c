@@ -239,8 +239,12 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len,bool catenate)
 		{	
 			t_quote = strstr(t_end,"'");
 			if (t_quote !=NULL){ t_end = t_quote; *t_end = 0;}
-		} else {t = "";len = 0;}
-//		printf("clientsaveMeta t= 0x%x t_end= 0x%x  t=%s\n",t,t_end,t);
+		}
+		else
+		{
+			if (len >2) len-=2; 
+		}
+		//		printf("clientsaveMeta t= 0x%x t_end= 0x%x  t=%s\n",t,t_end,t);
 		
 //		s = t;
 		if ((header.members.mArr[METADATA] != NULL)&&(catenate))
