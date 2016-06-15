@@ -1,0 +1,191 @@
+{"Name":"Europe1","URL":"www.listenlive.eu","File":"/europe1.m3u","Port":"80"}
+{"Name":"RTL","URL":"ais.rtl.fr","File":"/rtl-1-44-128","Port":"80"}
+{"Name":"RTL2","URL":"streaming.radio.rtl.fr","File":"/rtl2-1-44-128.m3u","Port":"80"}
+{"Name":"RMC","URL":"www.listenlive.eu","File":"/rmc.m3u","Port":"80"}
+{"Name":"RFM","URL":"www.listenlive.eu","File":"/rfm.m3u","Port":"80"}
+{"Name":"RFM Collector","URL":"www.listenlive.eu","File":"/rfmcollector.m3u","Port":"80"}
+{"Name":"France Info","URL":"www.listenlive.eu","File":"/franceinfo.m3u","Port":"80"}
+{"Name":"France Inter","URL":"www.listenlive.eu","File":"/franceinter128.m3u","Port":"80"}
+{"Name":"FIP","URL":"www.listenlive.eu","File":"/fip128.m3u","Port":"80"}
+{"Name":"Tout nouveau tout FIP","URL":"www.listenlive.eu","File":"/fip5.m3u","Port":"80"}
+{"Name":"France Bleu IDF","URL":"www.listenlive.eu","File":"/fbidf.m3u","Port":"80"}
+{"Name":"Nostalgie","URL":"www.listenlive.eu","File":"/nostalgie_fr.m3u","Port":"80"}
+{"Name":"Nostalgie 60's","URL":"www.listenlive.eu","File":"/nostalgie_60.m3u","Port":"80"}
+{"Name":"Nostalgie 70's","URL":"www.listenlive.eu","File":"/nostalgie_70.m3u","Port":"80"}
+{"Name":"Nostalgie 80's","URL":"www.listenlive.eu","File":"/nostalgie_80.m3u","Port":"80"}
+{"Name":"Nostalgie Chansons francaises","URL":"www.listenlive.eu","File":"/nostalgie_chansons.m3u","Port":"80"}
+{"Name":"Nostalgie Rock","URL":"www.listenlive.eu","File":"/nostalgie_rock.m3u","Port":"80"}
+{"Name":"Nostalgie Top 100","URL":"www.listenlive.eu","File":"/nostalgie_top100.m3u","Port":"80"}
+{"Name":"Mélodie FM","URL":"www.melodiefm.net","File":"/live.m3u","Port":"80"}
+{"Name":"RFI Monde","URL":"www.listenlive.eu","File":"/rfimonde.m3u","Port":"80"}
+{"Name":"Alpes 1 Gap","URL":"broadcast.infomaniak.ch","File":"/alpes1gap-high.mp3.m3u","Port":"80"}
+{"Name":"Autoroute info sud","URL":"media.autorouteinfo.fr","File":"/direct_sud.mp3.m3u","Port":"8000"}
+{"Name":"Autoroute Info Nord","URL":"media.autorouteinfo.fr","File":"/direct_nord.mp3.m3u","Port":"8000"}
+{"Name":"BFM","URL":"www.listenlive.eu","File":"/bfm.m3u","Port":"80"}
+{"Name":"California 101","URL":"www.california101radio.com","File":"/california101.pls","Port":"80"}
+{"Name":"Chante France","URL":"stream1.chantefrance.com","File":"/Chante_France.m3u","Port":"80"}
+{"Name":"Chérie FM","URL":"www.listenlive.eu","File":"/cheriefm_mp3.m3u","Port":"80"}
+{"Name":"Chérie FM POP","URL":"www.listenlive.eu","File":"/cheriefm_pop_mp3.m3u","Port":"80"}
+{"Name":"Evasion FM","URL":"www.listenlive.eu","File":"/evasionfm.m3u","Port":"80"}
+{"Name":"Hit West Nantes","URL":"broadcast.infomaniak.ch","File":"/hitwest-high.mp3.m3u","Port":"80"}
+{"Name":"Rire et Chansons","URL":"www.listenlive.eu","File":"/rire.m3u","Port":"80"}
+{"Name":"Rire et Chansons Sketches","URL":"www.listenlive.eu","File":"/rire_sketches.m3u","Port":"80"}
+{"Name":"Rire et Chansons Live","URL":"www.listenlive.eu","File":"/rire_100.m3u","Port":"80"}
+{"Name":"Virgin Radio","URL":"www.listenlive.eu","File":"/virginradiofr.m3u","Port":"80"}
+{"Name":"Impact FM","URL":"broadcast.infomaniak.ch","File":"/impactfm-128.mp3.m3u","Port":"80"}
+{"Name":"M2 80's","URL":"www.m2radio.fr","File":"/pls/m280.m3u","Port":"80"}
+{"Name":"M2 90's","URL":"www.m2radio.fr","File":"/pls/m290.m3u","Port":"80"}
+{"Name":"M2 Hit's","URL":"www.m2radio.fr","File":"/pls/m2hit.m3u","Port":"80"}
+{"Name":"M2 Club","URL":"www.m2radio.fr","File":"/pls/m2club.m3u","Port":"80"}
+{"Name":"M2 Love","URL":"www.m2radio.fr","File":"/pls/m2love.m3u","Port":"80"}
+{"Name":"M2 Rock","URL":"www.m2radio.fr","File":"/pls/m2rock.m3u","Port":"80"}
+{"Name":"M2 Sunshine","URL":"www.m2radio.fr","File":"/pls/m2sunshine.m3u","Port":"80"}
+{"Name":"M2 Funk","URL":"www.m2radio.fr","File":"/pls/m2funk.m3u","Port":"80"}
+{"Name":"M2 Chillout","URL":"www.m2radio.fr","File":"/pls/m2chillout.m3u","Port":"80"}
+{"Name":"M2 Caliente","URL":"www.m2radio.fr","File":"/pls/m2caliente.m3u","Port":"80"}
+{"Name":"MFM","URL":"mfm.ice.infomaniak.ch","File":"/playlists/mfm-128.mp3.m3u","Port":"80"}
+{"Name":"MFM Sexy","URL":"mfm-wr3.ice.infomaniak.ch","File":"/playlists/mfm-wr3-128.mp3.m3u","Port":"80"}
+{"Name":"MFM Sérenité","URL":"mfm-wr2.ice.infomaniak.ch","File":"/playlists/mfm-wr2-128.mp3.m3u","Port":"80"}
+{"Name":"MFM Flashback","URL":"mfm-wr4.ice.infomaniak.ch","File":"/playlists/mfm-wr4-64.mp3.m3u","Port":"80"}
+{"Name":"OUI FM","URL":"broadcast.infomaniak.ch","File":"/ouifm-high.mp3.m3u","Port":"80"}
+{"Name":"OUI FM Alternatif","URL":"broadcast.infomaniak.net","File":"/ouifm2.mp3.m3u","Port":"80"}
+{"Name":"OUI FM Collector","URL":"ouifm3.ice.infomaniak.ch","File":"/ouifm3.mp3.m3u","Port":"80"}
+{"Name":"Bide","URL":"relay2.bide-et-musique.com","File":"/","Port":"9200"}
+{"Name":"Classical WETA 90.9 FM - Washington D.C.","URL":"38.100.128.106","File":"/listen.pls?sid=1","Port":"8000"}
+{"Name":"Classic Rock Florida HD","URL":"us2.internet-radio.com","File":"/","Port":"8039"}
+{"Name":"Classic Rock Florida","URL":"us2.internet-radio.com","File":"/","Port":"8046"}
+{"Name":"Classic Rock Miami","URL":"us2.internet-radio.com","File":"/","Port":"8191"}
+{"Name":"Classic Rock Miami HD","URL":"us2.internet-radio.com","File":"/","Port":"8050"}
+{"Name":"Lala Radio","URL":"broadcast.infomaniak.ch","File":"/lalaradio-high.mp3.m3u","Port":"80"}
+{"Name":"Radioaviva Montpellier","URL":"stream.franclr.fr","File":"/radioaviva.m3u","Port":"8000"}
+{"Name":"Pop Radio ogg","URL":"dir.xiph.org","File":"/listen/9057/listen.m3uu","Port":"80"}
+{"Name":"Nirvana meditation radio","URL":"dir.xiph.org","File":"/listen/2912/listen.m3u","Port":"80"}
+{"Name":"SUN - LE SON UNIQUE A NANTES ","URL":"80.82.229.202","File":"/sunhd.mp3","Port":"8000"}
+{"Name":"Rock Radio","URL":"dir.xiph.org","File":"/listen/174891/listen.m3u","Port":"80"}
+{"Name":"Los 40 Principales","URL":"provisioning.streamtheworld.com","File":"/pls/LOS40.pls","Port":"80"}
+{"Name":"Vivante FM Belgique","URL":"listen.radionomy.com","File":"/radio-vivantefm.m3u","Port":"80"}
+{"Name":"Radio Plus Belgique","URL":"radioplus23.ice.infomaniak.ch","File":"/radioplus23-48.aac.m3u","Port":"80"}
+{"Name":"BBC 1 Uk","URL":"www.listenlive.eu","File":"/bbcradio1.m3u","Port":"80"}
+{"Name":"BBC 2 Uk","URL":"www.listenlive.eu","File":"/bbcradio2.m3u","Port":"80"}
+{"Name":"BBC 3 Uk","URL":"www.listenlive.eu","File":"/bbcradio3.m3u","Port":"80"}
+{"Name":"BBC 4 Uk","URL":"www.listenlive.eu","File":"/bbcradio4.m3u","Port":"80"}
+{"Name":"BBC 5 Uk","URL":"www.listenlive.eu","File":"/bbc5live.m3u","Port":"80"}
+{"Name":"BBC 6 Uk","URL":"www.listenlive.eu","File":"/bbc6music.m3u","Port":"80"}
+{"Name":"BBC World","URL":"www.bbc.co.uk","File":"/worldservice/meta/live/mp3/eneuk.pls","Port":"80"}
+{"Name":"Earth Uk","URL":"media-ice.musicradio.com","File":"/HeartLondonMP3.m3u","Port":"80"}
+{"Name":"Hot Radio Uk","URL":"stream1.tune-in.co.uk/listen.pls","File":"/listen.pls","Port":"7002"}
+{"Name":"Minster Radio Uk","URL":"str1.sad.ukrd.com","File":"/minster.m3u","Port":"80"}
+{"Name":"The voice Uk","URL":"www.rosi-systems.com","File":"/thevoice.mp3.m3u","Port":"8000"}
+{"Name":"Must FM Belgique","URL":"rs1.vdl.fm","File":"/listen.pls","Port":"8700"}
+{"Name":"Easy Hit Florida","URL":"uk3.internet-radio.com","File":"/","Port":"8136"}
+{"Name":"Radio WahWah","URL":"uk1.internet-radio.com","File":"/","Port":"8144"}
+{"Name":"PARTY VIBE RADIO ","URL":"www.partyviberadio.com","File":"/listen.pls?sid=1","Port":"8000"}
+{"Name":"Plein Sud 106 FM","URL":"199.195.194.92","File":"/listen.pls","Port":"8090"}
+{"Name":"Sunshine 106.8 Dublin","URL":"50.7.74.82","File":"/listen.pls","Port":"8117"}
+{"Name":"Zenith Classic Rock Dublin","URL":"148.163.81.10","File":"/listen.pls?sid=1","Port":"8006"}
+{"Name":"LaFabrik Suisse","URL":"stream.lafabrik.ch","File":"/lafabrik.m3u","Port":"80"}
+{"Name":"Vibration FM Suise","URL":"vibration.stream2net.eu","File":"/listen.pls","Port":"8130"}
+{"Name":"Vibration PopRock Suisse","URL":"vibrationpoprock.stream2net.eu","File":"/listen.pls","Port":"8260"}
+{"Name":"Vibration Latina Suisse","URL":"vibracionlatina.stream2net.eu","File":"/listen.pls","Port":"8410"}
+{"Name":"Vibratio classic hit Suisse","URL":"vibrationclassic80.stream2net.eu","File":"/listen.pls","Port":"8060"}
+{"Name":"Yes FM Suisse","URL":"yesfm.ice.infomaniak.ch","File":"/yesfm-high.mp3.m3u","Port":"80"}
+{"Name":"Rouge MadeInFrance Suisse","URL":"rouge-madeinfrance.ice.infomaniak.ch","File":"/rouge-madeinfrance-128.mp3.m3u","Port":"80"}
+{"Name":"Classic Rock New York - WWWSHERADIOCOM ","URL":"us2.internet-radio.com","File":"/","Port":"8347"}
+{"Name":"Motown Magic Oldies","URL":"uk3.internet-radio.com","File":"/","Port":"8126"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"","Port":"0"}
+{"Name":"","URL":"","File":"/","Port":"0"}

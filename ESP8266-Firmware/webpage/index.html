@@ -1,0 +1,164 @@
+<!DOCTYPE HTML>
+<HTML>
+	<head>
+<!--		<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1"> -->
+		<meta charset="UTF-8"> 
+		<meta name="viewport" content="width=device-width, minimum-scale=0.25"/>
+		<link rel="icon" type="image/png" href="favicon.png" />
+		<link rel="stylesheet" href="style.css" type="text/css"/>
+		<title>Ka-Radio, the ultimate Wifi Webradio</title>
+	    <style type="text/css">
+        </style>
+	</head>
+	<body>
+	<script src="script.js"></script>
+		<div id="MAIN">
+				<div class="LEFT"><img src="logo.png"></div>
+				<div class="RIGHT">
+				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">KaraWin</a><br/>
+				<a href="https://github.com/PiotrSperka/ESP8266-WebRadio" target="_blank">PiotrSperka</a><br/>
+				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.0.4</a>
+				</div>
+			<div id="HEAD">
+			<span class="bold4"><span id="meta">Ka-Radio</span></span>
+		  </div>
+			<div id="CONTENT">
+				<ul class="tabs">
+				<li>
+				<input type="radio" name="tabs" id="tab1" checked />
+				<label for="tab1">Main</label>
+				<div id="tab-content1" class="tab-content">
+				<h1>Select stations &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" checked  id="aplay" /> AutoPlay</h1>
+					<p>
+					<select id="stationsSelect" onchange="Select()" >
+					</select></p>
+					<span id="np"><p>					
+					<input type="button" value="Previous"  onClick="prevStation()"> &nbsp;
+					<input type="button" value="Next"  onClick="nextStation()">
+					</p><p>
+					<input type="button" value="Play"  onClick="playStation()"> &nbsp;
+					<input type="button" value="Stop"  onClick="stopStation()"></p></span>
+					<p>
+                     <span class="bold2">Volume: </span> &nbsp;<span id="vol1_span"></span><br/>
+					<input type="range" id="vol1_range" name="vol1"  onChange="onRangeVolChange(this.value,true)" min=0 max=254 style="height:25px;">
+					</p>				
+				 <h1>Station informations &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" checked  id="Full"  onclick="full()"/> Full</h1>				  
+					<p><span class="bold1" >Name: </span><span id="name"></span>&nbsp;&nbsp;<img id="icon" src=""  height="16px" width="16px"> </p>
+					<p><span id="ldescr"> <span class="bold1">Description: </span><span id="descr"></span></span></p>
+					<p><span id="lnot1"><span class="bold1">Notice: </span><span id="not1"></span> <span id="not2"></span></span></p>
+					<p><span id="lgenre"><span class="bold1">Genre: </span><span id="genre"></span></span></p>
+					<p><span id="lurl"><span class="bold1">URL: </span><a  target="_blank" id="url2"> <span id="url1"></span></a></span></p>
+					<p><span id="lbitr"><span class="bold1">Bitrate: </span><span id="bitr"></span></span></p>
+							
+				 <h1>Monitoring</h1>	
+				 <p>
+					<input type="button" value="Play"  onClick="mplay()"> &nbsp;
+					<input type="button" value="Stop"  onClick="mstop()"></p><p>
+                    <span class="bold2">Volume</span><br/>
+					<input type="range" id="volm_range" name="volm"  onChange="mvol(this.value/100)" min=0 max=100 style="height:25px;" ></p></br>
+					<audio  volume="1"  id="audio" src=""  onerror="monerror()">
+						I'm sorry; your browser doesn't support HTML5 <code>audio</code>.
+					</audio>
+				 
+				<h1>Instant play</h1>
+					<p>
+					<span class="bold1">URL: </span><input type="text" id="instant_url" name="url"><br>
+					<span class="bold1">Port: </span><input type="text" id="instant_port" name="port" value="80"><br>
+					<span class="bold1">Path: </span><input type="text" id="instant_path" name="path" value="/"><br>
+					<input type="button" value="Play"   onClick="instantPlay()">&nbsp;
+					<input type="button" value="Stop"  onClick="stopStation()">
+					</p>
+				</div>
+				</li>
+				<li>
+					<input type="radio" name="tabs" id="tab2" />
+					<label for="tab2">stations</label>
+					<div id="tab-content2" class="tab-content">
+						<div id="editStationDiv" style="display:none;">
+							<h1>Edit station</h1>
+							<form>
+								<p>
+									<span class="bold">Slot number: </span><input type="text" id="add_slot" name="slot"><br>
+									<span class="bold">Name: </span><input type="text" id="add_name" name="name"><br>
+									<span class="bold">URL: </span><input type="text" id="add_url" name="url"><br>
+									<span class="bold">Port: </span><input type="text" id="add_port" name="port" value="80"><br>
+									<span class="bold">Path: </span><input type="text" id="add_path" name="path" value="/"><br>
+									<input type="button"  onClick="saveStation()" value="save">
+								</p>
+							</form>
+						</div>
+						<h1>Manage stations</h1>
+						<table id = "stationsTable">
+							<thead><tr><td style="width:10%">No.</td><td style="width:20%">Name</td><td style="width:20%">URL</td><td style="width:30%">File</td><td style="width:10%">Port</td><td style="width:10%"></td></tr></thead>
+							<tbody>  							
+							</tbody>
+						</table>
+						<form>
+						<span class="bold2">Select: </span>
+							<a class="page" href="#" onClick="loadStations(1);">1</a>
+							<a class="page" href="#" onClick="loadStations(2);">2</a>
+							<a class="page" href="#" onClick="loadStations(3);">3</a>
+							<a class="page" href="#" onClick="loadStations(4);">4</a>
+							<a class="page" href="#" onClick="loadStations(5);">5</a>
+							<a class="page" href="#" onClick="loadStations(6);">6</a>
+							<a class="page" href="#" onClick="loadStations(7);">7</a>
+							<a class="page" href="#" onClick="loadStations(8);">8</a>
+							<a class="page" href="#" onClick="loadStations(9);">9</a>
+							<a class="page" href="#" onClick="loadStations(10);">10</a>
+							<a class="page" href="#" onClick="loadStations(11);">11</a>
+							<a class="page" href="#" onClick="loadStations(12);">12</a>
+						
+						</form>
+					</div>
+				</li>
+				<li>
+					<input type="radio" name="tabs" id="tab3" />
+					<label for="tab3">Settings</label>
+					<div id="tab-content3" class="tab-content">
+					<h1>Sound</h1>
+						<p>
+						<span class="bold">Treble control: </span><input type="range" id="treble_range" name="treble"  onChange="onRangeChange('treble_range', 'treble_span', 1.5, false)" min=-8 max=7 > <span id="treble_span"></span><br>
+						<span class="bold">Treble frequency: </span><input type="range" id="treblefreq_range" name="treblefreq"  onChange="onRangeChangeFreqTreble('treblefreq_range', 'treblefreq_span', 1, false)" min=1 max=15 > <span id="treblefreq_span"></span><br>
+						<span class="bold">  Bass enhance: </span><input type="range"  id="bass_range" name="bass"  onChange="onRangeChange('bass_range', 'bass_span', 1, false)" min=0 max=15 > <span id="bass_span"></span><br>
+						<span class="bold">  Bass frequency: </span><input type="range"  id="bassfreq_range" name="bassfreq"  onChange="onRangeChangeFreqBass('bassfreq_range', 'bassfreq_span', 10, false)" min=2 max=15 > <span id="bassfreq_span"></span><br>
+						<span class="bold">  Spacialization: </span><input type="range"  id="spacial_range" name="spacial"  onChange="onRangeChangeSpatial('spacial_range', 'spacial_span')" min=0 max=3 > <span id="spacial_span"></span><br>
+						<br/>
+						<span class="bold">Volume: </span><input type="range" id="vol_range" name="vol"  onChange="onRangeVolChange(this.value,true)" min=0 max=254 > <span id="vol_span"></span><br>
+						</p>
+					<h1>Stations</h1>
+						<p>
+						<input type="button"  onClick="saveTextAsFile()" value="Save Stations from WebRadio"> 
+						<span style="display:inline-block;">To 
+						<input type="text" style="width:200;" value="WebStations.txt" id="filesave"></span>
+						<a HREF="" download="WebStations.txt" id="downloadlink" style="display: none;">Download it</a><br/><br/>
+						<input type="button"   onClick="downloadStations()" value="Load Stations to WebRadio"> <span style="display:inline-block;">From 
+						<input type="file" style="width:300;" id="fileload"></span><br/><br/>
+						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list">
+						<input type="button" style="float:right;" id="clear" title="Warning: This will clear all stations.\n Be sure to save them before." onClick="clearList()"  value="Clear all stations"><br/>				
+						<br/>
+						</p>
+					<h1>Wifi</h1>
+						<p>
+						<span class="bold">AP SSID:</span>
+						<input  id="ssid" type=text />
+						<br/>
+						<span class="bold"> AP PASSWORD:</span>
+						<input id="passwd" type=text />
+						<br/> <span class="bold"> Use DHCP:</span><input id="dhcp" type=checkbox onclick="clickdhcp()" /><br/>
+						<span class="bold">Ip:</span>
+						<input  id="ip" type=text oninput="chkip(this)" />
+						<br/>
+						<span class="bold">Mask:</span>
+						<input id="mask" type=text oninput="chkip(this)" value="255.255.255.0" /><br/>
+						<span class="bold">Gateway:</span>
+						<input id="gw" type=text oninput="chkip(this)" /><br/>
+						<input type=button value="Validate" onclick="valid()" /><br/>
+						
+						</p>
+					</div>
+				</li>
+				</ul>
+			</div>
+		</div>	
+	</body>
+</HTML>

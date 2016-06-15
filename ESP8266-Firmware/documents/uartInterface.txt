@@ -1,0 +1,69 @@
+UART interface for the Wifi Webradio
+____________________________________
+
+The uart inteface can be used to receive events from the webradio and to send commands to it.
+
+Example of indications received:
+##CLI.URLSET#: 194.150.236.178
+##CLI.PATHSET#: /
+##CLI.PORTSET#: 8000
+##CLI.URL#: 194.150.236.178, path: /, port: 8000
+##CLI.ICY0#: California-101 The Westcoast Radio
+##CLI.ICY1#: <BR>This stream requires <a href="http://www.winamp.com/">Winamp</a><BR>
+##CLI.ICY2#: SHOUTcast Distributed Network Audio Server/win32 v1.9.2<BR>
+##CLI.ICY3#: http://www.california101radio.com
+##CLI.ICY4#: Rock - Pop - Californian music
+##CLI.ICY5#: 128
+##CLI.META#: Carole Bayer Sager - One Star Shining
+##CLI.PLAYING#
+##CLI.STOPPED#
+##CLI.URLSET#: broadcast.infomaniak.ch
+##CLI.PATHSET#: /hitwest-high.mp3.m3u
+##CLI.PORTSET#: 80
+##CLI.URLSET#: ice5.infomaniak.ch
+##CLI.PATHSET#: /hitwest-high.mp3
+##CLI.PORTSET#: 80
+##CLI.URL#: ice5.infomaniak.ch, path: /hitwest-high.mp3, port: 80
+##CLI.STOPPED#
+##CLI.ICY0#: Hitwest Mp3  128k
+##CLI.ICY3#: http://www.hitwest.co
+##CLI.ICY4#: Hit
+##CLI.ICY5#: 128
+##CLI.ICY6#: Hitwest
+##CLI.ICY7#:  ice-samplerate=44100;ice-bitrate=128;ice-channels=2
+##CLI.PLAYING#
+##CLI.META#: KAOLIN - Partons vite
+
+with ICYx: 0:"icy-name:", 1:"icy-notice1:", 2:"icy-notice2:",  3:"icy-url:", 4:"icy-genre:", 5:"icy-br:", 6:"icy-description:", 7:"ice-audio-info:"
+Some other informations may be printed for debug purpose, but usefull events always start with ##
+
+
+Commands:
+---------
+wifi.list		: give the list of received SSID
+wifi.con		: connect to the default SSID
+wifi.con("ssid","password")		: connect to the given ssid with password
+wifi.discon		: disconnect the current ssid
+wifi.status		: give #WIFI.STATUS#			start of the answer
+						5						the connection state
+						192.168.1.40			the current ip
+						255.255.255.0			the network mask
+						192.168.1.70			the network gateway
+						##WIFI.STATUS#			end of the answer
+wifi.station			: the current ssid and password
+
+cli.url("url")			: the name or ip of the station to play
+cli.path("/path")		: the path of the station to play
+cli.port("xxxx")		: the port number of the station to play						
+cli.start				: start to play the given station
+cli.stop				: stop the playing station
+cli.list				: list of the recorded stations
+cli.play("xxx")			: play the xxx recorded station in the list
+cli.vol("xxx")			: set the volume to xxx with xxx from 0 to 254 (max volume)
+cli.prev (or cli.previous): select the previous station in the list and play it
+cli.next				: select the next station in the list and play it
+
+sys.erase				: erase all recorded configuration and stations.
+
+<enter> will display 
+#INFO:""#

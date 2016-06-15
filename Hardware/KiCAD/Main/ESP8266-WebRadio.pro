@@ -1,0 +1,96 @@
+update=01/06/2016 23:16:40
+version=1
+last_client=kicad
+[general]
+version=1
+[cvpcb]
+version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms
+[pcbnew]
+version=1
+LastNetListRead=
+UseCmpFile=1
+PadDrill="    0,600000"
+PadDrillOvalY="    0,600000"
+PadSizeH="    1,400000"
+PadSizeV="    1,400000"
+PcbTextSizeV="    1,500000"
+PcbTextSizeH="    1,500000"
+PcbTextThickness="    0,300000"
+ModuleTextSizeV="    1,500000"
+ModuleTextSizeH="    1,500000"
+ModuleTextSizeThickness="    0,150000"
+SolderMaskClearance="    0,200000"
+SolderMaskMinWidth="    0,000000"
+DrawSegmentWidth="    0,200000"
+BoardOutlineThickness="    0,150000"
+ModuleOutlineThickness="    0,150000"
+[pcbnew/libraries]
+LibDir=
+LibName1=_moje
+LibName2=sockets
+LibName3=connect
+LibName4=discret
+LibName5=pin_array
+LibName6=divers
+LibName7=libcms
+LibName8=display
+LibName9=valves
+LibName10=led
+LibName11=dip_sockets
+LibName12=esp8266
+LibName13=lqfp48
+LibName14=logo
+[eeschema]
+version=1
+LibDir=
+[eeschema/libraries]
+LibName1=ESP8266-WebRadio-rescue
+LibName2=_moje
+LibName3=power
+LibName4=device
+LibName5=transistors
+LibName6=conn
+LibName7=linear
+LibName8=regul
+LibName9=74xx
+LibName10=cmos4000
+LibName11=adc-dac
+LibName12=memory
+LibName13=xilinx
+LibName14=special
+LibName15=microcontrollers
+LibName16=dsp
+LibName17=microchip
+LibName18=analog_switches
+LibName19=motorola
+LibName20=texas
+LibName21=intel
+LibName22=audio
+LibName23=interface
+LibName24=digital-audio
+LibName25=philips
+LibName26=display
+LibName27=cypress
+LibName28=siliconi
+LibName29=opto
+LibName30=atmel
+LibName31=contrib
+LibName32=valves
+LibName33=esp8266
+LibName34=vs10xx
+LibName35=lm1117
+LibName36=23lcv1024
+LibName37=ne5532
+[schematic_editor]
+version=1
+PageLayoutDescrFile=
+PlotDirectoryName=
+SubpartIdSeparator=0
+SubpartFirstId=65
+NetFmtName=
+SpiceForceRefPrefix=0
+SpiceUseNetNumbers=0
+LabSize=60

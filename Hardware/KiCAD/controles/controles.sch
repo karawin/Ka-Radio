@@ -1,0 +1,404 @@
+EESchema Schematic File Version 2
+LIBS:power
+LIBS:device
+LIBS:transistors
+LIBS:conn
+LIBS:linear
+LIBS:regul
+LIBS:74xx
+LIBS:cmos4000
+LIBS:adc-dac
+LIBS:memory
+LIBS:xilinx
+LIBS:microcontrollers
+LIBS:dsp
+LIBS:microchip
+LIBS:analog_switches
+LIBS:motorola
+LIBS:texas
+LIBS:intel
+LIBS:audio
+LIBS:interface
+LIBS:digital-audio
+LIBS:philips
+LIBS:display
+LIBS:cypress
+LIBS:siliconi
+LIBS:opto
+LIBS:atmel
+LIBS:contrib
+LIBS:valves
+LIBS:controles-cache
+EELAYER 25 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title "Controls for Ka-Radio"
+Date ""
+Rev "1.0"
+Comp "KaraWin"
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L CONN_01X04 Conn1
+U 1 1 575AD139
+P 1650 2750
+F 0 "Conn1" H 1650 3000 50  0000 C CNN
+F 1 "CONN 1" V 1750 2750 50  0000 C CNN
+F 2 "" H 1650 2750 50  0000 C CNN
+F 3 "" H 1650 2750 50  0000 C CNN
+	1    1650 2750
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R2
+U 1 1 575AD312
+P 3000 3350
+F 0 "R2" V 3080 3350 50  0000 C CNN
+F 1 "1k" V 3000 3350 50  0000 C CNN
+F 2 "" V 2930 3350 50  0000 C CNN
+F 3 "" H 3000 3350 50  0000 C CNN
+	1    3000 3350
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R1
+U 1 1 575AD3E7
+P 3000 2850
+F 0 "R1" V 3080 2850 50  0000 C CNN
+F 1 "16k" V 3000 2850 50  0000 C CNN
+F 2 "" V 2930 2850 50  0000 C CNN
+F 3 "" H 3000 2850 50  0000 C CNN
+	1    3000 2850
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R3
+U 1 1 575AE6A0
+P 3000 3800
+F 0 "R3" V 3080 3800 50  0000 C CNN
+F 1 "1k" V 3000 3800 50  0000 C CNN
+F 2 "" V 2930 3800 50  0000 C CNN
+F 3 "" H 3000 3800 50  0000 C CNN
+	1    3000 3800
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R4
+U 1 1 575AE6D0
+P 3000 4250
+F 0 "R4" V 3080 4250 50  0000 C CNN
+F 1 "1k" V 3000 4250 50  0000 C CNN
+F 2 "" V 2930 4250 50  0000 C CNN
+F 3 "" H 3000 4250 50  0000 C CNN
+	1    3000 4250
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R5
+U 1 1 575AE761
+P 3000 4700
+F 0 "R5" V 3080 4700 50  0000 C CNN
+F 1 "1k" V 3000 4700 50  0000 C CNN
+F 2 "" V 2930 4700 50  0000 C CNN
+F 3 "" H 3000 4700 50  0000 C CNN
+	1    3000 4700
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R6
+U 1 1 575AE7B1
+P 3000 5150
+F 0 "R6" V 3080 5150 50  0000 C CNN
+F 1 "1k" V 3000 5150 50  0000 C CNN
+F 2 "" V 2930 5150 50  0000 C CNN
+F 3 "" H 3000 5150 50  0000 C CNN
+	1    3000 5150
+	-1   0    0    1   
+$EndComp
+$Comp
+L R R7
+U 1 1 575AE844
+P 3000 5650
+F 0 "R7" V 3080 5650 50  0000 C CNN
+F 1 "1k" V 3000 5650 50  0000 C CNN
+F 2 "" V 2930 5650 50  0000 C CNN
+F 3 "" H 3000 5650 50  0000 C CNN
+	1    3000 5650
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	3000 3000 3000 3100
+Wire Wire Line
+	3000 3100 3000 3200
+Wire Wire Line
+	3000 3500 3000 3550
+Wire Wire Line
+	3000 3550 3000 3650
+Wire Wire Line
+	3000 3950 3000 4000
+Wire Wire Line
+	3000 4000 3000 4100
+Wire Wire Line
+	3000 4400 3000 4550
+Wire Wire Line
+	3000 4850 3000 4900
+Wire Wire Line
+	3000 4900 3000 5000
+Wire Wire Line
+	3000 5300 3000 5400
+Wire Wire Line
+	3000 5400 3000 5500
+$Comp
+L GNDA #PWR?
+U 1 1 575AFBBF
+P 3000 6450
+F 0 "#PWR?" H 3000 6200 50  0001 C CNN
+F 1 "GNDA" H 3000 6300 50  0000 C CNN
+F 2 "" H 3000 6450 50  0000 C CNN
+F 3 "" H 3000 6450 50  0000 C CNN
+	1    3000 6450
+	1    0    0    -1  
+$EndComp
+$Comp
+L SW_PUSH STOP
+U 1 1 575AFD23
+P 3700 3550
+F 0 "STOP" H 3850 3660 50  0000 C CNN
+F 1 "SW_PUSH" H 3700 3470 50  0000 C CNN
+F 2 "" H 3700 3550 50  0000 C CNN
+F 3 "" H 3700 3550 50  0000 C CNN
+	1    3700 3550
+	1    0    0    -1  
+$EndComp
+$Comp
+L SW_PUSH START
+U 1 1 575AFDA9
+P 3700 4000
+F 0 "START" H 3850 4110 50  0000 C CNN
+F 1 "SW_PUSH" H 3700 3920 50  0000 C CNN
+F 2 "" H 3700 4000 50  0000 C CNN
+F 3 "" H 3700 4000 50  0000 C CNN
+	1    3700 4000
+	1    0    0    -1  
+$EndComp
+$Comp
+L SW_PUSH VOL+
+U 1 1 575AFE01
+P 3700 4400
+F 0 "VOL+" H 3850 4510 50  0000 C CNN
+F 1 "SW_PUSH" H 3700 4320 50  0000 C CNN
+F 2 "" H 3700 4400 50  0000 C CNN
+F 3 "" H 3700 4400 50  0000 C CNN
+	1    3700 4400
+	1    0    0    -1  
+$EndComp
+$Comp
+L SW_PUSH PREVIOUS
+U 1 1 575AFE66
+P 3700 4900
+F 0 "PREVIOUS" H 3850 5010 50  0000 C CNN
+F 1 "SW_PUSH" H 3700 4820 50  0000 C CNN
+F 2 "" H 3700 4900 50  0000 C CNN
+F 3 "" H 3700 4900 50  0000 C CNN
+	1    3700 4900
+	1    0    0    -1  
+$EndComp
+$Comp
+L SW_PUSH VOL-
+U 1 1 575AFEAE
+P 3700 5400
+F 0 "VOL-" H 3850 5510 50  0000 C CNN
+F 1 "SW_PUSH" H 3700 5320 50  0000 C CNN
+F 2 "" H 3700 5400 50  0000 C CNN
+F 3 "" H 3700 5400 50  0000 C CNN
+	1    3700 5400
+	1    0    0    -1  
+$EndComp
+$Comp
+L SW_PUSH NEXT
+U 1 1 575AFF14
+P 3700 5900
+F 0 "NEXT" H 3850 6010 50  0000 C CNN
+F 1 "SW_PUSH" H 3700 5820 50  0000 C CNN
+F 2 "" H 3700 5900 50  0000 C CNN
+F 3 "" H 3700 5900 50  0000 C CNN
+	1    3700 5900
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R8
+U 1 1 575AFF8A
+P 3000 6150
+F 0 "R8" V 3080 6150 50  0000 C CNN
+F 1 "1k" V 3000 6150 50  0000 C CNN
+F 2 "" V 2930 6150 50  0000 C CNN
+F 3 "" H 3000 6150 50  0000 C CNN
+	1    3000 6150
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	3000 5800 3000 5900
+Wire Wire Line
+	3000 5900 3000 6000
+Wire Wire Line
+	3000 6300 3000 6450
+Wire Wire Line
+	3400 3550 3000 3550
+Connection ~ 3000 3550
+Wire Wire Line
+	3400 4000 3000 4000
+Connection ~ 3000 4000
+Wire Wire Line
+	3400 4400 3000 4400
+Wire Wire Line
+	3400 4900 3000 4900
+Connection ~ 3000 4900
+Wire Wire Line
+	3400 5400 3000 5400
+Connection ~ 3000 5400
+Wire Wire Line
+	3400 5900 3000 5900
+Connection ~ 3000 5900
+Wire Wire Line
+	4000 3550 4350 3550
+Wire Wire Line
+	4350 3550 4350 4000
+Wire Wire Line
+	4350 4000 4350 4400
+Wire Wire Line
+	4350 4400 4350 4900
+Wire Wire Line
+	4350 4900 4350 5400
+Wire Wire Line
+	4350 5400 4350 5900
+Wire Wire Line
+	4350 5900 4350 6450
+Wire Wire Line
+	4000 4000 4350 4000
+Connection ~ 4350 4000
+Wire Wire Line
+	4000 4400 4350 4400
+Connection ~ 4350 4400
+Wire Wire Line
+	4000 4900 4350 4900
+Connection ~ 4350 4900
+Wire Wire Line
+	4000 5400 4350 5400
+Connection ~ 4350 5400
+Wire Wire Line
+	4000 5900 4350 5900
+Connection ~ 4350 5900
+$Comp
+L GNDA #PWR?
+U 1 1 575B0E58
+P 4350 6450
+F 0 "#PWR?" H 4350 6200 50  0001 C CNN
+F 1 "GNDA" H 4350 6300 50  0000 C CNN
+F 2 "" H 4350 6450 50  0000 C CNN
+F 3 "" H 4350 6450 50  0000 C CNN
+	1    4350 6450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3000 3100 1850 3100
+Wire Wire Line
+	1850 3100 1850 2900
+Connection ~ 3000 3100
+$Comp
+L LED D?
+U 1 1 575B2AAD
+P 4450 2550
+F 0 "D?" H 4450 2650 50  0000 C CNN
+F 1 "LED" H 4450 2450 50  0000 C CNN
+F 2 "" H 4450 2550 50  0000 C CNN
+F 3 "" H 4450 2550 50  0000 C CNN
+	1    4450 2550
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R9
+U 1 1 575B2BE1
+P 4500 2850
+F 0 "R9" V 4580 2850 50  0000 C CNN
+F 1 "1k" V 4500 2850 50  0000 C CNN
+F 2 "" V 4430 2850 50  0000 C CNN
+F 3 "" H 4500 2850 50  0000 C CNN
+	1    4500 2850
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	2350 2800 1850 2800
+Connection ~ 3000 2700
+Wire Wire Line
+	4650 2550 4650 2850
+Wire Wire Line
+	4350 2700 4350 2850
+Wire Wire Line
+	4500 2550 2350 2550
+Wire Wire Line
+	2350 2550 2350 2800
+Wire Wire Line
+	1850 2700 3000 2700
+Wire Wire Line
+	2750 2700 3000 2700
+Wire Wire Line
+	3000 2700 4350 2700
+$Comp
+L GNDA #PWR?
+U 1 1 575B57C2
+P 1850 2600
+F 0 "#PWR?" H 1850 2350 50  0001 C CNN
+F 1 "GNDA" H 1850 2450 50  0000 C CNN
+F 2 "" H 1850 2600 50  0000 C CNN
+F 3 "" H 1850 2600 50  0000 C CNN
+	1    1850 2600
+	0    -1   -1   0   
+$EndComp
+Text Notes 1300 2650 0    60   ~ 0
+Gnd
+Text Notes 1300 2750 0    60   ~ 0
+3.3v
+Text Notes 900  2850 0    60   ~ 0
+GPIO16 (led)
+Text Notes 1300 2950 0    60   ~ 0
+ADC
+Text Notes 6500 3100 0    60   ~ 0
+NEXT
+Text Notes 6500 3850 0    60   ~ 0
+Previous
+Text Notes 6050 3450 0    60   ~ 0
+Vol-
+Text Notes 7100 3400 0    60   ~ 0
+Vol+
+Text Notes 8150 3400 0    60   ~ 0
+Start
+Text Notes 9000 3400 0    60   ~ 0
+Stop
+Wire Wire Line
+	5800 2450 5800 2450
+Wire Wire Line
+	5800 2450 9550 2450
+Wire Wire Line
+	9550 2450 9550 4200
+Wire Wire Line
+	9550 4200 5800 4200
+Wire Wire Line
+	5800 4200 5800 2450
+Connection ~ 5800 2450
+$Comp
+L CONN_01X04 Conn?
+U 1 1 575B8F25
+P 9150 2550
+F 0 "Conn?" H 9150 2800 50  0000 C CNN
+F 1 "CONN 1" V 9250 2550 50  0000 C CNN
+F 2 "" H 9150 2550 50  0000 C CNN
+F 3 "" H 9150 2550 50  0000 C CNN
+	1    9150 2550
+	0    -1   -1   0   
+$EndComp
+$EndSCHEMATC
