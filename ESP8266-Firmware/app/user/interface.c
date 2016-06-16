@@ -20,15 +20,19 @@ extern void setVolume(char* vol);
 #define MAX_WIFI_STATIONS 50
 	bool inside = false;
 
+unsigned short adcdiv;	
 void switchCommand() {
 	int adc;
 	uint8_t vol;
 	char Vol[22];
+	if (adcdiv == 0) return; // no panel
 //	vTaskDelay(100);
 //	while (true)
 	{	
 		adc = system_adc_read(); 
-//		if (adc < 940) printf("adc: %d\n",adc);
+		adc *= adcdiv;
+		if (adc < 940) 
+			printf("adc: %d  div: %d\n",adc,adcdiv);
 //		if (adc >940) vTaskDelay(10);
 		if (inside&&(adc > 940)) inside = false;
 		

@@ -27,6 +27,8 @@
 #include "vs1053.h"
 
 #include "eeprom.h"
+
+
 void uart_div_modify(int no, unsigned int freq);
 
 	struct station_config config;
@@ -164,7 +166,11 @@ void uartInterfaceTask(void *pvParameters) {
 	free(info);
 	free (device);
 	free (config);
-	
+	if (system_adc_read() < 10) adcdiv = 0; // no panel adc grounded
+	else
+	// read adc to see if it is a nodemcu with adc dividor
+		if (system_adc_read() < 400) adcdiv = 3;
+			else adcdiv = 1;
 	FlashOn = 100;FlashOff = 10;	
 	while(1) {
 		while(1) {
