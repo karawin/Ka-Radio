@@ -224,7 +224,7 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len,bool catenate)
 		char* t_quote;
 		char* t ;
 		bool found = false;
-		if (catenate) printf("Entry meta len=%d catenate=%d  s= %s\n",len,catenate,s);
+//		if (catenate) printf("Entry meta len=%d catenate=%d  s= %s\n",len,catenate,s);
 		if (catenate) oldlen = strlen(header.members.mArr[METADATA]);
 		t = s;
 		t_end = strstr(t,";StreamUrl='");
@@ -263,7 +263,7 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len,bool catenate)
 		header.members.mArr[METADATA][oldlen +len] = 0;
 		strncpy(&(header.members.mArr[METADATA][oldlen]), t,len);
 		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],oldlen +len);
-		if (catenate)	printf("clientsaveMeta t=\"%s\"   meta=\"%s\"\n",t,header.members.mArr[METADATA]);
+//		if (catenate)	printf("clientsaveMeta t=\"%s\"   meta=\"%s\"\n",t,header.members.mArr[METADATA]);
 		printf("##CLI.META#: %s\n",header.members.mArr[METADATA]);
 		char* title = incmalloc(strlen(header.members.mArr[METADATA])+15);
 		if (title != NULL)

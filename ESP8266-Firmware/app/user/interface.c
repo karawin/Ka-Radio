@@ -31,8 +31,8 @@ void switchCommand() {
 	{	
 		adc = system_adc_read(); 
 		adc *= adcdiv;
-		if (adc < 940) 
-			printf("adc: %d  div: %d\n",adc,adcdiv);
+//		if (adc < 940) 
+//			printf("adc: %d  div: %d\n",adc,adcdiv);
 //		if (adc >940) vTaskDelay(10);
 		if (inside&&(adc > 940)) inside = false;
 		
