@@ -2,6 +2,9 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations
+PiotSperka merged this software in https://github.com/PiotrSperka/ESP8266-WebRadio.<br/>
+He implemented an external ram in his board removing the main problem of the esp8266: the lack of room for the audio buffer.<br/>
+It is the place to go if you want to build a very small board with discret components.<br/>
 ####Version: 1.0.4<br/>
 Added:<br/>
 Next and previous buttons,<br/>
