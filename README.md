@@ -5,6 +5,7 @@
 PiotSperka merged this software in https://github.com/PiotrSperka/ESP8266-WebRadio.<br/>
 He implemented an external ram in his board removing the main problem of the esp8266: the lack of room for the audio buffer.<br/>
 It is the place to go if you want to build a very small board with discret components.<br/>
+<<<<<<< HEAD
 ###Release 1.0.5<br/>
 Never say good bye, I cannot resist to improve this project.<BR/>
 New features:<br/>
@@ -20,6 +21,8 @@ To upgrade to this release, please flash user1.4096.new.4.bin at 0x1000 ,<BR/>
 After that, all next updates are done with the On The Air (OTA) feature.<BR/>
 New binaries are hosted at http://karadio.karawin.fr .<BR/>
 
+=======
+>>>>>>> origin/master
 ####Version: 1.0.4<br/>
 Added:<br/>
 Next and previous buttons,<br/>
