@@ -5,6 +5,21 @@
 PiotSperka merged this software in https://github.com/PiotrSperka/ESP8266-WebRadio.<br/>
 He implemented an external ram in his board removing the main problem of the esp8266: the lack of room for the audio buffer.<br/>
 It is the place to go if you want to build a very small board with discret components.<br/>
+###Release 1.0.5<br/>
+Never say good bye, I cannot resist to improve this project.<BR/>
+New features:<br/>
+- OTA support<BR/>
+- Autoplay check on page refresh.<BR/>
+- Optional external ram (23LCV1024) support (1:CS/=GPIO16 2:MISO=GPIO12 3:NC 4:GND 5:MOSI=GPIO13 6:SCK=GPIO14 7:GND 8:3.3v)<BR/>
+Attention:<br/>
+The optional led is now on GPIO2. The blue led on the ESP8266 is blinking at the same rate.<BR/>
+GPIO16 is now the Chip select for the external ram if any.<BR/>
+The external ram is detected at boot time if present.<BR/><BR/>
+To upgrade to this release, please flash user1.4096.new.4.bin at 0x1000 ,<BR/>
+ user2.4096.new.4.bin at 0X81000 and blank.bin at	0x7e000 & 0x3fe000 <BR/>
+After that, all next updates are done with the On The Air (OTA) feature.<BR/>
+New binaries are hosted at http://karadio.karawin.fr .<BR/>
+
 ####Version: 1.0.4<br/>
 Added:<br/>
 Next and previous buttons,<br/>
