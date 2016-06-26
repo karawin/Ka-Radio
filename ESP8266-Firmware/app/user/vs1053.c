@@ -72,18 +72,18 @@ ICACHE_FLASH_ATTR void Delay(uint32_t nTime)
 }
 
 ICACHE_FLASH_ATTR void ControlReset(uint8_t State){
-	if(State) PIN_OUT_CLEAR |= (1<<RST_PIN);
-	else PIN_OUT_SET |= (1<<RST_PIN);
+	if(State) PIN_OUT_CLEAR = (1<<RST_PIN);
+	else PIN_OUT_SET = (1<<RST_PIN);
 }
 
 ICACHE_FLASH_ATTR void SCI_ChipSelect(uint8_t State){
-	if(State) PIN_OUT_CLEAR |= (1<<CS_PIN);
-	else PIN_OUT_SET |= (1<<CS_PIN);
+	if(State) PIN_OUT_CLEAR = (1<<CS_PIN);
+	else PIN_OUT_SET = (1<<CS_PIN);
 }
 
 ICACHE_FLASH_ATTR void SDI_ChipSelect(uint8_t State){
-	if(State) PIN_OUT_CLEAR |= (1<<XDCS_PIN);
-	else PIN_OUT_SET |= (1<<XDCS_PIN);
+	if(State) PIN_OUT_CLEAR = (1<<XDCS_PIN);
+	else PIN_OUT_SET = (1<<XDCS_PIN);
 }
 
 ICACHE_FLASH_ATTR uint8_t VS1053_checkDREQ() {

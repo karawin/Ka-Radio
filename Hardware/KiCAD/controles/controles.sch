@@ -364,7 +364,7 @@ Gnd
 Text Notes 1300 2750 0    60   ~ 0
 3.3v
 Text Notes 900  2850 0    60   ~ 0
-GPIO16 (led)
+GPIO2 (led)
 Text Notes 1300 2950 0    60   ~ 0
 ADC
 Text Notes 6500 3100 0    60   ~ 0

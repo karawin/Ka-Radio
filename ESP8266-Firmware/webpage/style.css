@@ -135,6 +135,10 @@ div.LEFT {
 	-webkit-animation:mymove 1s infinite alternate;
 	animation:mymove 1s infinite alternate
 }
+.tabs span.bold4 {
+	width:98%;
+	display:inline-block
+}
 @-webkit-keyframes mymove {
 	from {
 		color:#0

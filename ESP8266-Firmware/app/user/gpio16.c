@@ -2,6 +2,30 @@
 #include "freertos/portmacro.h"
 
 #include "gpio16.h"
+extern volatile uint32_t PIN_OUT;
+extern volatile uint32_t PIN_OUT_SET;
+extern volatile uint32_t PIN_OUT_CLEAR;
+ 
+extern volatile uint32_t PIN_DIR;
+extern volatile uint32_t PIN_DIR_OUTPUT;
+extern volatile uint32_t PIN_DIR_INPUT;
+//#define PERIPHS_IO_MUX_GPIO2_U          (PERIPHS_IO_MUX + 0x38)
+//#define FUNC_GPIO2                          0
+
+void ICACHE_FLASH_ATTR
+gpio2_output_conf(void)
+{
+	PIN_DIR_OUTPUT = (1<<GPIO2);
+	PIN_OUT_SET = (1<<GPIO2);
+}
+
+void ICACHE_FLASH_ATTR
+gpio2_output_set(uint8 value)
+{
+	if(value == 0) PIN_OUT_CLEAR = (1<<GPIO2);
+	else PIN_OUT_SET = (1<<GPIO2);
+}
+
 
 void ICACHE_FLASH_ATTR
 gpio16_output_conf(void)

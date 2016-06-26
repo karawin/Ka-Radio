@@ -1,3 +1,4 @@
 #!/bin/bash
-#make COMPILE=gcc BOOT=new SPI_SIZE_MAP=6 APP=1
-make BOOT=new APP=1 SPI_SPEED=40 SPI_MODE=QIO SPI_SIZE_MAP=6
+./make1.sh
+./make2.sh
+

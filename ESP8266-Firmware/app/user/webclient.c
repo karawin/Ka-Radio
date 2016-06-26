@@ -15,6 +15,7 @@
 
 #include "vs1053.h"
 #include "eeprom.h"
+#include "buffer.h"
 
 static enum clientStatus cstatus;
 //static uint32_t metacount = 0;
@@ -41,14 +42,14 @@ uint16_t clientPort = 80;
 struct hostent *server = NULL;
 
 ///////////////
-#define BUFFER_SIZE 12960
+/*#define BUFFER_SIZE 12960
 //#define BUFFER_SIZE 9600
 //#define BUFFER_SIZE 8000
 uint8_t buffer[BUFFER_SIZE];
 uint16_t wptr = 0;
 uint16_t rptr = 0;
 uint8_t bempty = 1;
-
+*/
 void *incmalloc(size_t n)
 {
 	void* ret;
@@ -64,55 +65,6 @@ void incfree(void *p,char* from)
 	free(p);
 //	printf ("Client incfree of %x, from %s           Heap size: %d\n",p,from,xPortGetFreeHeapSize( ));
 }	
-
-ICACHE_FLASH_ATTR uint16_t getBufferFree() {
-	if(wptr > rptr ) return BUFFER_SIZE - wptr + rptr;
-	else if(wptr < rptr) return rptr - wptr;
-	else if(bempty) return BUFFER_SIZE; else return 0;
-}
-
-ICACHE_FLASH_ATTR uint16_t getBufferFilled() {
-	return BUFFER_SIZE - getBufferFree();
-}
-
-ICACHE_FLASH_ATTR uint16_t bufferWrite(uint8_t *data, uint16_t size) {
-//	uint16_t s = size;
-	uint16_t i = 0;
-	for(i=0; i<size; i++) {
-		if(getBufferFree() == 0) { return i;}
-		buffer[wptr++] = data[i];
-		if(bempty) bempty = 0;
-//		wptr++;
-		if(wptr == BUFFER_SIZE) wptr = 0;
-	}
-	return size;
-}
-
-ICACHE_FLASH_ATTR uint16_t bufferRead(uint8_t *data, uint16_t size) {
-	uint16_t s = size;
-	size = (size>>6)<<6; //mod 32
-	uint16_t i = 0;
-	uint16_t bf = BUFFER_SIZE - getBufferFree();
-	if(s > bf) s = bf;
-	for (i = 0; i < s; i++) {
-		if(bf == 0) { return i;}
-		data[i] = buffer[rptr++];
-//		rptr++;
-		if(rptr == BUFFER_SIZE) rptr = 0;
-		if(rptr == wptr) bempty = 1;
-	}
-	return s;
-}
-
-ICACHE_FLASH_ATTR void bufferReset() {
-	playing = 0;	
-	wptr = 0;
-	rptr = 0;
-	bempty = 1;
-}
-
-///////////////
-
 
 ICACHE_FLASH_ATTR void clientInit() {
 	vSemaphoreCreateBinary(sHeader);
@@ -224,7 +176,8 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len,bool catenate)
 		char* t_quote;
 		char* t ;
 		bool found = false;
-//		if (catenate) printf("Entry meta len=%d catenate=%d  s= %s\n",len,catenate,s);
+//		if (catenate) 
+//	printf("Entry meta len=%d catenate=%d  s= %s\n",len,catenate,s);
 		if (catenate) oldlen = strlen(header.members.mArr[METADATA]);
 		t = s;
 		t_end = strstr(t,";StreamUrl='");
@@ -234,23 +187,37 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len,bool catenate)
 		len = strlen(t);
 //		printf("Len= %d t= %s\n",len,t);
 		if ((t_end != NULL)&&(len >=3)) t_end -= 3;
-		else if (len >3) t_end = t+len-3; else t_end = t;
+		else {
+			if (t_end != NULL) t_end -=1;
+			else
+			if (len >=2) {t_end = t+len-2;found = true;} 
+			else t_end = t+len;
+//			printf("Len5= %d t= %s\n",len,t);
+
+		}
 		if (found)
 		{	
 			t_quote = strstr(t_end,"'");
-			if (t_quote !=NULL){ t_end = t_quote; *t_end = 0;}
+			if (t_quote !=NULL){ 
+				t_end = t_quote; *t_end = 0;
+//				printf("Len4= %d t= %s\n",len,t);
+
+			}
 		}
 		else
 		{
-			if (len >2) len-=2; 
+			if (len >=2) len-=2; 
+//					printf("Len3= %d t= %s\n",len,t);
+
 		}
-		//		printf("clientsaveMeta t= 0x%x t_end= 0x%x  t=%s\n",t,t_end,t);
+//				printf("clientsaveMeta t= 0x%x t_end= 0x%x  t=%s\n",t,t_end,t);
+//		printf("Len1= %d t= %s\n",len,t);
 		
 //		s = t;
 		if ((header.members.mArr[METADATA] != NULL)&&(catenate))
 		{
 			header.members.mArr[METADATA] = realloc(header.members.mArr[METADATA],(oldlen  +len+3)*sizeof(char));
-			printf("clientsaveMeta  s=\"%s\"  t=\"%s\"   meta=\"%s\"\n",s,t,header.members.mArr[METADATA]);
+//			printf("clientsaveMeta  s=\"%s\"  t=\"%s\"   meta=\"%s\"\n",s,t,header.members.mArr[METADATA]);
 		} else
 		{
 			if (header.members.mArr[METADATA] != NULL)
@@ -706,8 +673,9 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 	uint8_t bufrec[RECEIVE+10];
 //	portBASE_TYPE uxHighWaterMark;
 //	clearHeaders();
-/*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf("watermark: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
+/*
+	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+	printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 */	
 	while(1) {
 		xSemaphoreGive(sConnected);
@@ -776,13 +744,13 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			bufferReset();
 /*
 			uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-			printf("watermark: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
+			printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 */
 			if (playing)
 			{
-				VS1053_flush_cancel(2);
+//				VS1053_flush_cancel(2);
 				playing = 0;
-				VS1053_flush_cancel(0);
+//				VS1053_flush_cancel(0);
 			}	
 			shutdown(sockfd,SHUT_RDWR);
 			vTaskDelay(10);	

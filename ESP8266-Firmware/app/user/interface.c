@@ -31,10 +31,10 @@ void switchCommand() {
 	{	
 		adc = system_adc_read(); 
 		adc *= adcdiv;
-//		if (adc < 940) 
-//			printf("adc: %d  div: %d\n",adc,adcdiv);
+		if (adc < 930) 
+			printf("adc: %d  div: %d\n",adc,adcdiv);
 //		if (adc >940) vTaskDelay(10);
-		if (inside&&(adc > 940)) inside = false;
+		if (inside&&(adc > 930)) inside = false;
 		
 		if ((adc >400) && (adc < 580)) // volume +
 		{
@@ -75,7 +75,7 @@ void switchCommand() {
 				sprintf(Vol,"{\"wsstation\":\"%d\"}",currentStation);
 				websocketbroadcast(Vol, strlen(Vol));
 			}
-			else if ((adc >830) && (adc < 930)) // station+
+			else if ((adc >830) && (adc < 920)) // station+
 			{
 				inside = true;
 				wsStationNext();
@@ -398,6 +398,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
     else if(startsWith("cli.play",tmp)) clientPlay(tmp);
 	else if(startsWith("cli.vol",tmp)) clientVol(tmp);
     else if(strcmp(tmp, "sys.erase") == 0) eeEraseAll();
+    else if(strcmp(tmp, "cli.upd") == 0) update_firmware();
 	else printInfo(tmp);
 	free(tmp);
 	

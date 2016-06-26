@@ -17,7 +17,7 @@
 				<div class="RIGHT">
 				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">KaraWin</a><br/>
 				<a href="https://github.com/PiotrSperka/ESP8266-WebRadio" target="_blank">PiotrSperka</a><br/>
-				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.0.4</a>
+				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.0.5</a>
 				</div>
 			<div id="HEAD">
 			<span class="bold4"><span id="meta">Ka-Radio</span></span>
@@ -152,8 +152,12 @@
 						<input id="mask" type=text oninput="chkip(this)" value="255.255.255.0" /><br/>
 						<span class="bold">Gateway:</span>
 						<input id="gw" type=text oninput="chkip(this)" /><br/>
-						<input type=button value="Validate" onclick="valid()" /><br/>
-						
+						<input type=button value="Validate" onclick="valid()" /><br/>						
+						</p>
+					<h1>Upgrade to:</h1>
+						<p>
+						<span class="bold4" id="Version"></span><br/><br/>	
+						<input type=button value="Upgrade now" onclick="upgrade()" /><br/>		
 						</p>
 					</div>
 				</li>

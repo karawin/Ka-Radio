@@ -23,7 +23,8 @@
 #include "interface.h"
 #include "webserver.h"
 #include "webclient.h"
-
+#include "buffer.h"
+#include "extram.h"
 #include "vs1053.h"
 
 #include "eeprom.h"
@@ -186,9 +187,9 @@ void uartInterfaceTask(void *pvParameters) {
 			switchCommand() ;  // hardware panel of command
 		}
 		checkCommand(t, tmp);
-/*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf("watermark uartTask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
-*/		
+//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+//	printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
+		
 		for(t = 0; t<64; t++) tmp[t] = 0;
 		t = 0;
 //		vTaskDelay(20); // 250ms
@@ -200,11 +201,16 @@ UART_SetBaudrate(uint8 uart_no, uint32 baud_rate) {
 }
 
 void testtask(void* p) {
-	gpio16_output_conf();
+	
+//	gpio16_output_conf();
+	gpio2_output_conf();
+	vTaskDelay(50);
 	while(1) {
-		gpio16_output_set(0);
+//		gpio16_output_set(0);
+		gpio2_output_set(0);
 		vTaskDelay(FlashOff);
-		gpio16_output_set(1);
+//		gpio16_output_set(1);
+		gpio2_output_set(1);
 		vTaskDelay(FlashOn);
 	};
 }
@@ -220,7 +226,10 @@ void user_init(void)
 //	REG_SET_BIT(0x3ff00014, BIT(0));
 //	system_update_cpu_freq(SYS_CPU_160MHZ);
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
+
     Delay(300);
+	extramInit();
+	initBuffer();
 	UART_SetBaudrate(0,115200);
 	wifi_set_opmode(STATION_MODE);
 	Delay(100);	
@@ -232,9 +241,12 @@ void user_init(void)
 	TCP_WND = 2 * TCP_MSS;
 
 	xTaskCreate(testtask, "t0", 80, NULL, 1, NULL); // DEBUG/TEST 80
-	xTaskCreate(uartInterfaceTask, "t1", 265, NULL, 2, NULL); //240
-	xTaskCreate(clientTask, "t3", 1024, NULL, 5, NULL); //1024
-	xTaskCreate(serverTask, "t2", 180, NULL, 4, NULL); //200
+	xTaskCreate(uartInterfaceTask, "t1", 244, NULL, 2, NULL); // 244
+	xTaskCreate(clientTask, "t3", 790, NULL, 5, NULL); // 790 
+	xTaskCreate(serverTask, "t2", 200, NULL, 4, NULL); //200
 	xTaskCreate(vsTask, "t4", 370, NULL,4, NULL); //370
+//	gpio2_output_conf();
+
+
 }
 

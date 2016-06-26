@@ -150,6 +150,7 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 	}
 	//monitor
 	else if (strstr(payload,"monitor")!= NULL){wsMonitor();}
+	else if (strstr(payload,"upgrade")!= NULL){update_firmware();}
 }
 
 

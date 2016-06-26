@@ -1,7 +1,7 @@
 var content = "Content-type",
 	ctype = "application/x-www-form-urlencoded",
 	cjson = "application/json";
-var intervalid , websocket,urlmonitor , e, playing = false;
+var intervalid , websocket,urlmonitor , e, playing = false, curtab = "tab-content1";
 
 function openwebsocket(){	
 	websocket = new WebSocket("ws://"+window.location.host+"/");
@@ -12,8 +12,8 @@ function openwebsocket(){
 	    var arr = JSON.parse(event.data);		
 		console.log("onmessage:"+event.data);
 		if (arr["meta"] == "") 
-		{ document.getElementById('meta').innerHTML = "Ka-Radio";setMainHeight("tab-content1");}
-		if (arr["meta"]) {	document.getElementById('meta').innerHTML = arr["meta"].replace(/\\/g,"");setMainHeight("tab-content1");}
+		{ document.getElementById('meta').innerHTML = "Ka-Radio";setMainHeight(curtab);}
+		if (arr["meta"]) {	document.getElementById('meta').innerHTML = arr["meta"].replace(/\\/g,"");setMainHeight(curtab);}
 		if (arr["wsvol"]) onRangeVolChange(arr['wsvol'],false); 
 		if (arr["wsicy"]) icyResp(arr["wsicy"]); 
 		if (arr["wssound"]) soundResp(arr["wssound"]); 
@@ -63,8 +63,6 @@ function playMonitor($arr){
 	}
 }	
 function mplay(){
-//	mstop();
-//	websocket.send("monitor");
 	monitor = document.getElementById("audio");
 	if (urlmonitor.endsWith("/"))
 		monitor.src = urlmonitor+";";
@@ -226,11 +224,11 @@ function icyResp(arr) {
 			document.getElementById('url1').innerHTML = $url;
 			document.getElementById('url2').href = $url;
 			if (arr["meta"] == "") 
-				{ document.getElementById('meta').innerHTML = "Ka-Radio";setMainHeight("tab-content1");}			
+				{ document.getElementById('meta').innerHTML = "Ka-Radio";setMainHeight(curtab);}			
 			if (arr["meta"]) document.getElementById('meta').innerHTML = arr["meta"].replace(/\\/g,"");
 //					else document.getElementById('meta').innerHTML = "Ka-Radio";
 
-			setMainHeight("tab-content1"); 
+			setMainHeight(curtab); 
 }	
 function soundResp(arr) {			
 			document.getElementById('vol_range').value = arr["vol"].replace(/\\/g,"");
@@ -389,6 +387,7 @@ function playStation() {
 		xhr.setRequestHeader(content,ctype);
 		xhr.send("id=" + id+"&");
 	} catch(e){console.log("error"+e);}
+	sessionStorage.setItem('autoplaying',"true");
 //	window.location.replace("/");
 //    window.location.reload(false);
 //	window.setTimeout(refresh, 500);
@@ -404,6 +403,7 @@ function stopStation() {
 		xhr.setRequestHeader(content,ctype);
 		xhr.send();
 	} catch(e){console.log("error"+e);}
+	sessionStorage.setItem('autoplaying',"false");
 }
 function saveSoundSettings() {
 	xhr = new XMLHttpRequest();
@@ -489,6 +489,26 @@ function clearList() {
 	}
 }	
 
+function upgrade()
+{
+	websocket.send("upgrade");	
+	alert("Rebooting to the new release\nPlease refresh the page in few seconds.");
+}
+function checkversion()
+{
+    if (window.XDomainRequest) {
+        xhr = new XDomainRequest(); 
+    } else if (window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest(); 
+    }
+	 xhr.onload = function() {
+		document.getElementById('Version').innerHTML = xhr.responseText;	
+    }
+	xhr.open("GET","http://karadio.karawin.fr/version.php", false);
+	try{
+		xhr.send(null );
+	}catch(e){;}
+}
 function downloadStations()
 {
 	var arr,reader,lines,line,file;
@@ -579,7 +599,7 @@ function loadStations(page) {
 	}
 	old_tbody = document.getElementById("stationsTable").getElementsByTagName('tbody')[0];
 	old_tbody.parentNode.replaceChild(new_tbody, old_tbody);
-	setMainHeight("tab-content2");
+	setMainHeight(curtab);
 }
 
 function loadStationsList(max) {
@@ -660,22 +680,31 @@ function setMainHeight(name) {
 document.addEventListener("DOMContentLoaded", function() {
 	document.getElementById("tab1").addEventListener("click", function() {
 			refresh();
-			setMainHeight("tab-content1");
+			curtab = "tab-content1"
+			setMainHeight(curtab);
 		});
 	document.getElementById("tab2").addEventListener("click", function() {
 			loadStations(1);
-			setMainHeight("tab-content2");
+			curtab = "tab-content2"
+			setMainHeight(curtab);
 		});
 	document.getElementById("tab3").addEventListener("click", function() {
+			curtab = "tab-content3"
 			wifi(0) ;
-			setMainHeight("tab-content3");
+			checkversion();
+			setMainHeight(curtab);
+			
 		});
 	if (intervalid != 0)  window.clearInterval(intervalid);
 	loadStationsList(191);
 	checkwebsocket();
 	refresh();
 	wifi(0) ;
-	setMainHeight("tab-content1");
+	checkversion();
+	if (sessionStorage.getItem('autoplaying') == null)  Select();
+//		sessionStorage.setItem('autoplaying',"false");
+//	if (sessionStorage.getItem('autoplaying') == "false")  Select();
+	setMainHeight(curtab);
 //	intervalid = window.setInterval(refresh,10000);
 	promptworking("");
 });

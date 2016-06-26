@@ -1,4 +1,4 @@
-update=01/06/2016 23:16:40
+update=19/06/2016 09:48:05
 version=1
 last_client=kicad
 [general]
@@ -43,6 +43,16 @@ LibName11=dip_sockets
 LibName12=esp8266
 LibName13=lqfp48
 LibName14=logo
+[schematic_editor]
+version=1
+PageLayoutDescrFile=
+PlotDirectoryName=
+SubpartIdSeparator=0
+SubpartFirstId=65
+NetFmtName=
+SpiceForceRefPrefix=0
+SpiceUseNetNumbers=0
+LabSize=60
 [eeschema]
 version=1
 LibDir=
@@ -84,13 +94,3 @@ LibName34=vs10xx
 LibName35=lm1117
 LibName36=23lcv1024
 LibName37=ne5532
-[schematic_editor]
-version=1
-PageLayoutDescrFile=
-PlotDirectoryName=
-SubpartIdSeparator=0
-SubpartFirstId=65
-NetFmtName=
-SpiceForceRefPrefix=0
-SpiceUseNetNumbers=0
-LabSize=60
