@@ -243,7 +243,7 @@ void user_init(void)
 	xTaskCreate(testtask, "t0", 80, NULL, 1, NULL); // DEBUG/TEST 80
 	xTaskCreate(uartInterfaceTask, "t1", 244, NULL, 2, NULL); // 244
 	xTaskCreate(clientTask, "t3", 790, NULL, 5, NULL); // 790 
-	xTaskCreate(serverTask, "t2", 200, NULL, 4, NULL); //200
+	xTaskCreate(serverTask, "t2", 220, NULL, 4, NULL); //220
 	xTaskCreate(vsTask, "t4", 370, NULL,4, NULL); //370
 //	gpio2_output_conf();
 
