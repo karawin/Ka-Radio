@@ -1,10 +1,8 @@
-# ** ESP8266 & VS1053 Wifi WebRadio** #
+# ** ESP8266 & VS1053 Wifi WebRadio ** #
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations
-PiotSperka merged this software in https://github.com/PiotrSperka/ESP8266-WebRadio.<br/>
-He implemented an external ram in his board removing the main problem of the esp8266: the lack of room for the audio buffer.<br/>
-It is the place to go if you want to build a very small board with discret components.<br/>
+
 ###Release 1.0.5<br/>
 Never say good bye, I cannot resist to improve this project.<BR/>
 New features:<br/>
@@ -18,9 +16,12 @@ The external ram is detected at boot time if present.<BR/><BR/>
 To upgrade to this release, please flash user1.4096.new.4.bin at 0x1000 ,<BR/>
  user2.4096.new.4.bin at 0X81000 and blank.bin at	0x7e000 & 0x3fe000 <BR/>
 After that, all next updates are done with the On The Air (OTA) feature.<BR/>
-New binaries are hosted at http://karadio.karawin.fr .<BR/>
-
+New binaries are hosted at http://karadio.karawin.fr .<BR/><BR/>
+##History
 ####Version: 1.0.4<br/>
+PiotSperka merged this software in https://github.com/PiotrSperka/ESP8266-WebRadio.<br/>
+He implemented an external ram in his board removing the main problem of the esp8266: the lack of room for the audio buffer.<br/>
+It is the place to go if you want to build a very small board with discret components.<br/>
 Added:<br/>
 Next and previous buttons,<br/>
 Autoplay check box<br/>
