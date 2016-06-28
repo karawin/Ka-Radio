@@ -74,8 +74,8 @@ First step, Final release done.
 - ...
 
 #### Loading the esp8266
-- https://github.com/karawin/ESP8266-WebRadio/blob/master/ESP8266-Firmware/bin/boot_v1.5.bin at 0x0000
-- https://github.com/karawin/ESP8266-WebRadio/blob/master/ESP8266-Firmware/bin/upgrade/user1.4096.new.6.bin at 0x1000
+- https://github.com/karawin/ESP8266-WebRadio/blob/Ka-Radio/ESP8266-Firmware/bin/upgrade/user1.4096.new.4.bin 
+- https://github.com/karawin/ESP8266-WebRadio/blob/Ka-Radio/ESP8266-Firmware/bin/upgrade/user2.4096.new.4.bin 
 
 #### First use
 - If the acces point of your router is not known, the webradio inits itself as an AP. Connect your wifi to the ssid "WifiWebRadio",  
