@@ -137,7 +137,7 @@ function saveTextAsFile()
 {
 	var output = '',id,textFileAsBlob,downloadLink; 
 //	for (var key in localStorage) {
-	for (id =0;id<191 ;id++) {
+	for (id =0;id<256 ;id++) {
 //	output = output+(localStorage[key])+'\n';
 	output = output+(localStorage[id])+'\n';
 	}
@@ -471,22 +471,22 @@ function editStation(id) {
 function refreshList() {
 	promptworking("Working.. Please Wait");
 	localStorage.clear();
-//	loadStationsList(191);
+//	loadStationsList(256);
 	window.location.reload(false);
 	promptworking("");
 }
 
 function clearList() {
+		promptworking("Working.. Please Wait");
 	if (confirm("Warning: This will clear all stations.\n Be sure to save station before.\nClear now?"))
 	{
-		promptworking("Working.. Please Wait");
 		xhr = new XMLHttpRequest();
 		xhr.open("POST","clear",false);
 		xhr.setRequestHeader(content,ctype);
 		xhr.send( );
 		window.setTimeout(refreshList, 10);
-		promptworking("");
 	}
+		promptworking("");
 }	
 
 function upgrade()
@@ -539,7 +539,7 @@ function downloadStations()
 				} catch (e){console.log("error "+e);}
 			}
 			localStorage.clear();
-			loadStationsList(191);		
+			loadStationsList(256);		
 
 		};
 		file = document.getElementById('fileload').files[0];
@@ -696,7 +696,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			
 		});
 	if (intervalid != 0)  window.clearInterval(intervalid);
-	loadStationsList(191);
+	loadStationsList(256);
 	checkwebsocket();
 	refresh();
 	wifi(0) ;

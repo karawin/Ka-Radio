@@ -8,9 +8,14 @@
 #define ICACHE_STORE_ATTR __attribute__((aligned(4)))
 #define ICACHE_RAM_ATTR __attribute__((section(".iram0.text")))
 
-#define EEPROM_START	0x3F0000 // Last 64k of flash (32Mbits or 4 MBytes)
+/*#define EEPROM_START	0x3F0000 // Last 64k of flash (32Mbits or 4 MBytes)
 #define EEPROM_SIZE		0xBFFF	 // until xC000 (48k) espressif take the end
-#define NBSTATIONS		192
+#define NBSTATIONS		192*/
+#define EEPROM_OLDSTART	0x3F0000 // Last 64k of flash (32Mbits or 4 MBytes)
+#define EEPROM_START	0x3E0000 // Last 128k of flash (32Mbits or 4 MBytes)
+#define EEPROM_SIZE		0xFFFF	 // until xffff , espressif take the end
+#define NBOLDSTATIONS	192
+#define NBSTATIONS		256
 
 //uint32_t eebuf[1024];
 /*
@@ -44,6 +49,44 @@ ICACHE_FLASH_ATTR void eeSet4Byte(uint32_t address, uint32_t data) {
 	spi_flash_write(addr, (uint32 *)eebuf, 4096);
 }
 */
+
+ICACHE_FLASH_ATTR void eeGetOldData(int address, void* buffer, int size) { // address, size in BYTES !!!!
+int result;
+	result = spi_flash_read(EEPROM_OLDSTART + address, (uint32 *)buffer, size);
+
+}
+
+ICACHE_FLASH_ATTR void eeSetOldData(int address, void* buffer, int size) { // address, size in BYTES !!!!
+	uint8_t* inbuf = buffer;
+int result;
+uint32_t* eebuf= malloc(4096);
+	if (eebuf != NULL)
+	{
+	while(1) {
+		uint32_t sector = (EEPROM_OLDSTART + address) & 0xFFF000;
+		spi_flash_read(sector, (uint32 *)eebuf, 4096);
+		spi_flash_erase_sector(sector >> 12);
+		
+		uint8_t* eebuf8 = (uint8_t*)eebuf;
+		uint16_t startaddr = address & 0xFFF;
+		uint16_t maxsize = 4096 - startaddr;
+		uint16_t i;
+		
+		for(i=0; (i<size && i<maxsize); i++) eebuf8[i+startaddr] = inbuf[i];
+		result = spi_flash_write(sector, (uint32 *)eebuf, 4096);
+		if(maxsize >= size) break;
+		
+		address += i;
+		inbuf += i;
+		size -= i;
+	}
+	free (eebuf);
+	} else printf("eebuf malloc fails\n");
+}
+
+
+
+
 ICACHE_FLASH_ATTR void eeGetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
 int result;
 	result = spi_flash_read(EEPROM_START + address, (uint32 *)buffer, size);
@@ -102,6 +145,27 @@ ICACHE_FLASH_ATTR void saveStation(struct shoutcast_info *station, uint8_t posit
 	eeSetData((position+1)*256, station, 256);
 }
 
+ICACHE_FLASH_ATTR struct shoutcast_info* getOldStation(uint8_t position) {
+	if (position > NBOLDSTATIONS-1) {printf("getOldStation fails position=%d\n",position); return NULL;}
+	uint8_t* buffer = malloc(256);
+	while (buffer== NULL)
+	{
+		buffer = malloc(256);
+        if ( buffer == NULL ){
+			int i = 0;
+			do { 
+			i++;		
+			printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
+			vTaskDelay(10);
+			printf("getOldstation malloc fails for %d\n",256 );
+			}
+			while (i<10);
+			if (i >=10) { /*free(string);*/ return NULL;}
+		} 		
+	}
+	eeGetOldData((position+1)*256, buffer, 256);
+	return (struct shoutcast_info*)buffer;
+}
 ICACHE_FLASH_ATTR struct shoutcast_info* getStation(uint8_t position) {
 	if (position > NBSTATIONS-1) {printf("getStation fails position=%d\n",position); return NULL;}
 	uint8_t* buffer = malloc(256);
@@ -128,7 +192,13 @@ ICACHE_FLASH_ATTR void saveDeviceSettings(struct device_settings *settings) {
 	if (settings == NULL) { printf("saveDeviceSetting fails: settings null\n");return;}
 	eeSetData(0, settings, 256);
 }
-
+ICACHE_FLASH_ATTR struct device_settings* getOldDeviceSettings() {
+	uint8_t* buffer = malloc(256);
+	if(buffer) {
+		eeGetOldData(0, buffer, 256);
+		return (struct device_settings*)buffer;
+	} else { printf("getDeviceSetting fails: malloc\n");return NULL;}
+}
 ICACHE_FLASH_ATTR struct device_settings* getDeviceSettings() {
 	uint8_t* buffer = malloc(256);
 	if(buffer) {

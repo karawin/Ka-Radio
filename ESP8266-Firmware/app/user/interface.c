@@ -31,8 +31,8 @@ void switchCommand() {
 	{	
 		adc = system_adc_read(); 
 		adc *= adcdiv;
-		if (adc < 930) 
-			printf("adc: %d  div: %d\n",adc,adcdiv);
+//		if (adc < 930) 
+//			printf("adc: %d  div: %d\n",adc,adcdiv);
 //		if (adc >940) vTaskDelay(10);
 		if (inside&&(adc > 930)) inside = false;
 		
@@ -338,7 +338,7 @@ ICACHE_FLASH_ATTR void clientList()
 	struct shoutcast_info* si;
 	int i;
 	printf("\n#CLI.LIST#\n");
-	for (i = 0;i <192;i++)
+	for (i = 0;i <256;i++)
 	{
 		si = getStation(i);
 		if (si->port != 0)

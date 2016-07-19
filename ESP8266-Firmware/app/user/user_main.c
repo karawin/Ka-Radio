@@ -214,7 +214,78 @@ void testtask(void* p) {
 		vTaskDelay(FlashOn);
 	};
 }
+/******************************************************************************
+ * FunctionName : user_rf_cal_sector_set
+ * Description  : SDK just reversed 4 sectors, used for rf init data and paramters.
+ *                We add this function to force users to set rf cal sector, since
+ *                we don't know which sector is free in user's application.
+ *                sector map for last several sectors : ABCCC
+ *                A : rf cal
+ *                B : rf init data
+ *                C : sdk parameters
+ * Parameters   : none
+ * Returns      : rf cal sector
+*******************************************************************************/
+uint32 user_rf_cal_sector_set(void)
+{
+    flash_size_map size_map = system_get_flash_size_map();
+    uint32 rf_cal_sec = 0;
 
+    switch (size_map) {
+        case FLASH_SIZE_4M_MAP_256_256:
+            rf_cal_sec = 128 - 5;
+            break;
+
+        case FLASH_SIZE_8M_MAP_512_512:
+            rf_cal_sec = 256 - 5;
+            break;
+
+        case FLASH_SIZE_16M_MAP_512_512:
+        case FLASH_SIZE_16M_MAP_1024_1024:
+            rf_cal_sec = 512 - 5;
+            break;
+
+        case FLASH_SIZE_32M_MAP_512_512:
+        case FLASH_SIZE_32M_MAP_1024_1024:
+            rf_cal_sec = 1024 - 5;
+            break;
+
+        default:
+            rf_cal_sec = 0;
+            break;
+    }
+
+    return rf_cal_sec;
+}
+/******************************************************************************
+ * FunctionName : test_upgrade
+ * Description  : check if it is an upgrade. Convert if needed
+ * Parameters   : none
+ * Returns      : none
+*******************************************************************************/
+void test_upgrade(void)
+{
+	uint8 autotest;
+	struct device_settings *settings;
+	struct shoutcast_info* station;
+	int j;
+	eeGetOldData(0x0C070, &autotest, 1);
+	if (autotest == 3) // old bin before 1.0.6
+	{
+		autotest = 0; //patch espressif 1.4.2 see http://bbs.espressif.com/viewtopic.php?f=46&t=2349
+		eeSetOldData(0x0C070, &autotest, 1);
+		settings = getOldDeviceSettings();
+		saveDeviceSettings(settings);
+		free(settings);
+		eeEraseStations();
+		for(j=0; j<192; j++){
+			station = getOldStation(j) ;	
+			saveStation(station, j);
+			free(station);			
+			vTaskDelay(1); // avoid watchdog
+		}
+	}		
+}
 /******************************************************************************
  * FunctionName : user_init
  * Description  : entry of user application, init user function here
@@ -226,8 +297,9 @@ void user_init(void)
 //	REG_SET_BIT(0x3ff00014, BIT(0));
 //	system_update_cpu_freq(SYS_CPU_160MHZ);
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
-
+	xTaskHandle pxCreatedTask;
     Delay(300);
+	test_upgrade();
 	extramInit();
 	initBuffer();
 	UART_SetBaudrate(0,115200);
@@ -240,11 +312,16 @@ void user_init(void)
 	Delay(100);	
 	TCP_WND = 2 * TCP_MSS;
 
-	xTaskCreate(testtask, "t0", 80, NULL, 1, NULL); // DEBUG/TEST 80
-	xTaskCreate(uartInterfaceTask, "t1", 244, NULL, 2, NULL); // 244
-	xTaskCreate(clientTask, "t3", 790, NULL, 5, NULL); // 790 
-	xTaskCreate(serverTask, "t2", 220, NULL, 4, NULL); //220
-	xTaskCreate(vsTask, "t4", 370, NULL,4, NULL); //370
+	xTaskCreate(testtask, "t0", 80, NULL, 1, &pxCreatedTask); // DEBUG/TEST 80
+	printf("t0 task: %x\n",pxCreatedTask);
+	xTaskCreate(uartInterfaceTask, "t1", 244, NULL, 2, &pxCreatedTask); // 244
+	printf("t1 task: %x\n",pxCreatedTask);
+	xTaskCreate(clientTask, "t3", 800, NULL, 5, &pxCreatedTask); // 790 
+	printf("t3 task: %x\n",pxCreatedTask);
+	xTaskCreate(serverTask, "t2", 220, NULL, 4, &pxCreatedTask); //220
+	printf("t2 task: %x\n",pxCreatedTask);
+	xTaskCreate(vsTask, "t4", 370, NULL,4, &pxCreatedTask); //370
+	printf("t4 task: %x\n",pxCreatedTask);
 //	gpio2_output_conf();
 
 

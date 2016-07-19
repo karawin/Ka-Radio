@@ -19,7 +19,7 @@ void *inmalloc(size_t n)
 }	
 void infree(void *p)
 {
-	free(p);
+	if (p != NULL)free(p);
 //	printf ("server free of %x,                      Heap size: %d\n",p,xPortGetFreeHeapSize( ));
 }	
 
@@ -266,7 +266,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* id = getParameterFromResponse("idgp=", data, data_size);
 			if (id ) 
 			{
-				if ((atoi(id) >=0) && (atoi(id) < 192)) 
+				if ((atoi(id) >=0) && (atoi(id) < 256)) 
 				{
 					char ibuf [6];	
 					char *buf;
@@ -308,7 +308,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* port = getParameterFromResponse("port=", data, data_size);
 			if(id && url && file && name && port) {
 				struct shoutcast_info *si = inmalloc(sizeof(struct shoutcast_info));
-				if ((si != NULL) && (atoi(id) >=0) && (atoi(id) < 192))
+				if ((si != NULL) && (atoi(id) >=0) && (atoi(id) < 256))
 				{	
 					char* bsi = (char*)si;
 					int i; for (i=0;i< sizeof(struct shoutcast_info);i++) bsi[i]=0; //clean 
@@ -321,7 +321,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 					si->port = atoi(port);
 					saveStation(si, atoi(id));
 				} else printf("setStation SI inmalloc failed or illegal id %d\n",atoi(id));
-				if (si != NULL) infree (si);
+				infree (si);
 			} 
 			infree(port);
 			infree(name);
@@ -477,6 +477,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t buflen) {
 	char* c;
 	char* d;
+	xTaskHandle pxCreatedTask;
 //	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
 	if( (c = strstr(buf, "GET ")) != NULL)
 	{
@@ -506,12 +507,12 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			pvParams->buf = pbuf;
 			pvParams->len = buflen;
 //			printf("GET websocket\n");
-			while (xTaskCreate( websocketTask,"t11",320,(void *) pvParams,4, NULL )!= pdPASS)  //280
+			while (xTaskCreate( websocketTask,"t11",320,(void *) pvParams,4, &pxCreatedTask )!= pdPASS)  //310
 			{
 				printf("ws xTaskCreate  failed. Retry\n");
 				vTaskDelay(100);
 			}
-
+//			printf("t11 task: %x\n",pxCreatedTask);
 			return false;
 		} else
 		{

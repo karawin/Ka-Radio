@@ -62,7 +62,7 @@ void *incmalloc(size_t n)
 }	
 void incfree(void *p,char* from)
 {
-	free(p);
+	if (p != NULL) free(p);
 //	printf ("Client incfree of %x, from %s           Heap size: %d\n",p,from,xPortGetFreeHeapSize( ));
 }	
 
@@ -515,8 +515,8 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 				{
 						icyfound = clientParseHeader(pdata);
 						wsMonitor();											
-						if(header.members.single.bitrate != NULL) 
-/*							if (strcmp(header.members.single.bitrate,"320")==0)
+/*						if(header.members.single.bitrate != NULL) 
+							if (strcmp(header.members.single.bitrate,"320")==0)
 								 system_update_cpu_freq(SYS_CPU_160MHZ);
 							else system_update_cpu_freq(SYS_CPU_80MHZ);*/
 						if(header.members.single.metaint > 0) 
