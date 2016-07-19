@@ -2,7 +2,16 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations
+###Release 1.0.6<br/>
+<font color="red">New features:</font><br/>
+- New sdk patch from Espressif see <a href="http://bbs.espressif.com/viewtopic.php?f=46&t=2349" target="_blank">http://bbs.espressif.com/viewtopic.php?f=46&t=2349</a> <BR/>
+- Now the maximum number of stations is 256<BR/>
+<BR/>
 
+The upgrade changes in the flash eprom  are made at the first start of the new release.<BR/>
+Please, once upgraded, do another ota in order to align the two banks of bin.<BR/><BR/>
+Built on 2016/07/19
+<BR/><BR/>
 ###Release 1.0.5<br/>
 Never say good bye, I cannot resist to improve this project.<BR/>
 New features:<br/>
