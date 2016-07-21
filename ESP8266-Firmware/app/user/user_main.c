@@ -299,16 +299,17 @@ void user_init(void)
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
 	xTaskHandle pxCreatedTask;
     Delay(300);
+	UART_SetBaudrate(0,115200);
+	VS1053_HW_init(); // init spi
 	test_upgrade();
 	extramInit();
 	initBuffer();
-	UART_SetBaudrate(0,115200);
 	wifi_set_opmode(STATION_MODE);
 	Delay(100);	
 	system_print_meminfo();
 	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
 	clientInit();
-	VS1053_HW_init();
+//	VS1053_HW_init();
 	Delay(100);	
 	TCP_WND = 2 * TCP_MSS;
 

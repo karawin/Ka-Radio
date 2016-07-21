@@ -8,14 +8,16 @@
 #include "buffer.h"
 
 void extramInit() {
-	char test[17];
-#define testram "123456789ABCDEF"
+	char test[]=  "FFFFFFFFFFFFFFFF";
+	char testram[]= "0123456789ABCDEF";
 	gpio16_output_conf();
 	gpio16_output_set(1);
 	externram = false;
 	extramWrite(16, 0, testram);
 	extramRead(16, 0, test);
-	if (memcmp(test,testram,16) == 0) externram = true;	
+	if (memcmp(test,testram,16) == 0) 
+		externram = true;	
+	printf("\n=> extraram state: %d 0x%x %s\n",externram,test[0],test );
 }
 
 uint32_t extramRead(uint32_t size, uint32_t address, uint8_t *buffer) {

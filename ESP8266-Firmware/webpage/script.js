@@ -135,26 +135,30 @@ function promptworking(label) {
 
 function saveTextAsFile()
 {
-	var output = '',id,textFileAsBlob,downloadLink; 
+	var output = '',id,textFileAsBlob,downloadLink,fileName; 
 //	for (var key in localStorage) {
 	for (id =0;id<256 ;id++) {
 //	output = output+(localStorage[key])+'\n';
 	output = output+(localStorage[id])+'\n';
 	}
-    textFileAsBlob = new Blob([output], {type:'text/plain'}),
-     downloadLink = document.getElementById('downloadlink');
-	downloadLink.download = document.getElementById('filesave').value;
-	if (downloadLink.download == "")
+	fileName = document.getElementById('filesave').value;
+	if (fileName == "")
 		alert("Please give a file name");
-	else {
-		if (window.webkitURL != null)
-			downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
-		else if(window.navigator.msSaveOrOpenBlob)
+	else {	
+		textFileAsBlob = new Blob([output], {type:'text/plain'}),
+		downloadLink =  document.createElement("a");
+		downloadLink.style.display = "none";
+		downloadLink.setAttribute("download", fileName);
+		document.body.appendChild(downloadLink);
+
+		if(window.navigator.msSaveOrOpenBlob)
 			downloadLink.addEventListener("click",function(){
-                window.navigator.msSaveBlob(textFileAsBlob, downloadLink.download);
+                window.navigator.msSaveBlob(textFileAsBlob, fileName);
             });
-			else		
-				downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+		else	if ('URL' in window)
+			downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+		else 	
+				downloadLink.href = window.webkitURL.createObjectURL(textFileAsBlob);
 		downloadLink.click();
 	}
 }
