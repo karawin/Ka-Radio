@@ -498,6 +498,21 @@ function upgrade()
 	websocket.send("upgrade");	
 	alert("Rebooting to the new release\nPlease refresh the page in few seconds.");
 }
+function checkhistory()
+{
+    if (window.XDomainRequest) {
+        xhr = new XDomainRequest(); 
+    } else if (window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest(); 
+    }
+	 xhr.onload = function() {
+		document.getElementById('History').innerHTML = xhr.responseText;	
+    }
+	xhr.open("GET","http://karadio.karawin.fr/history.php", false);
+	try{
+		xhr.send(null );
+	}catch(e){;}
+}
 function checkversion()
 {
     if (window.XDomainRequest) {
@@ -512,6 +527,7 @@ function checkversion()
 	try{
 		xhr.send(null );
 	}catch(e){;}
+	checkhistory();
 }
 function downloadStations()
 {
