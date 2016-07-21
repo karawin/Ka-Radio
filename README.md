@@ -6,6 +6,8 @@
 <font color="red">New features:</font><br/>
 - New sdk patch from Espressif see <a href="http://bbs.espressif.com/viewtopic.php?f=46&t=2349" target="_blank">http://bbs.espressif.com/viewtopic.php?f=46&t=2349</a> <BR/>
 - Now the maximum number of stations is 256<BR/>
+- The external ram detection is working. For some  23lcv chip with /Hold in place of /VBAT (pin7) must be wired to VCC (pin8)<BR/>
+- For Edge browser, the filename for "Save Stations from webradio" was not correct.
 <BR/>
 
 The upgrade changes in the flash eprom  are made at the first start of the new release.<BR/>
