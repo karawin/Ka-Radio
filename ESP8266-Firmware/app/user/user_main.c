@@ -317,14 +317,12 @@ void user_init(void)
 	printf("t0 task: %x\n",pxCreatedTask);
 	xTaskCreate(uartInterfaceTask, "t1", 244, NULL, 2, &pxCreatedTask); // 244
 	printf("t1 task: %x\n",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 800, NULL, 5, &pxCreatedTask); // 790 
+	xTaskCreate(clientTask, "t3", 1024, NULL, 5, &pxCreatedTask); // 810
 	printf("t3 task: %x\n",pxCreatedTask);
 	xTaskCreate(serverTask, "t2", 220, NULL, 4, &pxCreatedTask); //220
 	printf("t2 task: %x\n",pxCreatedTask);
 	xTaskCreate(vsTask, "t4", 370, NULL,4, &pxCreatedTask); //370
 	printf("t4 task: %x\n",pxCreatedTask);
-//	gpio2_output_conf();
-
 
 }
 

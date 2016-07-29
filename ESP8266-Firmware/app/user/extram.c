@@ -23,6 +23,7 @@ void extramInit() {
 uint32_t extramRead(uint32_t size, uint32_t address, uint8_t *buffer) {
 	uint32_t i = 0;
 	spi_take_semaphore();
+	spi_clock(HSPI, 3, 2); //20MHz
 	gpio16_output_set(0);
 	SPIPutChar(0x03);
 	SPIPutChar((address>>16)&0xFF);
@@ -39,6 +40,7 @@ uint32_t extramRead(uint32_t size, uint32_t address, uint8_t *buffer) {
 uint32_t extramWrite(uint32_t size, uint32_t address, uint8_t *data) {
 	uint32_t i = 0;
 	spi_take_semaphore();
+	spi_clock(HSPI, 3, 2); //20MHz
 	gpio16_output_set(0);
 	SPIPutChar(0x02);
 	SPIPutChar((address>>16)&0xFF);

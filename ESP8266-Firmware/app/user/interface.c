@@ -375,6 +375,12 @@ ICACHE_FLASH_ATTR void clientVol(char *s)
         free(vol);
     }	
 }
+
+ICACHE_FLASH_ATTR void heapSize()
+{
+	printf("##SYS.HEAP: %d #\n",xPortGetFreeHeapSize( ));
+}
+
 ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 {
 	char *tmp = (char*)malloc((size+1)*sizeof(char));
@@ -398,6 +404,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
     else if(startsWith("cli.play",tmp)) clientPlay(tmp);
 	else if(startsWith("cli.vol",tmp)) clientVol(tmp);
     else if(strcmp(tmp, "sys.erase") == 0) eeEraseAll();
+    else if(strcmp(tmp, "sys.heap") == 0) heapSize();
     else if(strcmp(tmp, "cli.upd") == 0) update_firmware();
 	else printInfo(tmp);
 	free(tmp);

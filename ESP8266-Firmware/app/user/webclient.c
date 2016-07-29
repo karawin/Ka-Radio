@@ -41,15 +41,7 @@ uint16_t clientPort = 80;
 
 struct hostent *server = NULL;
 
-///////////////
-/*#define BUFFER_SIZE 12960
-//#define BUFFER_SIZE 9600
-//#define BUFFER_SIZE 8000
-uint8_t buffer[BUFFER_SIZE];
-uint16_t wptr = 0;
-uint16_t rptr = 0;
-uint8_t bempty = 1;
-*/
+
 void *incmalloc(size_t n)
 {
 	void* ret;
@@ -523,6 +515,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 							metad = header.members.single.metaint;
 //						printf("t1: 0x%x, cstatus: %d, icyfound: %d  metad:%d Metaint:%d\n", t1,cstatus, icyfound,metad, header.members.single.metaint); 
 						cstatus = C_DATA;	// a stream found
+						VS1053_flush_cancel(0);
 						VS1053_flush_cancel(1);
 						t2 = strstr(pdata, "Transfer-Encoding: chunked"); // chunked stream? 
 //						t2 = NULL;
@@ -619,14 +612,14 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 			if (len >0) bufferWrite(pdata+rest, len);	
 		}
 // ---------------			
-		if(!playing && (getBufferFree() < BUFFER_SIZE/3)) {
+		if(!playing && (getBufferFree() < (BUFFER_SIZE/2))) {
 			playing=1;
 			printf("##CLI.PLAYING#\n");
 		}	
     }
 }
 
-#define VSTASKBUF	1000
+#define VSTASKBUF	1024
 IRAM_ATTR void vsTask(void *pvParams) { 
 	uint8_t b[VSTASKBUF];
 //	portBASE_TYPE uxHighWaterMark;
@@ -635,8 +628,7 @@ IRAM_ATTR void vsTask(void *pvParams) {
 	Delay(100);
 	VS1053_Start();
 	device = getDeviceSettings();
-	Delay(300);
-
+	Delay(200);
 	VS1053_SetVolume( device->vol);	
 	VS1053_SetTreble(device->treble);
 	VS1053_SetBass(device->bass);
@@ -648,16 +640,14 @@ IRAM_ATTR void vsTask(void *pvParams) {
 	while(1) {
 		if(playing) {
 			s = 0; 
-			size = bufferRead(b, VSTASKBUF);		
+			size = bufferRead(b, VSTASKBUF);			
 			while(s < size) 
 			{
 				s += VS1053_SendMusicBytes(b+s, size-s);
 			}
-			
-			vTaskDelay(1);
+			vTaskDelay(2);
 		} else 
 		{
-//			VS1053_SPI_SpeedDown();
 			vTaskDelay(20);
 		
 //	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
@@ -717,8 +707,12 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 					bytes_read = recv(sockfd, bufrec, RECEIVE, 0);
 					if (playing)
 					{
-						if (RECEIVE-bytes_read ) bytes_read += recv(sockfd, bufrec+bytes_read, RECEIVE-bytes_read, 0); //boost
+						if (bytes_read < RECEIVE ) 
+							bytes_read += recv(sockfd, bufrec+bytes_read, RECEIVE-bytes_read, 0); //boost
+							if (bytes_read < RECEIVE ) 
+								bytes_read += recv(sockfd, bufrec+bytes_read, RECEIVE-bytes_read, 0); //boost	
 					}
+					
 //					printf("s:%d   ", bytes_read);
 					if ( bytes_read > 0 )
 						clientReceiveCallback(sockfd,bufrec, bytes_read);
@@ -729,7 +723,6 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			/*---Clean up---*/
 			if (bytes_read == 0 ) 
 			{
-					
 					if (playing) 
 					{
 						clientDisconnect(); 
@@ -738,8 +731,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 					else{
 						clientDisconnect(); 
 						clientSaveOneHeader("Not Found", 9,METANAME);
-					}	
-					
+					}						
 			}//jpc
 			bufferReset();
 /*
@@ -752,6 +744,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				playing = 0;
 //				VS1053_flush_cancel(0);
 			}	
+
 			shutdown(sockfd,SHUT_RDWR);
 			vTaskDelay(10);	
 			close(sockfd);

@@ -203,6 +203,20 @@ div.LEFT {
 .tabs input[type="text"]:hover {
 	box-shadow:0 5px 5px 0 rgba(0,0,0,0.24),0 5px 10px 0 rgba(0,0,0,0.24)
 }
+.tabs input[type="password"] {
+	font-size:12px;
+	min-width:100px;
+	height:20px;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
+	border-radius:5px
+}
+.tabs input[type="password"]:hover {
+	box-shadow:0 5px 5px 0 rgba(0,0,0,0.24),0 5px 10px 0 rgba(0,0,0,0.24)
+}
 .tabs input[type="file"] {
 	font-size:14px;
 	min-width:100px;

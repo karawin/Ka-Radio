@@ -13,7 +13,9 @@
 #define METANAME 0
 #define ICY_HEADERS_COUNT 9
 #define ICY_HEADER_COUNT 10
-#define RECEIVE 2000
+//2000
+#define RECEIVE 2840
+
 extern uint16_t currentStation;
 
 struct icyHeader
