@@ -241,7 +241,7 @@ ICACHE_FLASH_ATTR int VS1053_SendMusicBytes(uint8_t* music, uint16_t quantity){
 		} 
 	}
 	SDI_ChipSelect(RESET);
-//	VS1053_SPI_SpeedDown();
+	VS1053_SPI_SpeedDown();
 	spi_give_semaphore();
 	return o;
 }

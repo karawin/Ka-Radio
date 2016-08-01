@@ -628,7 +628,7 @@ IRAM_ATTR void vsTask(void *pvParams) {
 	Delay(100);
 	VS1053_Start();
 	device = getDeviceSettings();
-	Delay(200);
+	Delay(300);
 	VS1053_SetVolume( device->vol);	
 	VS1053_SetTreble(device->treble);
 	VS1053_SetBass(device->bass);
@@ -709,8 +709,8 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 					{
 						if (bytes_read < RECEIVE ) 
 							bytes_read += recv(sockfd, bufrec+bytes_read, RECEIVE-bytes_read, 0); //boost
-							if (bytes_read < RECEIVE ) 
-								bytes_read += recv(sockfd, bufrec+bytes_read, RECEIVE-bytes_read, 0); //boost	
+//							if (bytes_read < RECEIVE ) 
+//								bytes_read += recv(sockfd, bufrec+bytes_read, RECEIVE-bytes_read, 0); //boost	
 					}
 					
 //					printf("s:%d   ", bytes_read);

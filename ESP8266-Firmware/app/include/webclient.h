@@ -14,7 +14,7 @@
 #define ICY_HEADERS_COUNT 9
 #define ICY_HEADER_COUNT 10
 //2000
-#define RECEIVE 2840
+#define RECEIVE 2000
 
 extern uint16_t currentStation;
 
