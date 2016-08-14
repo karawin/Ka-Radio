@@ -169,7 +169,7 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len,bool catenate)
 		char* t ;
 		bool found = false;
 //		if (catenate) 
-//	printf("Entry meta len=%d catenate=%d  s= %s\n",len,catenate,s);
+//	printf("Entry meta len=%d catenate=%d  s= \"%s\"\n",len,catenate,s);
 		if (catenate) oldlen = strlen(header.members.mArr[METADATA]);
 		t = s;
 		t_end = strstr(t,";StreamUrl='");
@@ -505,6 +505,14 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 //				printf("Header len: %d,  Header: %s\n",len,pdata);
 				if ((t1 != NULL) && (t1 <= pdata+len-4)) 
 				{
+						t2 = strstr(pdata, "Internal Server Error"); 
+						if (t2 != NULL)
+						{
+							printf("Internal Server Error\n");
+							clientDisconnect();
+							cstatus = C_HEADER;
+							
+						}
 						icyfound = clientParseHeader(pdata);
 						wsMonitor();											
 /*						if(header.members.single.bitrate != NULL) 
@@ -515,8 +523,8 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 							metad = header.members.single.metaint;
 //						printf("t1: 0x%x, cstatus: %d, icyfound: %d  metad:%d Metaint:%d\n", t1,cstatus, icyfound,metad, header.members.single.metaint); 
 						cstatus = C_DATA;	// a stream found
-						VS1053_flush_cancel(0);
-						VS1053_flush_cancel(1);
+//						VS1053_flush_cancel(0);
+//						VS1053_flush_cancel(1);
 						t2 = strstr(pdata, "Transfer-Encoding: chunked"); // chunked stream? 
 //						t2 = NULL;
 						if ( t2 != NULL) 
@@ -658,6 +666,9 @@ IRAM_ATTR void vsTask(void *pvParams) {
 
 ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 //1440	for MTU 
+	struct timeval timeout; 
+    timeout.tv_sec = 4000; // bug *1000 for seconds
+    timeout.tv_usec = 0;
 	int sockfd, bytes_read;
 	struct sockaddr_in dest;
 	uint8_t bufrec[RECEIVE+10];
@@ -696,24 +707,28 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				  cstatus = C_PLAYLIST;
 				  sprintf(bufrec, "GET %s HTTP/1.0\r\nHOST: %s\r\n\r\n", clientPath,clientURL); //ask for the playlist
 			    } 
-				else sprintf(bufrec, "GET %s HTTP/1.1\r\nHost: %s\r\nicy-metadata: 1\r\n\r\n", clientPath,clientURL); 
+				else sprintf(bufrec, "GET %s HTTP/1.1\r\nHost: %s\r\nAccept: */*\r\nConnection: Keep-Alive\r\nicy-metadata: 1\r\n\r\n", clientPath,clientURL); 
 //				printf("st:%d, Client Sent:\n%s\n",cstatus,bufrec);
 				send(sockfd, bufrec, strlen(bufrec), 0);
 				
 				xSemaphoreTake(sConnected, 0);
-
+/*				
+				if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
+					printf("setsockopt failed\n");
+*/
 				do
 				{
 					bytes_read = recv(sockfd, bufrec, RECEIVE, 0);
 					if (playing)
 					{
-						if (bytes_read < RECEIVE ) 
+						if ((bytes_read < RECEIVE ) )
 							bytes_read += recv(sockfd, bufrec+bytes_read, RECEIVE-bytes_read, 0); //boost
-//							if (bytes_read < RECEIVE ) 
-//								bytes_read += recv(sockfd, bufrec+bytes_read, RECEIVE-bytes_read, 0); //boost	
+							if ((bytes_read < RECEIVE ) )
+								bytes_read += recv(sockfd, bufrec+bytes_read, RECEIVE-bytes_read, 0); //boost	
 					}
 					
-//					printf("s:%d   ", bytes_read);
+//					printf("s:%d", bytes_read);
+//					if ((bytes_read < 1000 ) ) printf(" Client Rec:\n%s\n",bufrec);
 					if ( bytes_read > 0 )
 						clientReceiveCallback(sockfd,bufrec, bytes_read);
 					if(xSemaphoreTake(sDisconnect, 0)) break;	
@@ -721,19 +736,19 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				while ( bytes_read > 0 );
 			} else printf("WebClient Socket fails to connect %d\n", errno);
 			/*---Clean up---*/
-			if (bytes_read == 0 ) 
+			if (bytes_read <= 0 ) 
 			{
+					clientDisconnect(); 
 					if (playing) 
 					{
-						clientDisconnect(); 
 						clientConnect();
 					}	
 					else{
-						clientDisconnect(); 
 						clientSaveOneHeader("Not Found", 9,METANAME);
 					}						
 			}//jpc
 			bufferReset();
+
 /*
 			uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 			printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));

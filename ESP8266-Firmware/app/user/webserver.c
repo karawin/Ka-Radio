@@ -306,19 +306,21 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* file = getParameterFromResponse("file=", data, data_size);
 			char* name = getParameterFromResponse("name=", data, data_size);
 			char* port = getParameterFromResponse("port=", data, data_size);
-			if(id && url && file && name && port) {
+			if(id ) {
 				struct shoutcast_info *si = inmalloc(sizeof(struct shoutcast_info));
 				if ((si != NULL) && (atoi(id) >=0) && (atoi(id) < 256))
 				{	
 					char* bsi = (char*)si;
 					int i; for (i=0;i< sizeof(struct shoutcast_info);i++) bsi[i]=0; //clean 
-					if (strlen(url) > sizeof(si->domain)) url[sizeof(si->domain)-1] = 0; //truncate if any
-					strcpy(si->domain, url);
-					if (strlen(file) > sizeof(si->file)) url[sizeof(si->file)-1] = 0; //truncate if any
-					strcpy(si->file, file);
-					if (strlen(name) > sizeof(si->name)) url[sizeof(si->name)-1] = 0; //truncate if any
-					strcpy(si->name, name);
-					si->port = atoi(port);
+					if(url && file && name && port) {
+						if (strlen(url) > sizeof(si->domain)) url[sizeof(si->domain)-1] = 0; //truncate if any
+						strcpy(si->domain, url);
+						if (strlen(file) > sizeof(si->file)) url[sizeof(si->file)-1] = 0; //truncate if any
+						strcpy(si->file, file);
+						if (strlen(name) > sizeof(si->name)) url[sizeof(si->name)-1] = 0; //truncate if any
+						strcpy(si->name, name);
+						si->port = atoi(port);
+					}
 					saveStation(si, atoi(id));
 				} else printf("setStation SI inmalloc failed or illegal id %d\n",atoi(id));
 				infree (si);

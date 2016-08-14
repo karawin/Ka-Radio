@@ -15,6 +15,7 @@
 
 //#include "vs1053b-patches-flac.h"
 #include "vs1053.h"
+#include "eeprom.h"
 #include "stdio.h"
 #include "spi.h"
 #include "osapi.h"
@@ -200,6 +201,7 @@ void VS1053_PluginLoad()
 }
 */
 ICACHE_FLASH_ATTR void VS1053_Start(){
+	struct device_settings *device;
 	VS1053_ResetChip();
 	Delay(100);
 // these 4 lines makes board to run on mp3 mode, no soldering required anymore
@@ -212,9 +214,20 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	VS1053_WriteRegister(SPI_CLOCKF,0x60,0x00);
 //	VS1053_WriteRegister(SPI_MODE, (SM_LINE1 | SM_SDINEW)>>8 , SM_RESET); // soft reset
 	VS1053_SoftwareReset();
-
 	VS1053_WriteRegister(SPI_MODE, SM_SDINEW>>8, SM_LAYER12); //mode 
 	while(VS1053_checkDREQ() == 0);
+/*	
+	device = getDeviceSettings();
+	Delay(300);
+	VS1053_SetVolume( device->vol);	
+	VS1053_SetTreble(device->treble);
+	VS1053_SetBass(device->bass);
+	VS1053_SetTrebleFreq(device->freqtreble);
+	VS1053_SetBassFreq(device->freqbass);
+	VS1053_SetSpatial(device->spacial);
+	incfree(device,"device");	
+*/	
+	
 	VS1053_regtest();
 }
 
