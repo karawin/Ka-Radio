@@ -2,6 +2,13 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations
+###Release 1.0.7<br/>
+<font color="red">New features:</font><br/>
+- Corrected: An empty station was not taken into account.
+<BR/>
+<BR/><BR/>
+
+##History<br/>
 ###Release 1.0.6<br/>
 <font color="red">New features:</font><br/>
 - New sdk patch from Espressif see <a href="http://bbs.espressif.com/viewtopic.php?f=46&t=2349" target="_blank">http://bbs.espressif.com/viewtopic.php?f=46&t=2349</a> <BR/>
@@ -30,8 +37,6 @@ To upgrade to this release, please flash user1.4096.new.4.bin at 0x1000 ,<BR/>
 After that, all next updates are done with the On The Air (OTA) feature.<BR/>
 New binaries are hosted at http://karadio.karawin.fr .<BR/><BR/>
 See also https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053 <br/>
-
-##History<br/>
 
 ####Version: 1.0.4<br/>
 PiotSperka merged this software in https://github.com/PiotrSperka/ESP8266-WebRadio.<br/>
