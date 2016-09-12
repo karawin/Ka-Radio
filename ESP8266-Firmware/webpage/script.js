@@ -2,6 +2,7 @@ var content = "Content-type",
 	ctype = "application/x-www-form-urlencoded",
 	cjson = "application/json";
 var intervalid , websocket,urlmonitor , e, playing = false, curtab = "tab-content1";
+const karadio = "Karadio";
 
 function openwebsocket(){	
 	websocket = new WebSocket("ws://"+window.location.host+"/");
@@ -12,7 +13,7 @@ function openwebsocket(){
 	    var arr = JSON.parse(event.data);		
 		console.log("onmessage:"+event.data);
 		if (arr["meta"] == "") 
-		{ document.getElementById('meta').innerHTML = "Ka-Radio";setMainHeight(curtab);}
+		{ document.getElementById('meta').innerHTML = karadio;setMainHeight(curtab);}
 		if (arr["meta"]) {	document.getElementById('meta').innerHTML = arr["meta"].replace(/\\/g,"");setMainHeight(curtab);}
 		if (arr["wsvol"]) onRangeVolChange(arr['wsvol'],false); 
 		if (arr["wsicy"]) icyResp(arr["wsicy"]); 
@@ -130,7 +131,7 @@ function valid() {
 
 function promptworking(label) {
 	document.getElementById('meta').innerHTML = label;
-	if (label == "") document.getElementById('meta').innerHTML = "Ka-Radio";
+	if (label == "") document.getElementById('meta').innerHTML = karadio;
 }
 
 function saveTextAsFile()
@@ -228,9 +229,9 @@ function icyResp(arr) {
 			document.getElementById('url1').innerHTML = $url;
 			document.getElementById('url2').href = $url;
 			if (arr["meta"] == "") 
-				{ document.getElementById('meta').innerHTML = "Ka-Radio";setMainHeight(curtab);}			
+				{ document.getElementById('meta').innerHTML = karadio;setMainHeight(curtab);}			
 			if (arr["meta"]) document.getElementById('meta').innerHTML = arr["meta"].replace(/\\/g,"");
-//					else document.getElementById('meta').innerHTML = "Ka-Radio";
+//					else document.getElementById('meta').innerHTML = karadio;
 
 			setMainHeight(curtab); 
 }	
@@ -493,6 +494,17 @@ function clearList() {
 		promptworking("");
 }	
 
+function removeOptions(selectbox)
+{
+    var i;
+    for(i = selectbox.options.length - 1 ; i >= 0 ; i--)
+    {
+        selectbox.remove(i);
+    }
+}
+
+
+
 function upgrade()
 {
 	websocket.send("upgrade");	
@@ -508,7 +520,7 @@ function checkhistory()
 	 xhr.onload = function() {
 		document.getElementById('History').innerHTML = xhr.responseText;	
     }
-	xhr.open("GET","http://karadio.karawin.fr/history.php", false);
+	xhr.open("GET","http://KaraDio.karawin.fr/history.php", false);
 	try{
 		xhr.send(null );
 	}catch(e){;}
@@ -523,7 +535,7 @@ function checkversion()
 	 xhr.onload = function() {
 		document.getElementById('Version').innerHTML = xhr.responseText;	
     }
-	xhr.open("GET","http://karadio.karawin.fr/version.php", false);
+	xhr.open("GET","http://KaraDio.karawin.fr/version.php", false);
 	try{
 		xhr.send(null );
 	}catch(e){;}

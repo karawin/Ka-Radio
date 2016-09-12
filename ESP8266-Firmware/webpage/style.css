@@ -245,7 +245,7 @@ div.LEFT {
 .tabs input[type="button"]:hover {
 	box-shadow:0 5px 5px 0 rgba(0,0,0,0.24),0 5px 10px 0 rgba(0,0,0,0.24)
 }
-.tabs span#np input[type="button"] {
+.tabs span input[type="button"] {
 	font-size:14px;
 	min-width:100px;
 	height:30px;
@@ -256,7 +256,7 @@ div.LEFT {
 	background:linear-gradient(#f8f8f8,#e8e8ef);
 	border-radius:5px
 }
-.tabs span#np input[type="button"]:hover {
+.tabs span input[type="button"]:hover {
 	box-shadow:0 5px 5px 0 rgba(0,0,0,0.24),0 5px 10px 0 rgba(0,0,0,0.24)
 }
 .tabs select {

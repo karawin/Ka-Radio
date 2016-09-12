@@ -133,7 +133,7 @@ ICACHE_FLASH_ATTR void setVolume(char* vol) {
 		if (device != NULL) infree(device);			
 }
 
-// treat the received message
+// treat the received message of the websocket
 void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t length)
 {
 	char answer[17];
