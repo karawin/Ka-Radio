@@ -2,13 +2,19 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations
+###Release 1.0.8<br/>
+<font color="red">New features:</font><br/>
+- Corrected: Chunked html was wrong for some stations.<br/>
+- The station name is displayed when no metadata available.<br/>
+<BR/>
+<BR/><BR/>
+
+##History<br/>
 ###Release 1.0.7<br/>
 <font color="red">New features:</font><br/>
 - Corrected: An empty station was not taken into account.
 <BR/>
 <BR/><BR/>
-
-##History<br/>
 ###Release 1.0.6<br/>
 <font color="red">New features:</font><br/>
 - New sdk patch from Espressif see <a href="http://bbs.espressif.com/viewtopic.php?f=46&t=2349" target="_blank">http://bbs.espressif.com/viewtopic.php?f=46&t=2349</a> <BR/>
