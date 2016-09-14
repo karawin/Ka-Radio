@@ -161,17 +161,13 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 		return str;
 }
 
-ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len,bool catenate)
+ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 {
-	    int oldlen = 0;
 		char* t_end = NULL;
 		char* t_quote;
 		char* t ;
 		bool found = false;
 		if (len > 256) return;
-//		if (catenate) 
-//	printf("Entry meta len=%d catenate=%d  s= \"%s\"\n",len,catenate,s);
-		if (catenate) oldlen = strlen(header.members.mArr[METADATA]);
 		t = s;
 		t_end = strstr(t,";StreamUrl='");
 		if (t_end != NULL) { *t_end = 0;found = true;} 
@@ -186,46 +182,30 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len,bool catenate)
 			if (len >=2) {t_end = t+len-2;found = true;} 
 			else t_end = t+len;
 //			printf("Len5= %d t= %s\n",len,t);
-
 		}
 		if (found)
 		{	
 			t_quote = strstr(t_end,"'");
 			if (t_quote !=NULL){ 
 				t_end = t_quote; *t_end = 0;
-//				printf("Len4= %d t= %s\n",len,t);
-
 			}
 		}
 		else
 		{
 			if (len >=2) len-=2; 
-//					printf("Len3= %d t= %s\n",len,t);
-
 		}
 //				printf("clientsaveMeta t= 0x%x t_end= 0x%x  t=%s\n",t,t_end,t);
 //		printf("Len1= %d t= %s\n",len,t);
-		
-//		s = t;
-		if ((header.members.mArr[METADATA] != NULL)&&(catenate))
-		{
-			header.members.mArr[METADATA] = realloc(header.members.mArr[METADATA],(oldlen  +len+3)*sizeof(char));
-//			printf("clientsaveMeta  s=\"%s\"  t=\"%s\"   meta=\"%s\"\n",s,t,header.members.mArr[METADATA]);
-		} else
-		{
-			if (header.members.mArr[METADATA] != NULL)
-				incfree(header.members.mArr[METADATA],"metad");
-			header.members.mArr[METADATA] = (char*)incmalloc((len+3)*sizeof(char));
-		}
+		if (header.members.mArr[METADATA] != NULL)
+			incfree(header.members.mArr[METADATA],"metad");
+		header.members.mArr[METADATA] = (char*)incmalloc((len+3)*sizeof(char));
 		if(header.members.mArr[METADATA] == NULL) 
 			{printf("clientsaveMeta malloc fails\n"); return;}
 
-		header.members.mArr[METADATA][oldlen +len] = 0;
-		strncpy(&(header.members.mArr[METADATA][oldlen]), t,len);
-		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],oldlen +len);
-//		if (catenate)	printf("clientsaveMeta t=\"%s\"   meta=\"%s\"\n",t,header.members.mArr[METADATA]);
+		strcpy(header.members.mArr[METADATA], t);
+		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],len);
 		printf("##CLI.META#: %s\n",header.members.mArr[METADATA]);
-
+// send station name if no metadata
 		if (strlen(header.members.mArr[METADATA])!=0)
 		{			
 			char* title = incmalloc(strlen(header.members.mArr[METADATA])+15);
@@ -475,6 +455,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 	static int rest ;
 	static uint32_t chunked;
 	static uint32_t cchunk;
+	static char metadata[257];
 	uint16_t l ;
 	uint32_t lc;
 	char *inpdata;
@@ -640,32 +621,46 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 //	 printf("CDATAO: chunked: %d, cchunk: %d, len: %d\n",chunked,cchunk,len);
 		
 // meta data	
+		if (rest <0) 
+		{
+//			printf("Negative len= %d, metad= %d  rest= %d   pdata= \"%s\"\n",len,metad,rest,pdata);
+			strncat(metadata,pdata,0-rest);
+			clientSaveMetadata(metadata,strlen(metadata));
+			len += rest;
+			metad = header.members.single.metaint ;
+			pdata += rest;
+//			printf("Negative len out = %d, metad= %d  rest= %d   pdata= \"%s\"\n",len,metad,rest,pdata);
+			rest = 0;
+		}
 		inpdata = pdata;
 		clen = len;
 		if((header.members.single.metaint != 0)&&(len > metad)) 
 		{
-			while ((metad < clen)&&(header.members.single.metaint != 0)) // in buffer
+//			printf("\nmetain len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );
+			while ((clen > metad)&&(header.members.single.metaint != 0)) // in buffer
 			{
 				l = inpdata[metad]*16;
 				rest = clen - metad  -l -1;
-//				printf("\nmt0 len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );
+//				printf("mt0 len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );
 				if (l !=0)
 				{
 //					printf("mt len:%d, clen:%d, metad:%d, l:%d, rest:%d, str: %s\n",len,clen,metad, l,rest,inpdata+metad+1 );
-					if (rest <0)	*(inpdata+len) = 0; //truncated
-					clientSaveMetadata(inpdata+metad+1,l,false);
-				}	
-			
-				while(getBufferFree() < metad)
-				{ 
-					vTaskDelay(1);
-				}
+					if (rest <0)
+					{
+						*(inpdata+clen) = 0; //truncated
+						strcpy(metadata,inpdata+metad+1);
+					}
+					else clientSaveMetadata(inpdata+metad+1,l);
+				}				
+				while(getBufferFree() < metad)	vTaskDelay(1);
 				bufferWrite(inpdata, metad); 
 				metad  = header.members.single.metaint;
 				inpdata = inpdata+clen-rest;
 				clen = rest;				
 //				printf("mt1 len:%d, clen:%d, metad:%d, l:%d, inpdata:%x,  rest:%d\n",len,clen,metad, l,inpdata,rest );
+				if (rest <0) {clen = 0; break;}
 			}	// while
+//			printf("\nmetaout len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );			
 			if (rest >0)
 			{	
 				metad = header.members.single.metaint - rest ; //until next
@@ -675,17 +670,11 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 				}
 				bufferWrite(inpdata, rest); 
 				rest = 0;
-			}						
+			}		
 		} else 
-		{	
-	        if (rest <0) 
-			{
-//				printf("Negative len= %d, metad= %d  rest= %d   pdata= \"%s\"\n",len,metad,rest,pdata);
-				clientSaveMetadata(pdata,0-rest,true);
-				len +=rest;metad += rest; rest = 0;
-			}	
+		{		
 			if (header.members.single.metaint != 0) metad -= len;
-//			printf("len = %d, metad = %d  metaint= %d  cchunk= %d\n",len,metad,header.members.single.metaint,cchunk);
+//			printf("out len = %d, metad = %d  metaint= %d, rest:%d\n",len,metad,header.members.single.metaint,rest);
 			while(getBufferFree() < len) 
 				{vTaskDelay(1); }
 			
