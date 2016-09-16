@@ -161,10 +161,10 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 		return str;
 }
 
+// A metadata found. Extract the Stream title
 ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 {
 		char* t_end = NULL;
-		char* t_quote;
 		char* t ;
 		bool found = false;
 		if (len > 256) return;
@@ -185,46 +185,37 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 		}
 		if (found)
 		{	
-			t_quote = strstr(t_end,"'");
-			if (t_quote !=NULL){ 
-				t_end = t_quote; *t_end = 0;
-			}
+			t_end = strstr(t_end,"'");
+			if (t_end !=NULL)	 *t_end = 0;
 		}
 		else
 		{
 			if (len >=2) len-=2; 
 		}
-//				printf("clientsaveMeta t= 0x%x t_end= 0x%x  t=%s\n",t,t_end,t);
-//		printf("Len1= %d t= %s\n",len,t);
+
 		if (header.members.mArr[METADATA] != NULL)
 			incfree(header.members.mArr[METADATA],"metad");
 		header.members.mArr[METADATA] = (char*)incmalloc((len+3)*sizeof(char));
 		if(header.members.mArr[METADATA] == NULL) 
-			{printf("clientsaveMeta malloc fails\n"); return;}
+			{printf("clientsaveMeta malloc fails\n");
+			return;}
 
 		strcpy(header.members.mArr[METADATA], t);
 		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],len);
 		printf("##CLI.META#: %s\n",header.members.mArr[METADATA]);
 // send station name if no metadata
-		if (strlen(header.members.mArr[METADATA])!=0)
-		{			
-			char* title = incmalloc(strlen(header.members.mArr[METADATA])+15);
-			if (title != NULL)
-			{
-				sprintf(title,"{\"meta\":\"%s\"}",header.members.mArr[METADATA]); 
-				websocketbroadcast(title, strlen(title));
-				incfree(title,"title");
-			} else printf("clientsaveMeta malloc title fails\n"); 
-		} else
-		{			
-			char* title = incmalloc(strlen(header.members.single.name)+15);
-			if (title != NULL)
-			{
-				sprintf(title,"{\"meta\":\"%s\"}",header.members.single.name); 
-				websocketbroadcast(title, strlen(title));
-				incfree(title,"title");
-			} else printf("clientsaveMeta malloc title fails\n"); 
-		}			
+		if (strlen(header.members.mArr[METADATA])!=0)			
+			t_end = header.members.mArr[METADATA];
+		else	
+			t_end = header.members.single.name;
+		char* title = incmalloc(strlen(t_end)+15);
+		if (title != NULL)
+		{
+			sprintf(title,"{\"meta\":\"%s\"}",t_end); 
+			websocketbroadcast(title, strlen(title));
+			incfree(title,"title");
+		} else printf("clientsaveMeta malloc title fails\n"); 
+	
 }	
 
 // websocket: next station
@@ -465,6 +456,25 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 	bool  icyfound;
 
 //	if (cstatus != C_DATA){printf("cstatus= %d\n",cstatus);  printf("Len=%d, Byte_list = %s\n",len,pdata);}
+	t1 = strstr(pdata, "404 Not Found"); 
+	if (t1 != NULL) { // 
+		if (strcmp(clientPath,"/;")==0)
+		{
+			clientSetPath("/");
+			clientDisconnect();
+			clientConnect();
+			cstatus = C_HEADER0;
+		} else
+		{
+			printf("404 Not Found\n");
+			clientSaveOneHeader("404 Not Found", 13,METANAME);
+			wsHeaders();
+			vTaskDelay(200);
+			clientDisconnect();
+			cstatus = C_HEADER;
+		}
+		return;
+	}	
 	switch (cstatus)
 	{
 	case C_PLAYLIST:
@@ -478,9 +488,10 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
         clientParsePlaylist(pdata) ;//more?
 		cstatus = C_PLAYLIST;
 	break;
+	case C_HEADER0:
 	case C_HEADER:
 		clearHeaders();
-		metad = -1;
+		metad = -1;	
 		t1 = strstr(pdata, "302 "); 
 		if (t1 ==NULL) t1 = strstr(pdata, "301 "); 
 		if (t1 != NULL) { // moved to a new address
@@ -768,9 +779,14 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				  cstatus = C_PLAYLIST;
 				  sprintf(bufrec, "GET %s HTTP/1.0\r\nHOST: %s\r\n\r\n", clientPath,clientURL); //ask for the playlist
 			    } 
-				else sprintf(bufrec, "GET %s HTTP/1.1\r\nHost: %s\r\nicy-metadata: 1\r\n\r\n", clientPath,clientURL); 
-//				printf("st:%d, Client Sent:\n%s\n",cstatus,bufrec);
+				else 
+				{
+					if ((strcmp(clientPath,"/") ==0)&&(cstatus != C_HEADER0)) clientSetPath("/;");
+					sprintf(bufrec, "GET %s HTTP/1.1\r\nHost: %s\r\nicy-metadata: 1\r\nUser-Agent: Mozilla/4.0 (compatible; esp8266 Lua; Windows NT 5.1)\r\n\r\n", clientPath,clientURL); 
+//					printf("st:%d, Client Sent:\n%s\n",cstatus,bufrec);
+				}
 				send(sockfd, bufrec, strlen(bufrec), 0);
+				
 				
 				xSemaphoreTake(sConnected, 0);
 				
@@ -798,17 +814,25 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 					if(xSemaphoreTake(sDisconnect, 0)) break;	
 				}
 				while ( bytes_read > 0 );
-			} else printf("WebClient Socket fails to connect %d\n", errno);
+			} else
+			{
+				printf("WebClient Socket fails to connect %d\n", errno);
+				clientSaveOneHeader("Invalid address",15,METANAME);
+				wsHeaders();	
+			}	
 			/*---Clean up---*/
 			if (bytes_read <= 0 ) 
-			{
-					clientDisconnect(); 
+			{					
 					if (playing) 
 					{
+						clientDisconnect(); 
 						clientConnect();
 					}	
 					else{
 						clientSaveOneHeader("Not Found", 9,METANAME);
+						wsHeaders();
+						vTaskDelay(200);	
+						clientDisconnect(); 
 					}						
 			}//jpc
 			bufferReset();
