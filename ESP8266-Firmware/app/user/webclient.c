@@ -639,13 +639,13 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 			clientSaveMetadata(metadata,strlen(metadata));
 			len += rest;
 			metad = header.members.single.metaint ;
-			pdata += rest;
+			pdata -= rest;
 //			printf("Negative len out = %d, metad= %d  rest= %d   pdata= \"%s\"\n",len,metad,rest,pdata);
 			rest = 0;
 		}
 		inpdata = pdata;
 		clen = len;
-		if((header.members.single.metaint != 0)&&(len > metad)) 
+		if((header.members.single.metaint != 0)&&(clen > metad)) 
 		{
 //			printf("\nmetain len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );
 			while ((clen > metad)&&(header.members.single.metaint != 0)) // in buffer
@@ -672,7 +672,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 				if (rest <0) {clen = 0; break;}
 			}	// while
 //			printf("\nmetaout len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );			
-			if (rest >0)
+			if (rest >=0)
 			{	
 				metad = header.members.single.metaint - rest ; //until next
 				while(getBufferFree() < rest) 
