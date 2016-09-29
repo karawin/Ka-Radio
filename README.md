@@ -1,7 +1,16 @@
 # ** ESP8266 & VS1053 Wifi WebRadio ** #
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
-##Basic informations
+##Basic informations<BR/>
+###Release 1.0.9 <br/>
+<font color="red">New features:</font><br/>
+- New html interface see  <a href="http://karadio.karawin.fr/Interface.txt"  target="_blank"><font color="blue">uart and html interfaces</font></a><br/>
+- New I2S external DAC interface on the vs1053. The I2S is enabled by default to 48kHz. To change the speed permanently use the uart interface with the command 
+	cli.i2s("x") with x =0 for 48kHz, x=1 for 96kHz and x=2 for 192kHz<br/>
+	The i2s interface is available on the alientek vs1053 with i2s_sclk on SCLK (GPIO16), i2s_sdata on SDIN (GPIO07), i2s_mclk on MCLK (GPIO05), i2s_lrout on LRCK (GPIO04).<br/>
+- New Autostart: If autoplay is checked on the web interface, the current station is started at power on even with no web browser.<br/>
+
+<BR/>
 ###Release 1.0.8<br/>
 <font color="red">New features:</font><br/>
 - Corrected: Chunked html was wrong for some stations.<br/>
