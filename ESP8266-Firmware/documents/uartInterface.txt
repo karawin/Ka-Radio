@@ -55,15 +55,17 @@ wifi.station			: the current ssid and password
 cli.url("url")			: the name or ip of the station to play
 cli.path("/path")		: the path of the station to play
 cli.port("xxxx")		: the port number of the station to play						
-cli.start				: start to play the given station
-cli.stop				: stop the playing station
-cli.list				: list of the recorded stations
-cli.play("xxx")			: play the xxx recorded station in the list
+cli.start			: start to play the current station
+cli.stop			: stop the playing station
+cli.list			: list of the recorded stations
+cli.play("xxx")			: play the xxx recorded station in the list (0 = stop)
 cli.vol("xxx")			: set the volume to xxx with xxx from 0 to 254 (max volume)
-cli.prev (or cli.previous): select the previous station in the list and play it
-cli.next				: select the next station in the list and play it
-
-sys.erase				: erase all recorded configuration and stations.
+cli.prev (or cli.previous)	: select the previous station in the list and play it
+cli.next			: select the next station in the list and play it
+cli.update			: start an OTA (on the air) update of the software
+cli.i2s("x")			: Change and record the I2S clock speed of the vs1053 GPIO5 MCLK for the i2s interface to external dac. 
+				: 0=48kHz, 1=96kHz, 2=192kHz, other equal 0
+sys.erase			: erase all recorded configuration and stations.
 
 <enter> will display 
 #INFO:""#

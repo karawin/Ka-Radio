@@ -20,15 +20,19 @@ extern void setVolume(char* vol);
 #define MAX_WIFI_STATIONS 50
 	bool inside = false;
 
+void setVolumew(char* vol)
+{
+	setVolume(vol);	
+	wsVol(vol);
+}	
 unsigned short adcdiv;	
+// Read the command panel
 void switchCommand() {
 	int adc;
 	uint8_t vol;
 	char Vol[22];
 	if (adcdiv == 0) return; // no panel
-//	vTaskDelay(100);
-//	while (true)
-	{	
+
 		adc = system_adc_read(); 
 		adc *= adcdiv;
 //		if (adc < 930) 
@@ -44,8 +48,7 @@ void switchCommand() {
 				vol+=10;	
 //				printf("vol %d   vol1 %d\n",vol,vol1);					
 				sprintf(Vol,"%d",vol);
-				setVolume(Vol);
-				wsVol(Vol);	
+				setVolumew(Vol);
 			}
 		}
 		else if ((adc >730) && (adc < 830)) // volume -
@@ -56,8 +59,7 @@ void switchCommand() {
 				vol-=10;
 //				printf("vol %d   vol1 %d\n",vol,vol1);					
 				sprintf(Vol,"%d",vol);
-				setVolume(Vol);
-				wsVol(Vol);	
+				setVolumew(Vol);
 			}
 		}		
 		if (!inside)
@@ -72,8 +74,6 @@ void switchCommand() {
 				inside = true;
 				sprintf(Vol,"%d",currentStation);
 				playStation	(Vol);
-				sprintf(Vol,"{\"wsstation\":\"%d\"}",currentStation);
-				websocketbroadcast(Vol, strlen(Vol));
 			}
 			else if ((adc >830) && (adc < 920)) // station+
 			{
@@ -85,9 +85,7 @@ void switchCommand() {
 				inside = true;
 				wsStationPrev();
 			}
-//			vTaskDelay(5);	
 		}
-	};
 }
 
 
@@ -347,7 +345,27 @@ ICACHE_FLASH_ATTR void clientList()
 	}	
 	printf("\n##CLI.LIST#\n");
 }
-
+ICACHE_FLASH_ATTR void clientI2S(char* s)
+{
+    char *t = strstr(s, "(\"");
+	if(t == 0)
+	{
+		printf("\n##CLI.CMD_ERROR#");
+		return;
+	}
+	char *t_end  = strstr(t, "\")")-2;
+    if(t_end <= 0)
+    {
+		printf("\n##CLI.CMD_ERROR#");
+		return;
+    }	
+	uint8_t speed = atoi(t+2);
+	VS1053_I2SRate(speed);
+	struct device_settings *device;
+	device = getDeviceSettings();
+	device->i2sspeed = speed;
+	saveDeviceSettings(device);	
+}
 ICACHE_FLASH_ATTR void clientVol(char *s)
 {
     char *t = strstr(s, "(\"");
@@ -370,9 +388,8 @@ ICACHE_FLASH_ATTR void clientVol(char *s)
         strncpy(vol, t+2, (t_end-t));
 		if ((atoi(vol)>=0)&&(atoi(vol)<=254))
 		{	
-			setVolume(vol);
-			wsVol(vol);		}	
-        free(vol);
+			setVolumew(vol);	}	
+			free(vol);
     }	
 }
 
@@ -406,6 +423,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
     else if(strcmp(tmp, "sys.erase") == 0) eeEraseAll();
     else if(strcmp(tmp, "sys.heap") == 0) heapSize();
     else if(strcmp(tmp, "cli.upd") == 0) update_firmware();
+    else if(startsWith("cli.i2s",tmp)) clientI2S(tmp);
 	else printInfo(tmp);
 	free(tmp);
 	

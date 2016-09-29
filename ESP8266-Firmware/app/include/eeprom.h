@@ -15,7 +15,10 @@ struct device_settings {
 	int8_t freqtreble;
 	uint8_t freqbass;
 	uint8_t spacial;
-	uint8_t future[109];
+	uint16_t currentstation;  // 
+	uint8_t autostart; // 0: stopped, 1: playing
+	uint8_t i2sspeed; // 0 = 48kHz, 1 = 96kHz, 2 = 128kHz
+	uint8_t future[105];
 };
 
 struct shoutcast_info {

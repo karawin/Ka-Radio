@@ -45,10 +45,10 @@ function openwebsocket(){
 	}
 }
 function wsplayStation($arr){
-	var id;
-	id = $arr;
-	select = document.getElementById('stationsSelect');
-	select.selectedIndex = parseInt(id);
+//	var id;
+//	id = $arr;
+//	document.getElementById('stationsSelect').selectedIndex = parseInt(id);
+	document.getElementById('stationsSelect').selectedIndex = $arr;
 }
 
 function playMonitor($arr){
@@ -83,7 +83,7 @@ function monerror()
 function mstop(){
 		monitor = document.getElementById("audio");	
 		monitor.muted = true;
-		monitor.src = 'http://www.xamuel.com/blank-mp3-files/point1sec.mp3';
+		monitor.src = 'http://karadio.karawin.fr/silence-1sec.mp3';
 		playing = false;
 }	
 function mpause(){
@@ -373,7 +373,13 @@ function nextStation() {
 		Select();
 	}
 }
-
+function autoplay() {
+	try{		
+		xhr.open("POST","auto",false);
+		xhr.setRequestHeader(content,ctype);
+		xhr.send("id=" +document.getElementById('aplay').checked+"&");		
+	} catch(e){console.log("error"+e);}	
+}
 function Select() {
 	if (document.getElementById('aplay').checked)
 		 playStation() ;
@@ -392,10 +398,6 @@ function playStation() {
 		xhr.setRequestHeader(content,ctype);
 		xhr.send("id=" + id+"&");
 	} catch(e){console.log("error"+e);}
-	sessionStorage.setItem('autoplaying',"true");
-//	window.location.replace("/");
-//    window.location.reload(false);
-//	window.setTimeout(refresh, 500);
 }
 function stopStation() {
 	var select = document.getElementById('stationsSelect');
@@ -408,7 +410,6 @@ function stopStation() {
 		xhr.setRequestHeader(content,ctype);
 		xhr.send();
 	} catch(e){console.log("error"+e);}
-	sessionStorage.setItem('autoplaying',"false");
 }
 function saveSoundSettings() {
 	xhr = new XMLHttpRequest();
@@ -460,7 +461,6 @@ function editStation(id) {
 		xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
 		if (xhr.readyState == 4 && xhr.status == 200) {
-//			var arr;
 			try{
 				arr = JSON.parse(xhr.responseText);
 			} catch(e){console.log("error"+e);}
@@ -589,7 +589,7 @@ function loadStations(page) {
 	function cploadStations(id,arr) {
 			tr = document.createElement('TR'),
 			td = document.createElement('TD');
-			td.appendChild(document.createTextNode(id + 1));
+			td.appendChild(document.createTextNode(id ));
 			td.style.width = "10%";
 			tr.appendChild(td);
 			for(key in arr){
@@ -733,10 +733,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	refresh();
 	wifi(0) ;
 	checkversion();
-	if (sessionStorage.getItem('autoplaying') == null)  Select();
-//		sessionStorage.setItem('autoplaying',"false");
-//	if (sessionStorage.getItem('autoplaying') == "false")  Select();
 	setMainHeight(curtab);
-//	intervalid = window.setInterval(refresh,10000);
 	promptworking("");
 });

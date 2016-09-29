@@ -17,7 +17,7 @@
 				<div class="RIGHT">
 				<a href="https://github.com/karawin/Ka-Radio" target="_blank">KaraWin</a><br/>
 				<a href="https://github.com/PiotrSperka/ESP8266-WebRadio" target="_blank">PiotrSperka</a><br/>
-				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.0.8</a>
+				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.0.9</a>
 				</div>
 			<div id="HEAD">
 			<span class="bold4"><span id="meta">Karadio</span></span>
@@ -28,7 +28,7 @@
 				<input type="radio" name="tabs" id="tab1" checked />
 				<label for="tab1">Main</label>
 				<div id="tab-content1" class="tab-content">
-				<h1>Select stations &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" checked  id="aplay" /> AutoPlay</h1>
+				<h1>Select stations &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" checked  id="aplay" onClick="autoplay()"/> AutoPlay</h1>
 					<p>
 					<select id="stationsSelect" onchange="Select()" >
 					</select></p>
@@ -64,7 +64,7 @@
 					<p>
 					<span class="bold1">URL: </span><input type="text" id="instant_url" name="url"><br>
 					<span class="bold1">Port: </span><input type="text" id="instant_port" name="port" value="80"><br>
-					<span class="bold1">Path: </span><input type="text" id="instant_path" name="path" value="/"><br>
+					<span class="bold1">Path: </span><input type="text" id="instant_path" name="path" value="/"><br><br>
 					<input type="button" value="Play"   onClick="instantPlay()">&nbsp;
 					<input type="button" value="Stop"  onClick="stopStation()">
 					</p>

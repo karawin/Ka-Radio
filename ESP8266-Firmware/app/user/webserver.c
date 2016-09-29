@@ -96,11 +96,11 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 	}
 }
 
-ICACHE_FLASH_ATTR char* getParameterFromResponse(char* param, char* data, uint16_t data_length) {
+ICACHE_FLASH_ATTR char* getParameter(char* sep,char* param, char* data, uint16_t data_length) {
 	char* p = strstr(data, param);
 	if(p != NULL) {
 		p += strlen(param);
-		char* p_end = strstr(p, "&");
+		char* p_end = strstr(p, sep);
 		if(p_end ==NULL) p_end = data_length + data;
 		if(p_end != NULL ) {
 			if (p_end==p) return NULL;
@@ -113,6 +113,12 @@ ICACHE_FLASH_ATTR char* getParameterFromResponse(char* param, char* data, uint16
 			return t;
 		}
 	} else return NULL;
+}
+ICACHE_FLASH_ATTR char* getParameterFromResponse(char* param, char* data, uint16_t data_length) {
+	return getParameter("&",param,data, data_length) ;
+}
+ICACHE_FLASH_ATTR char* getParameterFromCommands(char* param, char* data, uint16_t data_length) {
+	return getParameter("?",param,data, data_length) ;
 }
 
 ICACHE_FLASH_ATTR void respOk(int conn)
@@ -157,29 +163,41 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 	
 ICACHE_FLASH_ATTR void playStation(char* id) {
 	struct shoutcast_info* si;
-	si = getStation(atoi(id));
-	currentStation = atoi(id);
-	if(si != NULL &&si->domain && si->file) {
-		int i;
-		vTaskDelay(5);
-		clientDisconnect();
-		for (i = 0;i<100;i++)
-		{
-			if(!clientIsConnected())break;
-			vTaskDelay(4);
-		}
+	char answer[22];
+	struct device_settings *device;
 	
-		clientSetURL(si->domain);
-		clientSetPath(si->file);
-		clientSetPort(si->port);
-		clientConnect();
-		for (i = 0;i<100;i++)
-		{
-		  if (clientIsConnected()) break;
-		  vTaskDelay(4);
+	si = getStation(atoi(id));
+	currentStation = atoi(id) ;
+
+		if(si != NULL &&si->domain && si->file) {
+			int i;
+			vTaskDelay(5);
+			clientDisconnect();
+			for (i = 0;i<100;i++)
+			{
+				if(!clientIsConnected())break;
+				vTaskDelay(4);
+			}
+	
+			clientSetURL(si->domain);
+			clientSetPath(si->file);
+			clientSetPort(si->port);
+			clientConnect();
+			for (i = 0;i<100;i++)
+			{
+				if (clientIsConnected()) break;
+				vTaskDelay(4);
+			}
 		}
-	}
+
 	infree(si);
+	sprintf(answer,"{\"wsstation\":\"%d\"}",currentStation);
+	websocketbroadcast(answer, strlen(answer));
+	device = getDeviceSettings();
+	device->currentstation = currentStation;
+	saveDeviceSettings(device);
+	incfree(device,"playStation");
+	
 }
 
 ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int conn) {
@@ -333,14 +351,20 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		}
 	} else if(strcmp(name, "/play") == 0) {
 		if(data_size > 4) {
-//			char* id = getParameterFromResponse("id=", data, data_size);
 			char * id = data+3;
 			data[data_size-1] = 0;
-//			if(id != NULL) {
 				playStation(id);
-//				infree(id);
-//			}
 		}
+	} else if(strcmp(name, "/auto") == 0) {
+		if(data_size > 4) {
+			char * id = data+3;
+			data[data_size-1] = 0;
+			device = getDeviceSettings();
+			device->autostart = strcmp(id,"true")?0:1;
+//			printf("autostart: %s, num:%d\n",id,device->autostart);
+			saveDeviceSettings(device);
+			infree(device);			
+		}		
 	} else if(strcmp(name, "/stop") == 0) {
 	    int i;
 		if (clientIsConnected())
@@ -483,7 +507,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 //	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
 	if( (c = strstr(buf, "GET ")) != NULL)
 	{
-//		printf("GET socket:%d ",conn);
+//		printf("GET socket:%d str:\n%s\n",conn,buf);
 		if( ((d = strstr(buf,"Connection:")) !=NULL)&& ((d = strstr(d," Upgrade")) != NULL))
 		{  // a websocket request
 			// prepare the parameter of the websocket task
@@ -522,14 +546,34 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			uint8_t i;
 			for(i=0; i<32; i++) fname[i] = 0;
 			c += 4;
-			char* c_end = strstr(c, " ");
-			if(c_end == NULL) return;
-			uint8_t len = c_end-c;
-			if(len > 32) return;
-			strncpy(fname, c, len);
-//			printf("GET in  socket:%d file:%s\n",conn,fname);
-			serveFile(fname, conn);
-//			printf("GET end socket:%d file:%s\n",conn,fname);
+			char* c_end = strstr(c, "HTTP");
+			if(c_end == NULL) return false;
+			*(c_end-1) = 0;
+			c_end = strstr(c,"?");
+			if(c_end != NULL) // commands
+			{
+				char* param;
+//				printf("GET commands  socket:%d command:%s\n",conn,c);
+				param = getParameterFromResponse("volume=", c, strlen(c)) ;
+				if ((param != NULL)&&(atoi(param)>=0)&&(atoi(param)<=254))
+				{	
+					setVolume(param);
+					wsVol(param);
+				}	
+				if (param!= NULL) incfree(param);
+				param = getParameterFromResponse("play=", c, strlen(c)) ;
+				if (param != NULL) {playStation(param);incfree(param);}
+				param = strstr(c,"stop") ;
+				if (param != NULL) {clientDisconnect();}
+				respOk(conn);
+			}
+			else // file
+			{
+				if(strlen(c) > 32) return false;
+//				printf("GET file  socket:%d file:%s\n",conn,c);
+				serveFile(c, conn);
+//				printf("GET end socket:%d file:%s\n",conn,c);
+			}
 		}
 	} else if( (c = strstr(buf, "POST ")) != NULL) {
 //		printf("POST socket: %d\n",conn);

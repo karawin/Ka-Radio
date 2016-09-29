@@ -223,7 +223,7 @@ ICACHE_FLASH_ATTR void wsStationNext()
 {
 	char answer[22];
 	struct shoutcast_info* si =NULL;
-	if (currentStation <191)
+	if (currentStation <256)
 		si = getStation(++currentStation);
 	else 
 	{
@@ -236,8 +236,6 @@ ICACHE_FLASH_ATTR void wsStationNext()
 		playStation	(answer);
 	} else currentStation--;
 	incfree(si,"wsstation");
-	sprintf(answer,"{\"wsstation\":\"%d\"}",currentStation);
-	websocketbroadcast(answer, strlen(answer));
 }
 // websocket: previous station
 ICACHE_FLASH_ATTR void wsStationPrev()
@@ -253,8 +251,6 @@ ICACHE_FLASH_ATTR void wsStationPrev()
 		playStation	(answer);
 	} else currentStation++;
 	incfree(si,"wsstation");
-	sprintf(answer,"{\"wsstation\":\"%d\"}",currentStation);
-	websocketbroadcast(answer, strlen(answer));
 }
 
 // websocket: broadcast volume to all client
@@ -446,7 +442,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 	static int rest ;
 	static uint32_t chunked;
 	static uint32_t cchunk;
-	static char metadata[257];
+	static char* metadata = NULL;
 	uint16_t l ;
 	uint32_t lc;
 	char *inpdata;
@@ -659,6 +655,9 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 					if (rest <0)
 					{
 						*(inpdata+clen) = 0; //truncated
+						
+						if (metadata != NULL) incfree(metadata,"meta"); 
+						metadata = incmalloc(l+1);	
 						strcpy(metadata,inpdata+metad+1);
 					}
 					else clientSaveMetadata(inpdata+metad+1,l);
@@ -819,6 +818,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				printf("WebClient Socket fails to connect %d\n", errno);
 				clientSaveOneHeader("Invalid address",15,METANAME);
 				wsHeaders();	
+				vTaskDelay(200);	
 			}	
 			/*---Clean up---*/
 			if (bytes_read <= 0 ) 
@@ -830,24 +830,27 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 					}	
 					else{
 						clientSaveOneHeader("Not Found", 9,METANAME);
-						wsHeaders();
-						vTaskDelay(200);	
+						wsHeaders();						
+						vTaskDelay(300);	
 						clientDisconnect(); 
 					}						
 			}//jpc
-			bufferReset();
-
+			
+			
 /*
 			uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 			printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 */
 			if (playing)
 			{
+			
 //				VS1053_flush_cancel(2);
+				vTaskDelay(50);					
 				playing = 0;
 //				VS1053_flush_cancel(0);
 			}	
 
+			bufferReset();
 			shutdown(sockfd,SHUT_RDWR);
 			vTaskDelay(10);	
 			close(sockfd);

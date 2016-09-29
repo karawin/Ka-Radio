@@ -13,7 +13,7 @@
 #define NBSTATIONS		192*/
 #define EEPROM_OLDSTART	0x3F0000 // Last 64k of flash (32Mbits or 4 MBytes)
 #define EEPROM_START	0x3E0000 // Last 128k of flash (32Mbits or 4 MBytes)
-#define EEPROM_SIZE		0xFFFF	 // until xffff , espressif take the end
+#define EEPROM_SIZE		0xFFFF	 // until xffff , 
 #define NBOLDSTATIONS	192
 #define NBSTATIONS		256
 

@@ -200,8 +200,17 @@ void VS1053_PluginLoad()
   }
 }
 */
+
+ICACHE_FLASH_ATTR void VS1053_I2SRate(uint8_t speed){ // 0 = 48kHz, 1 = 96kHz, 2 = 128kHz
+    if (speed > 2) speed = 0;
+	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x17); //address of GPIO_ODATA is 0xC017	
+	VS1053_WriteRegister(SPI_WRAM, 0x00,0x80); //reset I2S_CF_ENA
+	VS1053_WriteRegister(SPI_WRAM, 0x00,0xC0|speed); //
+	printf("I2S Speed: %d\n",speed);
+}
+
 ICACHE_FLASH_ATTR void VS1053_Start(){
-	struct device_settings *device;
+//	struct device_settings *device;
 	VS1053_ResetChip();
 	Delay(100);
 // these 4 lines makes board to run on mp3 mode, no soldering required anymore
@@ -210,12 +219,19 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x19); //address of GPIO_ODATA is 0xC019
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0x00); //GPIO_ODATA=0
 	Delay(100);
+	
 	while(VS1053_checkDREQ() == 0);
 	VS1053_WriteRegister(SPI_CLOCKF,0x60,0x00);
 //	VS1053_WriteRegister(SPI_MODE, (SM_LINE1 | SM_SDINEW)>>8 , SM_RESET); // soft reset
 	VS1053_SoftwareReset();
 	VS1053_WriteRegister(SPI_MODE, SM_SDINEW>>8, SM_LAYER12); //mode 
 	while(VS1053_checkDREQ() == 0);
+	
+// enable I2C dac output
+	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x17); //
+	VS1053_WriteRegister(SPI_WRAM, 0x00,0xF0); //
+	VS1053_I2SRate(0);	
+
 /*	
 	device = getDeviceSettings();
 	Delay(300);

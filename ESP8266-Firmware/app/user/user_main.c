@@ -163,7 +163,17 @@ void uartInterfaceTask(void *pvParameters) {
 	strcpy(device->ssid,config->ssid);
 	strcpy(device->pass,config->password);
 	saveDeviceSettings(device);			
-
+//autostart	
+	printf("autostart: playing:%d, currentstation:%d\n",device->autostart,device->currentstation);
+	VS1053_I2SRate(device->i2sspeed);
+	if (device->autostart ==1)
+	{	
+		char cur[10];
+		sprintf(cur,"%d",device->currentstation);
+		vTaskDelay(100); //1000 ms
+		playStation(cur);
+	}
+//
 	free(info);
 	free (device);
 	free (config);
@@ -317,12 +327,12 @@ void user_init(void)
 	printf("t0 task: %x\n",pxCreatedTask);
 	xTaskCreate(uartInterfaceTask, "t1", 244, NULL, 2, &pxCreatedTask); // 244
 	printf("t1 task: %x\n",pxCreatedTask);
+	xTaskCreate(vsTask, "t4", 370, NULL,4, &pxCreatedTask); //370
+	printf("t4 task: %x\n",pxCreatedTask);
 	xTaskCreate(clientTask, "t3", 820, NULL, 5, &pxCreatedTask); // 810
 	printf("t3 task: %x\n",pxCreatedTask);
 	xTaskCreate(serverTask, "t2", 220, NULL, 4, &pxCreatedTask); //220
 	printf("t2 task: %x\n",pxCreatedTask);
-	xTaskCreate(vsTask, "t4", 370, NULL,4, &pxCreatedTask); //370
-	printf("t4 task: %x\n",pxCreatedTask);
 
 }
 
