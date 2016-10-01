@@ -203,7 +203,7 @@ void VS1053_PluginLoad()
 
 ICACHE_FLASH_ATTR void VS1053_I2SRate(uint8_t speed){ // 0 = 48kHz, 1 = 96kHz, 2 = 128kHz
     if (speed > 2) speed = 0;
-	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x17); //address of GPIO_ODATA is 0xC017	
+	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x40); //address of GPIO_ODATA is 0xC017	
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0x80); //reset I2S_CF_ENA
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0xC0|speed); //
 	printf("I2S Speed: %d\n",speed);
