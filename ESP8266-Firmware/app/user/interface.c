@@ -348,13 +348,13 @@ ICACHE_FLASH_ATTR void clientList()
 ICACHE_FLASH_ATTR void clientI2S(char* s)
 {
     char *t = strstr(s, "(\"");
-	if(t == 0)
+	if(t == NULL)
 	{
 		printf("\n##CLI.CMD_ERROR#");
 		return;
 	}
-	char *t_end  = strstr(t, "\")")-2;
-    if(t_end <= 0)
+	char *t_end  = strstr(t, "\")");
+    if(t_end == NULL)
     {
 		printf("\n##CLI.CMD_ERROR#");
 		return;
@@ -365,6 +365,39 @@ ICACHE_FLASH_ATTR void clientI2S(char* s)
 	device = getDeviceSettings();
 	device->i2sspeed = speed;
 	saveDeviceSettings(device);	
+	free(device);
+}
+ICACHE_FLASH_ATTR void clientUart(char* s)
+{
+	bool empty = false;
+	char *t ;
+	char *t_end;
+	if (s != NULL)
+	{	
+		t = strstr(s, "(\"");
+		if(t == NULL)
+		{
+			empty = true;
+		} else
+		{
+			t_end  = strstr(t, "\")");
+			if(t_end == NULL)
+			{
+				empty = true;
+			}	
+		}
+	}
+	struct device_settings *device;
+	device = getDeviceSettings();
+	if ((!empty)&&(t!=NULL))
+	{
+		uint32_t speed = atoi(t+2);
+		speed = checkUart(speed);
+		device->uartspeed= speed;
+		saveDeviceSettings(device);	
+	}
+	printf("\n##CLI.UART= %d# on next reset\n",device->uartspeed);	
+	free(device);
 }
 ICACHE_FLASH_ATTR void clientVol(char *s)
 {
@@ -424,6 +457,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
     else if(strcmp(tmp, "sys.heap") == 0) heapSize();
     else if(strcmp(tmp, "cli.upd") == 0) update_firmware();
     else if(startsWith("cli.i2s",tmp)) clientI2S(tmp);
+    else if(startsWith("cli.uart",tmp)) clientUart(tmp);
 	else printInfo(tmp);
 	free(tmp);
 	

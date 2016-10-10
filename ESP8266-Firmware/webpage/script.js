@@ -45,9 +45,6 @@ function openwebsocket(){
 	}
 }
 function wsplayStation($arr){
-//	var id;
-//	id = $arr;
-//	document.getElementById('stationsSelect').selectedIndex = parseInt(id);
 	document.getElementById('stationsSelect').selectedIndex = $arr;
 }
 
@@ -437,12 +434,17 @@ function saveStation() {
 	} catch(e){console.log("error "+e);}
 	window.location.replace("/");
 }
+function abortStation(id) {
+	document.getElementById('editStationDiv').style.display = "none";
+	setMainHeight("tab-content2");
+}
 function editStation(id) {
 	var arr; 
 	function cpedit(arr) {
 			document.getElementById('add_url').value = arr["URL"];
 			document.getElementById('add_name').value = arr["Name"];
 			document.getElementById('add_path').value = arr["File"];
+			if (arr["Port"] == "0") arr["Port"] = "80";
 			document.getElementById('add_port').value = arr["Port"];
 			document.getElementById('editStationDiv').style.display = "block";
 			setMainHeight("tab-content2");
@@ -594,6 +596,7 @@ function loadStations(page) {
 			tr.appendChild(td);
 			for(key in arr){
 				td = document.createElement('TD');
+				td.style="word-break: break-all;overflow-wrap: break-word; word-wrap: break-word;";
 				if(arr[key].length > 64) arr[key] = "Error";
 				td.appendChild(document.createTextNode(arr[key]));
 				tr.appendChild(td);
@@ -603,14 +606,15 @@ function loadStations(page) {
 			tr.appendChild(td);
 			new_tbody.appendChild(tr);
 	}	
-	for(id; id < 16*page; id++) {
+//	for(id; id < 16*page; id++) {
+	for(id; id < 256; id++) {
 		idstr = id.toString();		
 		if (localStorage.getItem(idstr) != null)
 		{	
 			try{
 				arr = JSON.parse(localStorage.getItem(idstr));
 			} catch (e){console.log("error"+e);}			
-				cploadStations(id,arr);
+			cploadStations(id,arr);
 		}
 		else
 		try {
@@ -629,20 +633,21 @@ function loadStations(page) {
 			xhr.send("idgp=" + id+"&");
 		} catch(e){console.log("error"+e);id--;}
 	}
+
 	old_tbody = document.getElementById("stationsTable").getElementsByTagName('tbody')[0];
 	old_tbody.parentNode.replaceChild(new_tbody, old_tbody);
 	setMainHeight(curtab);
 }
 
 function loadStationsList(max) {
-	var foundNull = false,id,opt,arr,select;
+	var foundNull = false,id,opt,arr,select, liste= [];;
 	select = document.getElementById("stationsSelect");
 	function cploadStationsList(id,arr) {
 		foundNull = false;
 			if(arr["Name"].length > 0) 
 			{
 				opt = document.createElement('option');
-				opt.appendChild(document.createTextNode(arr["Name"]));
+				opt.appendChild(document.createTextNode(id+":\t\t"+arr["Name"]));
 				opt.id = id;
 				select.appendChild(opt);
 			} else foundNull = true;
@@ -658,7 +663,8 @@ function loadStationsList(max) {
 			try {
 				arr = JSON.parse(localStorage.getItem(idstr));
 			} catch(e){console.log("error"+e);}
-			foundNull = cploadStationsList(id,arr);
+//			foundNull = cploadStationsList(id,arr);
+			liste.push(arr);
 		}
 		else
 		try {
@@ -669,7 +675,8 @@ function loadStationsList(max) {
 						arr = JSON.parse(xhr.responseText);
 					} catch(e){console.log("error"+e);}
 					localStorage.setItem(idstr,xhr.responseText);
-					foundNull = cploadStationsList(id,arr);
+//					foundNull = cploadStationsList(id,arr);
+					liste.push(arr);
 				}
 			}
 			xhr.open("POST","getStation",false);
@@ -677,8 +684,25 @@ function loadStationsList(max) {
 			xhr.send("idgp=" + id+"&");
 		} catch(e){console.log("error"+e); id--;}
 	}
+	
+
+	var map = liste.map(function(e, i) {
+		return { index: i, value: e.Name.toLowerCase() };
+	})
+/*	map.sort(function(a, b) {
+		return +(a.value > b.value) || +(a.value === b.value) - 1;
+	});
+*/
+	// on utilise un objet final pour les résultats
+	var result = map.map(function(e){
+		return {index: e.index, value:liste[e.index]};
+});	
+	for(id=0; id < 256; id++) {
+		foundNull = cploadStationsList(result[id].index,result[id].value);
+	}	
+	
 	promptworking("");
-	select = document.getElementById('stationsSelect');
+//	select = document.getElementById('stationsSelect');
 	select.disabled = false;
 	select.options.selectedIndex= parseInt(localStorage.getItem('selindexstore'));
 //	getSelIndex();

@@ -297,6 +297,21 @@ void test_upgrade(void)
 	}		
 }
 /******************************************************************************
+ * FunctionName : checkUart
+ * Description  : Check for a valid uart baudrate
+ * Parameters   : baud
+ * Returns      : baud
+*******************************************************************************/
+uint32_t checkUart(uint32_t speed)
+{
+	uint32_t valid[] = {1200,2400,4800,9600,14400,19200,28800,38400,57600,76880,115200,230400};
+	int i = 0;
+	for (i;i<12;i++){
+		if (speed == valid[i]) return speed;
+	}
+	return 115200; // default
+}
+/******************************************************************************
  * FunctionName : user_init
  * Description  : entry of user application, init user function here
  * Parameters   : none
@@ -304,12 +319,18 @@ void test_upgrade(void)
 *******************************************************************************/
 void user_init(void)
 {
-//	REG_SET_BIT(0x3ff00014, BIT(0));
-//	system_update_cpu_freq(SYS_CPU_160MHZ);
+	struct device_settings *device;
+	uint32_t uspeed;
+	REG_SET_BIT(0x3ff00014, BIT(0));
+	system_update_cpu_freq(SYS_CPU_160MHZ);
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
 	xTaskHandle pxCreatedTask;
     Delay(300);
-	UART_SetBaudrate(0,115200);
+	device = getDeviceSettings();
+	uspeed = device->uartspeed;
+	free(device);
+	uspeed = checkUart(uspeed);
+	UART_SetBaudrate(0,uspeed);
 	VS1053_HW_init(); // init spi
 	test_upgrade();
 	extramInit();

@@ -112,6 +112,7 @@ div.LEFT {
 	height:400px;
 	width:100%
 }
+
 .tabs span.bold {
 	height:25px;
 	font-weight:900;
@@ -191,7 +192,7 @@ div.LEFT {
 }
 .tabs input[type="text"] {
 	font-size:12px;
-	min-width:100px;
+	min-width:120px;
 	height:20px;
 	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
 	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);

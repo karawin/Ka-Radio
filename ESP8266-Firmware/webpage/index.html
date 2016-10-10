@@ -17,7 +17,7 @@
 				<div class="RIGHT">
 				<a href="https://github.com/karawin/Ka-Radio" target="_blank">KaraWin</a><br/>
 				<a href="https://github.com/PiotrSperka/ESP8266-WebRadio" target="_blank">PiotrSperka</a><br/>
-				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.0.9</a>
+				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.0.10</a>
 				</div>
 			<div id="HEAD">
 			<span class="bold4"><span id="meta">Karadio</span></span>
@@ -82,18 +82,19 @@
 									<span class="bold">Name: </span><input type="text" id="add_name" name="name"><br>
 									<span class="bold">URL: </span><input type="text" id="add_url" name="url"><br>
 									<span class="bold">Port: </span><input type="text" id="add_port" name="port" value="80"><br>
-									<span class="bold">Path: </span><input type="text" id="add_path" name="path" value="/"><br>
-									<input type="button"  onClick="saveStation()" value="save">
+									<span class="bold">Path: </span><input type="text" id="add_path" name="path" value="/"><br><br>
+									<input type="button"  onClick="saveStation()" value="save">&nbsp;
+									<input type="button"  onClick="abortStation()" value="abort">
 								</p>
 							</form>
 						</div>
 						<h1>Manage stations</h1>
-						<table id = "stationsTable">
-							<thead><tr><td style="width:10%">No.</td><td style="width:20%">Name</td><td style="width:20%">URL</td><td style="width:30%">File</td><td style="width:10%">Port</td><td style="width:10%"></td></tr></thead>
+						<table id = "stationsTable" style="table-layout: fixed; width: 100%;">
+							<thead><tr><td style="width:8%">No.</td><td style="width:33%; word-break: break-all">Name</td><td style="width:20%">URL</td><td style="width:20%">File</td><td style="width:10%">Port</td><td style="width:9%"></td></tr></thead>
 							<tbody>  							
 							</tbody>
 						</table>
-						<form>
+<!--						<form>
 						<span class="bold2">Select: </span>
 							<a class="page" href="#" onClick="loadStations(1);">1</a>
 							<a class="page" href="#" onClick="loadStations(2);">2</a>
@@ -113,6 +114,7 @@
 							<a class="page" href="#" onClick="loadStations(16);">16</a>
 						
 						</form>
+-->						
 					</div>
 				</li>
 				<li>

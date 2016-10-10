@@ -554,6 +554,8 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			{
 				char* param;
 //				printf("GET commands  socket:%d command:%s\n",conn,c);
+				param = strstr(c,"uart") ;
+				if (param != NULL) {UART_SetBaudrate(0, 115200);}	
 				param = getParameterFromResponse("volume=", c, strlen(c)) ;
 				if ((param != NULL)&&(atoi(param)>=0)&&(atoi(param)<=254))
 				{	
