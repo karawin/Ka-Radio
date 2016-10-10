@@ -107,7 +107,7 @@ void uartInterfaceTask(void *pvParameters) {
 	while ((wifi_station_get_connect_status() != STATION_GOT_IP)&&(!conn))
 	{	
 		printf("\nIn I: %d status: %d\n",i,wifi_station_get_connect_status());
-			FlashOn = FlashOff = 20;
+			FlashOn = FlashOff = 40;
 //			while (wifi_station_get_connect_status() != STATION_GOT_IP) 
 			{	
 				vTaskDelay(100);// 100 ms
@@ -117,7 +117,7 @@ void uartInterfaceTask(void *pvParameters) {
 			if (i >= 20)
 			{
 /*				printf("Config not found\nTrying smartconfig\n");
-				FlashOn = FlashOff = 50;
+				FlashOn = FlashOff = 100;
 				smartconfig_set_type(SC_TYPE_ESPTOUCH);
 				smartconfig_start(cb);
 				printf("smartConfig started. Waiting for ios or android 'ESP8266 SmartConfig' application\n");
@@ -132,7 +132,7 @@ void uartInterfaceTask(void *pvParameters) {
 				{
 					printf("\n");
 //					smartconfig_stop();
-					FlashOn = 10;FlashOff = 100;
+					FlashOn = 10;FlashOff = 200;
 					vTaskDelay(200);
 					printf("Config not found\n");
 					printf("\n");
@@ -182,7 +182,7 @@ void uartInterfaceTask(void *pvParameters) {
 	// read adc to see if it is a nodemcu with adc dividor
 		if (system_adc_read() < 400) adcdiv = 3;
 			else adcdiv = 1;
-	FlashOn = 100;FlashOff = 10;	
+	FlashOn = 200;FlashOff = 10;	
 	while(1) {
 		while(1) {
 			int c = uart_getchar_ms(100);
