@@ -2,47 +2,22 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations<BR/>
-###Release 1.0.9 <br/>
+###Release 1.0.10 <br/>
 <font color="red">New features:</font><br/>
-- New html interface see  <a href="http://karadio.karawin.fr/Interface.txt"  target="_blank"><font color="blue">uart and html interfaces</font></a><br/>
-- New I2S external DAC interface on the vs1053. The I2S is enabled by default to 48kHz. To change the speed permanently use the uart interface with the command 
-	cli.i2s("x") with x =0 for 48kHz, x=1 for 96kHz and x=2 for 192kHz<br/>
-	The i2s interface is available on the alientek vs1053 with i2s_sclk on SCLK (GPIO16), i2s_sdata on SDIN (GPIO07), i2s_mclk on MCLK (GPIO05), i2s_lrout on LRCK (GPIO04).<br/>
-- New Autostart: If autoplay is checked on the web interface, the current station is started at power on even with no web browser.<br/>
-
-<BR/>
-###Release 1.0.8<br/>
-<font color="red">New features:</font><br/>
-- Corrected: Chunked html was wrong for some stations.<br/>
-- The station name is displayed when no metadata available.<br/>
-<BR/>
-<BR/><BR/>
-
-##History<br/>
-###Release 1.0.7<br/>
-<font color="red">New features:</font><br/>
-- Corrected: An empty station was not taken into account.
-<BR/>
-<BR/><BR/>
-###Release 1.0.6<br/>
-<font color="red">New features:</font><br/>
-- New sdk patch from Espressif see <a href="http://bbs.espressif.com/viewtopic.php?f=46&t=2349" target="_blank">http://bbs.espressif.com/viewtopic.php?f=46&t=2349</a> <BR/>
-- Now the maximum number of stations is 256<BR/>
-- The external ram detection is working. For some  23lcv chip with /Hold in place of /VBAT (pin7) must be wired to VCC (pin8)<BR/>
-- For Edge browser, the filename for "Save Stations from webradio" was not correct.
+- New uart interface command: cli.uart("x")<br/>
+ With x the uart baudrate at the next reset and permanently.<br/>
+List of valid baudrate: 1200,2400,4800,9600,14400,19200,28800,38400,57600,76880,115200,230400<br/>
+The command will reply with<br/>
+##CLI.UART= 115200# on the next reset.<br/>
+<br/>
+- New Station selection with number<br/>
+- Stations management in one page<br/>
+- abort button on station edition.<br/>
+<font color="red">Corrected:</font><br/>
+- The I2S interface was not working. Thanks  Discover1977 for the test
 <BR/>
 
-The upgrade changes in the flash eprom  are made at the first start of the new release.<BR/>
-Please, once upgraded, do another ota in order to align the two banks of bin.<BR/><BR/>
-Built on 2016/07/19
-<BR/><BR/>
-###Release 1.0.5<br/>
-Never say good bye, I cannot resist to improve this project.<BR/>
-New features:<br/>
-- OTA support<BR/>
-- Autoplay check on page refresh.<BR/>
-- Optional external ram (23LCV1024) support (1:CS/=GPIO16 2:MISO=GPIO12 3:NC 4:GND 5:MOSI=GPIO13 6:SCK=GPIO14 7:GND 8:3.3v)<BR/>
-
+<BR/>
 Attention:<br/>
 The optional led is now on GPIO2. The blue led on the ESP8266 is blinking at the same rate.<BR/>
 GPIO16 is now the Chip select for the external ram if any.<BR/>
@@ -53,57 +28,6 @@ After that, all next updates are done with the On The Air (OTA) feature.<BR/>
 New binaries are hosted at http://karadio.karawin.fr .<BR/><BR/>
 See also https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053 <br/>
 
-####Version: 1.0.4<br/>
-PiotSperka merged this software in https://github.com/PiotrSperka/ESP8266-WebRadio.<br/>
-He implemented an external ram in his board removing the main problem of the esp8266: the lack of room for the audio buffer.<br/>
-It is the place to go if you want to build a very small board with discret components.<br/>
-Added:<br/>
-Next and previous buttons,<br/>
-Autoplay check box<br/>
-"Now playing" removed, the title is now on the top of the page,<br/>
-A hardware panel can be built. See  ESP8266-WebRadio/Hardware/KiCAD/controles/controles.pdf ,<br/>
-If not used, ADC input must be grounded.<br/>
-Optimized software.<br/>
-<br/>
-This release is the end of the project.<br/>
-In the future, a remote control will be added (433Mhz RF) based on arduino pro mini.<br/>
-####Version: 1.0.3<br />
-Added:<br/>
-New html look,<br/>
-Volume slider is now logarithmic,<br/>
-Monitoring of the current station in the browser, usefull for mobile<br/>
-Optimised ram usage.<br/>
-Read chunked html stream, some stations use this kind of GET<br/>
-First start updated,<br/>
-It seems that the 320KB/s is still not perfect due to too few ram on the processor. Not so bad but very sensitive, 256kB/s is perfect.<br/>
-####Version: 1.0.2<br />
-Added: "Now playing" informations are now given with the help of a websocket. The display is immediatly updated on the browser.<br/>
-Reading 320Kb/s is improved<br/>
-Stability tested during many days and nights....<br/>
-Video on https://youtu.be/cT8cGp9pvcs<br/>
-Hackaday.io page: https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053 <br/>
-Github page: https://github.com/karawin/ESP8266-WebRadio <br/>
-#####Version: 1.0.1<br />
-A static ip at the first start is a problem if you are not in 192.168.1.xxx network.<br />
-The first start will now be in dhcp mode. See the allocated ip in the uart traces or scan your network.<br />
-This can be done with fing for mobile for example: <br />
-IOS: https://itunes.apple.com/fr/app/fing-network-scanner/id430921107?mt=8<br />
-Android: https://play.google.com/store/apps/details?id=com.overlook.android.fing&hl=fr<br />
-
-#####Version: 1.0.0 (KaraWin)<br />
-Status: under design and development
-### 2016, May (KaraWin)
-First step, Final release done.
-- Read up to 320 kB/s stream,
-- New web page, Fit well on mobile or computer.
-- Embedded wifi configuration via the web site (see below)
-- Metadata displayed,
-- all settings saved (sound setting, stations, wifi)
-- server multi clients with automatic refresh for all,
-- The stations can be dowloaded and uploaded within the web site,
-- very quick responsive web by caching local information in the browser.
-- additional hardware: a led indicates the state of the equipment (gpo16->resistor->led->3.3volt). Speed blink: init, 90%in 10%out: connexion in progress, 10% in 90%out: Equipment ready.
-- ...
 
 #### Loading the esp8266
 - https://github.com/karawin/ESP8266-WebRadio/blob/Ka-Radio/ESP8266-Firmware/bin/upgrade/user1.4096.new.4.bin 
