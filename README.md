@@ -2,6 +2,14 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations<BR/>
+###Release 1.1.0 <br/>
+<font color="red">New features:</font><br/>
+- Drag an drop on the stations list: rearrange the list by dragging a line to another one. Save the change when asked.
+- Themes toggle between light blue and dark marron theme with a click on the logo.
+- Sleep mode to stop the play after a delay.
+- Functions on the web page are optimized. 
+- Many minor improvements on the code and the web page.
+
 ###Release 1.0.10 <br/>
 <font color="red">New features:</font><br/>
 - New uart interface command: cli.uart("x")<br/>
