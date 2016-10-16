@@ -15,6 +15,7 @@
 #include "lwip/api.h"
 #include "esp_common.h"
 #include "esp_softap.h"
+#include "esp_timer.h"
 #include "esp_wifi.h"
 #include "lwip/sockets.h"
 #include "lwip/dns.h"

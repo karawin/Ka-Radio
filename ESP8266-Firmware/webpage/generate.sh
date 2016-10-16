@@ -6,6 +6,13 @@ xxd -i style.css > style
 sed -i 's/\[\]/\[\] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR /g' style
 mv style.ori style.css
 
+yui-compressor   -o style1.min.css style1.css 
+mv style1.css style1.ori
+mv style1.min.css style1.css
+xxd -i style1.css > style1
+sed -i 's/\[\]/\[\] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR /g' style1
+mv style1.ori style1.css
+
 # old compressor
 #python3 ./css-html-js-minify.py --checkupdates style.css
 #mv style.css style.ori

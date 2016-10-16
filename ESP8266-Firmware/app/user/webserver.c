@@ -3,9 +3,12 @@
 */
 #include "webserver.h"
 #include "serv-fs.h"
-char lowmemory[] = { "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 10\r\n\r\n\", \"low memory\")"};
 
+char lowmemory[] = { "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 10\r\n\r\n\", \"low memory\")"};
 xSemaphoreHandle semclient = NULL ;
+
+os_timer_t sleepTimer;
+uint32_t sleepDelay;
 
 void *inmalloc(size_t n)
 {
@@ -43,7 +46,18 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 	int progress,part,gpart;
 	char buf[140];
 	char *content;
+	if (strcmp(name,"/style.css") == 0)
+	{
+		struct device_settings *device;
+		device = getDeviceSettings();
+		if (device != NULL)	 {
+			if (device->theme) strcpy(name , "/style1.css");
+//			printf("name: %s, theme:%d\n",name,device->theme);
+			infree(device);
+		}
+	}
 	struct servFile* f = findFile(name);
+//	printf("find %s at %x\n",name,f);
 //	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
 	gpart = PART;
 	if(f != NULL)
@@ -139,12 +153,47 @@ ICACHE_FLASH_ATTR void setVolume(char* vol) {
 		if (device != NULL) infree(device);			
 }
 
+// flip flop the theme indicator
+ICACHE_FLASH_ATTR void theme() {
+		struct device_settings *device;
+		device = getDeviceSettings();
+		if (device != NULL)	 {
+//			if (device->theme) device->theme=false; else device->theme = true;
+			device->theme = !device->theme;
+			saveDeviceSettings(device);
+			printf("theme:%d\n",device->theme);
+			infree(device);	
+		}
+}
+
+void sleepCallback(void *pArg) {
+	if (--sleepDelay == 0)
+	{
+		os_timer_disarm(&sleepTimer);
+		clientSilentDisconnect(); // stop the player
+	}		
+}
+
+ICACHE_FLASH_ATTR void startSleep(uint32_t delay)
+{
+//	printf("Delay:%d\n",delay);
+	if (delay == 0) return;
+	sleepDelay = delay*60; // minutes to seconds
+	os_timer_disarm(&sleepTimer);
+	os_timer_arm(&sleepTimer, 1000, true); // 1 second and rearm	
+}
+ICACHE_FLASH_ATTR void stopSleep(){
+//	printf("stopDelayDelay\n");
+	os_timer_disarm(&sleepTimer);
+}
+
 // treat the received message of the websocket
 void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t length)
 {
 	char answer[17];
 	struct device_settings *device;
 	//wsvol
+//	printf("websocketHandle: %s\n",payload);
 	if (strstr(payload,"wsvol=")!= NULL)
 	{
 		if (strstr(payload,"&") != NULL)
@@ -154,9 +203,18 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 		sprintf(answer,"{\"wsvol\":\"%s\"}",payload+6);
 		websocketlimitedbroadcast(socket,answer, strlen(answer));
 	}
+	if (strstr(payload,"startSleep=")!= NULL)
+	{
+		if (strstr(payload,"&") != NULL)
+			*strstr(payload,"&")=0;
+		else return;
+		startSleep(atoi(payload+11));
+	}
+	else if (strstr(payload,"stopSleep")!= NULL){stopSleep();}
 	//monitor
 	else if (strstr(payload,"monitor")!= NULL){wsMonitor();}
 	else if (strstr(payload,"upgrade")!= NULL){update_firmware();}
+	else if (strstr(payload,"theme")!= NULL){theme();}
 }
 
 
@@ -211,7 +269,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* url = getParameterFromResponse("url=", data, data_size);
 			char* path = getParameterFromResponse("path=", data, data_size);
 			char* port = getParameterFromResponse("port=", data, data_size);
-			int i;
+//			int i;
 			if(url != NULL && path != NULL && port != NULL) {
 				clientDisconnect();
 				for (i = 0;i<100;i++)
@@ -284,11 +342,11 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* id = getParameterFromResponse("idgp=", data, data_size);
 			if (id ) 
 			{
-				if ((atoi(id) >=0) && (atoi(id) < 256)) 
+				if ((atoi(id) >=0) && (atoi(id) < 255)) 
 				{
 					char ibuf [6];	
 					char *buf;
-					int i;
+//					int i;
 					for(i = 0; i<sizeof(ibuf); i++) ibuf[i] = 0;
 					struct shoutcast_info* si;
 					si = getStation(atoi(id));
@@ -319,35 +377,60 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		}
 	} else if(strcmp(name, "/setStation") == 0) {
 		if(data_size > 0) {
-			char* id = getParameterFromResponse("id=", data, data_size);
-			char* url = getParameterFromResponse("url=", data, data_size);
-			char* file = getParameterFromResponse("file=", data, data_size);
-			char* name = getParameterFromResponse("name=", data, data_size);
-			char* port = getParameterFromResponse("port=", data, data_size);
-			if(id ) {
-				struct shoutcast_info *si = inmalloc(sizeof(struct shoutcast_info));
-				if ((si != NULL) && (atoi(id) >=0) && (atoi(id) < 256))
-				{	
-					char* bsi = (char*)si;
-					int i; for (i=0;i< sizeof(struct shoutcast_info);i++) bsi[i]=0; //clean 
-					if(url && file && name && port) {
-						if (strlen(url) > sizeof(si->domain)) url[sizeof(si->domain)-1] = 0; //truncate if any
-						strcpy(si->domain, url);
-						if (strlen(file) > sizeof(si->file)) url[sizeof(si->file)-1] = 0; //truncate if any
-						strcpy(si->file, file);
-						if (strlen(name) > sizeof(si->name)) url[sizeof(si->name)-1] = 0; //truncate if any
-						strcpy(si->name, name);
-						si->port = atoi(port);
-					}
-					saveStation(si, atoi(id));
-				} else printf("setStation SI inmalloc failed or illegal id %d\n",atoi(id));
-				infree (si);
-			} 
-			infree(port);
-			infree(name);
-			infree(file);
-			infree(url);
-			infree(id);
+//			printf("data:%s\n",data);
+			char* nb = getParameterFromResponse("nb=", data, data_size);
+			uint16_t unb,uid = 0;
+//			printf("nb init:%s\n",nb);
+			if (nb) {unb = atoi(nb); infree(nb);}
+			else unb = 1;
+//			printf("unb init:%d\n",unb);
+			char* id; char* url; char* file; char* name; char* port;
+			struct shoutcast_info *si =  inmalloc(sizeof(struct shoutcast_info)*unb);
+			struct shoutcast_info *nsi ;
+			if (si == NULL) {
+				printf("setStation SI inmalloc failed or illegal nb %d\n",unb);
+				respOk(conn);
+				return;
+			}
+			char* bsi = (char*)si;
+			int j;
+			for (j=0;j< sizeof(struct shoutcast_info)*unb;j++) bsi[j]=0; //clean 
+
+			for (i=0;i<unb;i++)
+			{
+				nsi = si + i;
+				id = getParameterFromResponse("id=", data, data_size);
+				url = getParameterFromResponse("url=", data, data_size);
+				file = getParameterFromResponse("file=", data, data_size);
+				name = getParameterFromResponse("name=", data, data_size);
+				port = getParameterFromResponse("port=", data, data_size);
+//				printf("nb:%d,si:%x,nsi:%x,id:%s,url:%s,file:%s\n",i,si,nsi,id,url,file);
+				if(id ) {
+					if (i == 0) uid = atoi(id);
+					if ((atoi(id) >=0) && (atoi(id) < 255))
+					{	
+						if(url && file && name && port) {
+//							if (strlen(url) > sizeof(nsi->domain)) url[sizeof(nsi->domain)-1] = 0; //truncate if any
+							strcpy(nsi->domain, url);
+//							if (strlen(file) > sizeof(nsi->file)) url[sizeof(nsi->file)-1] = 0; //truncate if any
+							strcpy(nsi->file, file);
+//							if (strlen(name) > sizeof(nsi->name)) url[sizeof(nsi->name)-1] = 0; //truncate if any
+							strcpy(nsi->name, name);
+							nsi->port = atoi(port);
+						}
+					} 					
+				} 
+				infree(port);
+				infree(name);
+				infree(file);
+				infree(url);
+				infree(id);
+				data = strstr(data,"&&")+2;
+//				printf("si:%x, nsi:%x, addr:%x\n",si,nsi,data);
+			}
+//			printf("save station: %d, unb:%d, addr:%x\n",uid,unb,nsi);
+			saveMultiStation(si, uid,unb);
+			infree (si);
 		}
 	} else if(strcmp(name, "/play") == 0) {
 		if(data_size > 4) {
@@ -366,7 +449,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			infree(device);			
 		}		
 	} else if(strcmp(name, "/stop") == 0) {
-	    int i;
+//	    int i;
 		if (clientIsConnected())
 		{	
 			clientDisconnect();
@@ -591,6 +674,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 //		printf("Name: %s\n", fname);
 		// DATA
 		char* d_start = strstr(buf, "\r\n\r\n");
+//		printf("dstart:%s\n",buf);
 		if(d_start > 0) {
 			d_start += 4;
 			uint16_t len = buflen - (d_start-buf);
@@ -640,7 +724,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 					if (strstr(buf,"POST") ) //rest of post?
 					{
 						uint16_t cl = atoi(strstr(buf, "Content-Length: ")+16);
-//						printf("cl: %d\n",cl);
+//						printf("cl: %d, rec:%s\n",cl,buf);
 						if ((reclen == RECLEN) && ((bend - buf +cl)> reclen))
 						{
 							buf = realloc(buf,(2*RECLEN) );
@@ -652,8 +736,8 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 						if ((bend - buf +cl)> recbytes)
 						{	
 //							printf ("Server: try receive more:%d bytes. reclen = %d\n", recbytes,reclen);
-							while(((recb = read(client_sock , bend, cl))==0));
-//							printf ("Server: received more now: %d bytes\n", recbytes+recb);
+							while(((recb = read(client_sock , buf+recbytes, cl))==0));
+//							printf ("Server: received more now: %d bytes, rec:%s\n", recbytes+recb,buf);
 							if (recb < 0) {
 								if (errno != EAGAIN )
 								{
@@ -724,6 +808,7 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
 //	portBASE_TYPE uxHighWaterMark;
     semclient = xSemaphoreCreateCounting(2,2); 
 	websocketinit();
+	os_timer_setfn(&sleepTimer, sleepCallback, NULL);
 	int stack = 340;
 	
 	while (1) {
@@ -754,7 +839,7 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
             }
 
             sin_size = sizeof(client_addr);
-            while(1) {
+            while(1) {				
                 if ((client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &sin_size)) < 0) {
 					printf ("Accept fails %d\n",errno);
 					vTaskDelay(100);					
@@ -783,7 +868,7 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
 							"t10",
 							stack,
 							(void *) client_sock,
-							3, 
+							4, 
 							NULL ) != pdPASS) 
 							{
 								printf("xTaskCreate 1 failed for stack %d. Retrying...\n",stack);

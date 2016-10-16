@@ -1,7 +1,7 @@
 var content = "Content-type",
 	ctype = "application/x-www-form-urlencoded",
 	cjson = "application/json";
-var intervalid , websocket,urlmonitor , e, playing = false, curtab = "tab-content1";
+var intervalid , websocket,urlmonitor , e, playing = false, curtab = "tab-content1",stchanged = false,maxStation = 255;
 const karadio = "Karadio";
 
 function openwebsocket(){	
@@ -97,7 +97,7 @@ function checkwebsocket() {
 	else 
 	{
 		if (websocket.readyState == websocket.CLOSED) openwebsocket();	
-		else websocket.send("opencheck");
+		else if (websocket.readyState == websocket.OPEN) websocket.send("opencheck");
 	}	
 }	
 
@@ -126,16 +126,38 @@ function valid() {
     alert("System reboot. Please change your browser address to the new one.");
 }
 
+function labelSleep(label){
+	document.getElementById('sleepdelay').value = label;	
+}
+function startSleep(){
+	var val = document.getElementById('sleepdelay').value;
+	if(Number.isInteger(parseInt(val,10))){
+		websocket.send("startSleep=" + val+"&");
+		labelSleep("Started, Good night!");
+		window.setTimeout(labelSleep, 3000 ,val);	
+	} else
+	{
+		labelSleep("Error, try again");
+		window.setTimeout(labelSleep, 2000 ,"1");
+	}	
+}
+function stopSleep(){
+	var a = document.getElementById("sleepdelay").value;
+    websocket.send("stopSleep");
+    labelSleep("Stopped");
+    window.setTimeout(labelSleep, 2000, a);	
+}
+
 function promptworking(label) {
 	document.getElementById('meta').innerHTML = label;
-	if (label == "") document.getElementById('meta').innerHTML = karadio;
+	if (label == "") {document.getElementById('meta').innerHTML = karadio; refresh();}
 }
 
 function saveTextAsFile()
 {
 	var output = '',id,textFileAsBlob,downloadLink,fileName; 
 //	for (var key in localStorage) {
-	for (id =0;id<256 ;id++) {
+	for (id =0;id<maxStation ;id++) {
 //	output = output+(localStorage[key])+'\n';
 	output = output+(localStorage[id])+'\n';
 	}
@@ -264,6 +286,11 @@ function refresh() {
 		xhr.send();
 	} catch(e){console.log("error"+e);}
 }
+// change the theme
+function theme(){
+	websocket.send("theme");
+	window.location.reload(true); // force reload from the server
+}
 
 function onRangeChange($range, $spanid, $mul, $rotate, $nosave) {
 	var val = document.getElementById($range).value;
@@ -350,7 +377,6 @@ function instantPlay() {
 		document.getElementById('instant_url').value = document.getElementById('instant_url').value.replace(/^https?:\/\//,'');
 		xhr.send("url=" + document.getElementById('instant_url').value + "&port=" + document.getElementById('instant_port').value + "&path=" + document.getElementById('instant_path').value+"&");
 	} catch(e){console.log("error"+e);}
-//	window.setTimeout(refresh, 500);
 }
 
 
@@ -429,12 +455,14 @@ function saveStation() {
 		xhr = new XMLHttpRequest();
 		xhr.open("POST","setStation",false);
 		xhr.setRequestHeader(content,ctype);
-		xhr.send("id=" + document.getElementById('add_slot').value + "&url=" + url + "&name=" + document.getElementById('add_name').value + "&file=" + file + "&port=" + document.getElementById('add_port').value+"&");
+		xhr.send("nb=" + 1+"&id=" + document.getElementById('add_slot').value + "&url=" + url + "&name=" + document.getElementById('add_name').value + "&file=" + file + "&port=" + document.getElementById('add_port').value+"&&");
 		localStorage.setItem(document.getElementById('add_slot').value,"{\"Name\":\""+document.getElementById('add_name').value+"\",\"URL\":\""+url+"\",\"File\":\""+file+"\",\"Port\":\""+document.getElementById('add_port').value+"\"}");
 	} catch(e){console.log("error "+e);}
-	window.location.replace("/");
+	abortStation(); // to erase the edit field
+	loadStations();
+	loadStationsList(maxStation);
 }
-function abortStation(id) {
+function abortStation() {
 	document.getElementById('editStationDiv').style.display = "none";
 	setMainHeight("tab-content2");
 }
@@ -477,12 +505,16 @@ function editStation(id) {
 
 function refreshList() {
 	promptworking("Working.. Please Wait");
-	localStorage.clear();
-//	loadStationsList(256);
-	window.location.reload(false);
-	promptworking("");
+	intervalid =window.setTimeout(refreshListtemp, 2);
 }
-
+function refreshListtemp() {
+	
+	localStorage.clear();
+	loadStationsList(maxStation);
+//	window.location.reload(false);
+	promptworking("");
+	refresh();
+}
 function clearList() {
 		promptworking("Working.. Please Wait");
 	if (confirm("Warning: This will clear all stations.\n Be sure to save station before.\nClear now?"))
@@ -491,11 +523,12 @@ function clearList() {
 		xhr.open("POST","clear",false);
 		xhr.setRequestHeader(content,ctype);
 		xhr.send( );
-		window.setTimeout(refreshList, 10);
+		refreshList();
+		window.setTimeout(loadStations, 5);
 	}
-		promptworking("");
+	else 	promptworking("");
 }	
-
+/*
 function removeOptions(selectbox)
 {
     var i;
@@ -504,12 +537,11 @@ function removeOptions(selectbox)
         selectbox.remove(i);
     }
 }
-
-
+*/
 
 function upgrade()
 {
-	websocket.send("upgrade");	
+	if (websocket.readyState == websocket.OPEN) websocket.send("upgrade");	
 	alert("Rebooting to the new release\nPlease refresh the page in few seconds.");
 }
 function checkhistory()
@@ -527,6 +559,7 @@ function checkhistory()
 		xhr.send(null );
 	}catch(e){;}
 }
+//load the version and history html
 function checkversion()
 {
     if (window.XDomainRequest) {
@@ -543,11 +576,11 @@ function checkversion()
 	}catch(e){;}
 	checkhistory();
 }
+
+// refresh the stations list by reading in the webradio
 function downloadStations()
 {
-	var arr,reader,lines,line,file;
-	/*var textArea = document.getElementById("my-text-area");
-	var arrayOfLines = textArea.value.split("\n"); // arrayOfLines is array where every element is string of one line*/
+	var i,indmax,tosend,arr,reader,lines,line,file;
 	if (window.File && window.FileReader && window.FileList && window.Blob) {
 		reader = new FileReader();
 		xhr = new XMLHttpRequest();
@@ -555,25 +588,46 @@ function downloadStations()
 			promptworking("Working.. Please Wait"); // some time to display promptworking
 		}
 		reader.onload = function(e){
+			function fillInfo(ind,arri){
+				tosend = tosend+"&id="+ind + "&url="+arri["URL"] +"&name="+ arri["Name"]+ "&file="+arri["File"] + "&port=" + arri["Port"]+"&";
+				localStorage.setItem(ind,"{\"Name\":\""+arri["Name"]+"\",\"URL\":\""+arri["URL"] +"\",\"File\":\""+arri["File"]+"\",\"Port\":\""+arri["Port"]+"\"}");
+			}	
 			// Entire file
 			//console.log(this.result);
 			// By lines
 			lines = this.result.split('\n');
-			
-			for(line = 0; line < lines.length; line++){				
+			localStorage.clear();
+			indmax = 7;
+			line = 0;
+			try {
+				tosend =  "nb=" + indmax;
+				for (i = 0 ; i< indmax;i++)
+				{
+					arr = JSON.parse(lines[i]);
+					fillInfo(i,arr);
+				}				
+				xhr.open("POST","setStation",false);
+				xhr.setRequestHeader(content,ctype);
+				console.log("post "+tosend);
+				xhr.send(tosend);
+				} catch (e){console.log("error "+e);}
+//			}
+			indmax = 8;
+			for(line = 7; line < lines.length; line+=indmax){				
 //				console.log(lines[line]);
 				try {
-				arr = JSON.parse(lines[line]);
-				} catch (e){console.log("error"+e);}
-				finally try {
-//				console.log("Name="+arr["Name"]);
-					xhr.open("POST","setStation",false);
-					xhr.setRequestHeader(content,ctype);
-					xhr.send("id="+line + "&url="+arr["URL"] +"&name="+ arr["Name"]+ "&file="+arr["File"] + "&port=" + arr["Port"]+"&");
+				tosend =  "nb=" + indmax;
+				for (i = 0 ; i< indmax;i++)
+				{
+					arr = JSON.parse(lines[line+i]);
+					fillInfo(line+i,arr);
+				}
+				xhr.open("POST","setStation",false);
+				xhr.setRequestHeader(content,ctype);
+				xhr.send(tosend);
 				} catch (e){console.log("error "+e);}
 			}
-			localStorage.clear();
-			loadStationsList(256);		
+			loadStationsList(maxStation);		
 
 		};
 		file = document.getElementById('fileload').files[0];
@@ -585,14 +639,98 @@ function downloadStations()
 		}
 	}	
 }	
-function loadStations(page) {
+function dragStart(ev) {
+    ev.dataTransfer.setData("Text", ev.target.id);
+}
+
+function moveNodes(a, b){
+	var pa1= a.parentNode, sib= b.nextSibling,txt;
+	if(sib=== a) sib= sib.nextSibling;
+	pa1.insertBefore(a, b);
+	txt = 0 ; 
+	for (txt=0;txt<maxStation;txt++)
+	{
+		pa1.rows[txt].cells[0].innerText = txt.toString();
+		pa1.rows[txt].cells[5].innerHTML = "<a href=\"#\" onClick=\"editStation("+ txt.toString()+")\">Edit</a>";
+	}
+	stchanged = true;
+	document.getElementById("stsave").disabled = false;
+}
+function dragDrop(ev) {
+    ev.preventDefault();
+    var TRStart = document.getElementById(ev.dataTransfer.getData("text"));
+    var TRDrop = document.getElementById(ev.currentTarget.id);
+    moveNodes(TRStart,TRDrop);
+}
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+function stChanged()
+{
+	var i,indmax,tosend,index,tbody = document.getElementById("stationsTable").getElementsByTagName('tbody')[0];
+	function fillInfo(ind){
+				id=tbody.rows[ind].cells[0].innerText;
+				name=tbody.rows[ind].cells[1].innerText;
+				url=tbody.rows[ind].cells[2].innerText;
+				file=tbody.rows[ind].cells[3].innerText;
+				port= tbody.rows[ind].cells[4].innerText;
+				localStorage.setItem(id,"{\"Name\":\""+name+"\",\"URL\":\""+url +"\",\"File\":\""+file+"\",\"Port\":\""+port+"\"}");
+				tosend = tosend+"&id="+id + "&url="+ url+"&name="+ name+ "&file="+file + "&port=" +port+"&";
+	}
+	promptworking("Working.. Please Wait"); // some time to display promptworking
+	if (stchanged && confirm("The list is modified. Do you want to save the modified list?"))
+	{
+		xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+		}
+		promptworking("Working.. Please Wait"); // some time to display promptworking
+		localStorage.clear();	
+		indmax = 7;
+		index = 0;	
+		{
+			try {
+				tosend = "nb=" + indmax;
+				for (i = 0; i<indmax; i++)
+					fillInfo(index+i);
+				xhr.open("POST","setStation",false);
+				xhr.setRequestHeader(content,ctype);
+				xhr.send(tosend);
+			} catch (e){console.log("error "+e);}		
+		}
+		indmax = 8;
+		for (index = 7; index < maxStation; index+=indmax)
+		{
+			try {
+				tosend = "nb=" + indmax;
+				for (i = 0 ; i< indmax;i++)
+					fillInfo(index+i);
+				xhr.open("POST","setStation",false);
+				xhr.setRequestHeader(content,ctype);
+				xhr.send(tosend);
+			} catch (e){console.log("error "+e);}		
+		}
+		loadStationsList(maxStation);		
+	}
+	stchanged = false;
+	document.getElementById("stsave").disabled = true;
+	promptworking("");
+	setMainHeight(curtab);
+}
+//Load the Stations table
+function loadStations(/*page*/) {
 	var new_tbody = document.createElement('tbody'),
-		id = 16 * (page-1),tr,td,key,arr,old_tbody;
+//		id = 16 * (page-1),tr,td,key,arr,old_tbody;
+	id = 0;
 	function cploadStations(id,arr) {
 			tr = document.createElement('TR'),
 			td = document.createElement('TD');
+			tr.draggable="true";
+			tr.id = "tr"+id.toString();
+			tr.ondragstart=dragStart;
+			tr.ondrop=dragDrop;
+			tr.ondragover=allowDrop;
 			td.appendChild(document.createTextNode(id ));
-			td.style.width = "10%";
+//			td.style.width = "8%";
 			tr.appendChild(td);
 			for(key in arr){
 				td = document.createElement('TD');
@@ -607,7 +745,7 @@ function loadStations(page) {
 			new_tbody.appendChild(tr);
 	}	
 //	for(id; id < 16*page; id++) {
-	for(id; id < 256; id++) {
+	for(id; id < maxStation; id++) {
 		idstr = id.toString();		
 		if (localStorage.getItem(idstr) != null)
 		{	
@@ -636,18 +774,23 @@ function loadStations(page) {
 
 	old_tbody = document.getElementById("stationsTable").getElementsByTagName('tbody')[0];
 	old_tbody.parentNode.replaceChild(new_tbody, old_tbody);
-	setMainHeight(curtab);
+	setMainHeight("tab-content2");
 }
 
+//Load the selection with all stations
 function loadStationsList(max) {
-	var foundNull = false,id,opt,arr,select, liste= [];;
+	var foundNull = false,id,opt,arr,select, liste= [],i;
 	select = document.getElementById("stationsSelect");
+    for(i = select.options.length - 1 ; i >= 0 ; i--)
+    {
+        select.remove(i);
+    }
 	function cploadStationsList(id,arr) {
 		foundNull = false;
 			if(arr["Name"].length > 0) 
 			{
 				opt = document.createElement('option');
-				opt.appendChild(document.createTextNode(id+":\t\t"+arr["Name"]));
+				opt.appendChild(document.createTextNode(id+": \t"+arr["Name"]));
 				opt.id = id;
 				select.appendChild(opt);
 			} else foundNull = true;
@@ -697,12 +840,11 @@ function loadStationsList(max) {
 	var result = map.map(function(e){
 		return {index: e.index, value:liste[e.index]};
 });	
-	for(id=0; id < 256; id++) {
+	for(id=0; id < maxStation; id++) {
 		foundNull = cploadStationsList(result[id].index,result[id].value);
 	}	
 	
 	promptworking("");
-//	select = document.getElementById('stationsSelect');
 	select.disabled = false;
 	select.options.selectedIndex= parseInt(localStorage.getItem('selindexstore'));
 //	getSelIndex();
@@ -721,7 +863,7 @@ function getSelIndex() {
 				} 
 			}
 		}
-		xhr.open("POST","getSelIndex",true);
+		xhr.open("POST","getSelIndex",false);
 		xhr.setRequestHeader(content,ctype);
 		xhr.send();	
 }	*/
@@ -735,24 +877,27 @@ function setMainHeight(name) {
 
 document.addEventListener("DOMContentLoaded", function() {
 	document.getElementById("tab1").addEventListener("click", function() {
+			if (stchanged) stChanged();
 			refresh();
-			curtab = "tab-content1"
+			curtab = "tab-content1";
 			setMainHeight(curtab);
 		});
 	document.getElementById("tab2").addEventListener("click", function() {
-			loadStations(1);
-			curtab = "tab-content2"
-			setMainHeight(curtab);
+			if (stchanged) stChanged();
+			loadStations(/*1*/);
+			curtab = "tab-content2";
+			intervalid =window.setTimeout(setMainHeight,1,curtab );			
 		});
 	document.getElementById("tab3").addEventListener("click", function() {
-			curtab = "tab-content3"
+			if (stchanged) stChanged();
+			curtab = "tab-content3";
 			wifi(0) ;
 			checkversion();
-			setMainHeight(curtab);
-			
+			setMainHeight(curtab);	
 		});
-	if (intervalid != 0)  window.clearInterval(intervalid);
-	loadStationsList(256);
+	if (intervalid != 0)  window.clearTimeout(intervalid);
+	intervalid = 0;
+	loadStationsList(maxStation);
 	checkwebsocket();
 	refresh();
 	wifi(0) ;

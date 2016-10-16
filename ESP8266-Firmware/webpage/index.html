@@ -5,7 +5,7 @@
 		<meta charset="UTF-8"> 
 		<meta name="viewport" content="width=device-width, minimum-scale=0.25"/>
 		<link rel="icon" type="image/png" href="favicon.png" />
-		<link rel="stylesheet" href="style.css" type="text/css"/>
+		<link rel="stylesheet" title="base" href="style.css" type="text/css"/>
 		<title>Karadio, the ultimate Wifi Webradio</title>
 	    <style type="text/css">
         </style>
@@ -13,11 +13,11 @@
 	<body>
 	<script src="script.js"></script>
 		<div id="MAIN">
-				<div class="LEFT"><img src="logo.png"></div>
+				<div class="LEFT"><img title="Click on the logo to change the theme" onClick= "theme()" src="logo.png"></div>
 				<div class="RIGHT">
 				<a href="https://github.com/karawin/Ka-Radio" target="_blank">KaraWin</a><br/>
 				<a href="https://github.com/PiotrSperka/ESP8266-WebRadio" target="_blank">PiotrSperka</a><br/>
-				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.0.10</a>
+				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.1.0</a>
 				</div>
 			<div id="HEAD">
 			<span class="bold4"><span id="meta">Karadio</span></span>
@@ -60,6 +60,13 @@
 						I'm sorry; your browser doesn't support HTML5 <code>audio</code>.
 					</audio>
 				 
+				<h1>Sleep mode</h1>
+					<p>
+					<input type="button" value="Start Sleep"  onClick="startSleep()" > &nbsp;
+					<input type="button" value="Stop Sleep"  onClick="stopSleep()"></p>
+					<p>
+					<span class="bold1">Minute(s): </span><input type="text" id="sleepdelay"><br>
+
 				<h1>Instant play</h1>
 					<p>
 					<span class="bold1">URL: </span><input type="text" id="instant_url" name="url"><br>
@@ -67,7 +74,7 @@
 					<span class="bold1">Path: </span><input type="text" id="instant_path" name="path" value="/"><br><br>
 					<input type="button" value="Play"   onClick="instantPlay()">&nbsp;
 					<input type="button" value="Stop"  onClick="stopStation()">
-					</p>
+					</p>					
 				</div>
 				</li>
 				<li>
@@ -75,22 +82,27 @@
 					<label for="tab2">stations</label>
 					<div id="tab-content2" class="tab-content">
 						<div id="editStationDiv" style="display:none;">
-							<h1>Edit station</h1>
+							<h1>Edit station</h1> 
 							<form>
 								<p>
-									<span class="bold">Slot number: </span><input type="text" id="add_slot" name="slot"><br>
+									<span class="bold">Slot number: </span><input type="text" id="add_slot" disabled="true" name="slot"><br>
 									<span class="bold">Name: </span><input type="text" id="add_name" name="name"><br>
 									<span class="bold">URL: </span><input type="text" id="add_url" name="url"><br>
 									<span class="bold">Port: </span><input type="text" id="add_port" name="port" value="80"><br>
 									<span class="bold">Path: </span><input type="text" id="add_path" name="path" value="/"><br><br>
 									<input type="button"  onClick="saveStation()" value="save">&nbsp;
 									<input type="button"  onClick="abortStation()" value="abort">
-								</p>
+								</p><hr> 
 							</form>
 						</div>
-						<h1>Manage stations</h1>
+						<!--<h1>Manage stations</h1>--><br/>
+						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list">
+						<input type="button" id="stsave" disabled="true" style="margin:0px auto" title="This will reload the stations from the WebRadio" onClick="stChanged()"  value="Save the modified list">
+						<input type="button" style="margin:0px auto" id="clear" title="Warning: This will clear all stations.\n Be sure to save them before." onClick="clearList()"  value="Clear all stations"><br/>				
+						<br/>
+
 						<table id = "stationsTable" style="table-layout: fixed; width: 100%;">
-							<thead><tr><td style="width:8%">No.</td><td style="width:33%; word-break: break-all">Name</td><td style="width:20%">URL</td><td style="width:20%">File</td><td style="width:10%">Port</td><td style="width:9%"></td></tr></thead>
+							<thead><tr><td style="width:8%">No.</td><td style="width:33%; ">Name</td><td style="width:20%">URL</td><td style="width:20%">File</td><td style="width:10%">Port</td><td style="width:9%"></td></tr></thead>
 							<tbody>  							
 							</tbody>
 						</table>
@@ -141,9 +153,9 @@
 						<br/><br/>
 						<input type="button"   onClick="downloadStations()" value="Load Stations to WebRadio"> <span style="display:inline-block;">From 
 						<input type="file" style="width:300;" id="fileload"></span><br/><br/>
-						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list">
+<!--						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list">
 						<input type="button" style="float:right;" id="clear" title="Warning: This will clear all stations.\n Be sure to save them before." onClick="clearList()"  value="Clear all stations"><br/>				
-						<br/>
+						<br/>-->
 						</p>
 					<h1>Wifi</h1>
 						<p>

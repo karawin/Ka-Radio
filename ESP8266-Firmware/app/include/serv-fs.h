@@ -18,6 +18,7 @@ struct servFile
 
 #include "../../webpage/index"
 #include "../../webpage/style"
+#include "../../webpage/style1"
 #include "../../webpage/script"
 #include "../../webpage/logo"
 #include "../../webpage/favicon"
@@ -54,10 +55,17 @@ const struct servFile styleFile = {
 	(struct servFile*)&scriptFile
 };
 
+const struct servFile styleFile1 = {
+	"/style1.css",
+	"text/css",
+	sizeof(style1_css),
+	style1_css,
+	(struct servFile*)&styleFile
+};
 const struct servFile indexFile = {
 	"/",
 	"text/html",
 	sizeof(index_html),
 	index_html,
-	(struct servFile*)&styleFile
+	(struct servFile*)&styleFile1
 };

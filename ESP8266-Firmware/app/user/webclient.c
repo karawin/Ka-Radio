@@ -223,7 +223,7 @@ ICACHE_FLASH_ATTR void wsStationNext()
 {
 	char answer[22];
 	struct shoutcast_info* si =NULL;
-	if (currentStation <256)
+	if (currentStation <255)
 		si = getStation(++currentStation);
 	else 
 	{
@@ -422,6 +422,10 @@ ICACHE_FLASH_ATTR void clientConnect()
 		clientDisconnect();
 	}
 }
+ICACHE_FLASH_ATTR void clientSilentDisconnect()
+{
+	xSemaphoreGive(sDisconnect);
+}
 
 ICACHE_FLASH_ATTR void clientDisconnect()
 {
@@ -454,13 +458,13 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 //	if (cstatus != C_DATA){printf("cstatus= %d\n",cstatus);  printf("Len=%d, Byte_list = %s\n",len,pdata);}
 	t1 = strstr(pdata, "404 Not Found"); 
 	if (t1 != NULL) { // 
-		if (strcmp(clientPath,"/;")==0)
+/*		if (strcmp(clientPath,"/;")==0)
 		{
 			clientSetPath("/");
 			clientDisconnect();
 			clientConnect();
 			cstatus = C_HEADER0;
-		} else
+		} else*/
 		{
 			printf("404 Not Found\n");
 			clientSaveOneHeader("404 Not Found", 13,METANAME);
@@ -477,10 +481,10 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
  
         if (!clientParsePlaylist(pdata)) //need more
 		  cstatus = C_PLAYLIST1;
-		else clientDisconnect();  
+		else {clientDisconnect();  }
     break;
 	case C_PLAYLIST1:
-       clientDisconnect();		  
+       clientDisconnect();	   
         clientParsePlaylist(pdata) ;//more?
 		cstatus = C_PLAYLIST;
 	break;
@@ -540,7 +544,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 							if (strchr((t1),0x0A) != NULL)
 								*strchr(t1,0x0A) = 0;
 							
-						printf("chunked: %d,  strlen: %d  \"%s\"\n",chunked,strlen(t1)+1,t1);
+//						printf("chunked: %d,  strlen: %d  \"%s\"\n",chunked,strlen(t1)+1,t1);
 							t1 +=strlen(t1)+1; //+1 for char 0, 
 						}
 						
@@ -781,7 +785,8 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				else 
 				{
 					if ((strcmp(clientPath,"/") ==0)&&(cstatus != C_HEADER0)) clientSetPath("/;");
-					sprintf(bufrec, "GET %s HTTP/1.1\r\nHost: %s\r\nicy-metadata: 1\r\nUser-Agent: Mozilla/4.0 (compatible; esp8266 Lua; Windows NT 5.1)\r\n\r\n", clientPath,clientURL); 
+//					sprintf(bufrec, "GET %s HTTP/1.1\r\nHost: %s\r\nicy-metadata: 1\r\nUser-Agent: WinampMPEG/5.1\r\n\r\n", clientPath,clientURL); 
+					sprintf(bufrec, "GET %s HTTP/1.1\r\nHost: %s\r\nicy-metadata: 1\r\nUser-Agent: Karadio/1.1.0\r\n\r\n", clientPath,clientURL); 
 //					printf("st:%d, Client Sent:\n%s\n",cstatus,bufrec);
 				}
 				send(sockfd, bufrec, strlen(bufrec), 0);
@@ -797,10 +802,10 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 					bytes_read = recv(sockfd, bufrec, RECEIVE, 0);
 					if (playing)
 					{
-						vTaskDelay(1);	
+							
 						if ((bytes_read < RECEIVE )&&(bytes_read >0 ) )
 							bytes_read += recv(sockfd, bufrec+bytes_read, RECEIVE-bytes_read, 0); //boost
-							vTaskDelay(1);	
+							
 							if ((bytes_read < RECEIVE ) )
 								bytes_read += recv(sockfd, bufrec+bytes_read, RECEIVE-bytes_read, 0); //boost	
 					}

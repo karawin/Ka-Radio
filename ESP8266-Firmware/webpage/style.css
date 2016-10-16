@@ -168,6 +168,10 @@ div.LEFT {
 .tabs li {
 	float:left
 }
+.tabs hr {
+	height: 1px;
+	color: #0;
+}
 .tabs input[type="radio"] {
 	position:absolute;
 	top:-9999px;
@@ -188,11 +192,11 @@ div.LEFT {
 	border-radius:5px
 }
 .tabs input[type=range]:hover {
-	box-shadow:0 5px 5px 0 rgba(0,0,0,0.24),0 5px 10px 0 rgba(0,0,0,0.24)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.5)
 }
 .tabs input[type="text"] {
 	font-size:12px;
-	min-width:120px;
+	min-width:140px;
 	height:20px;
 	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
 	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
@@ -202,11 +206,11 @@ div.LEFT {
 	border-radius:5px
 }
 .tabs input[type="text"]:hover {
-	box-shadow:0 5px 5px 0 rgba(0,0,0,0.24),0 5px 10px 0 rgba(0,0,0,0.24)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs input[type="password"] {
 	font-size:12px;
-	min-width:100px;
+	min-width:140px;
 	height:20px;
 	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
 	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
@@ -216,11 +220,11 @@ div.LEFT {
 	border-radius:5px
 }
 .tabs input[type="password"]:hover {
-	box-shadow:0 5px 5px 0 rgba(0,0,0,0.24),0 5px 10px 0 rgba(0,0,0,0.24)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs input[type="file"] {
 	font-size:14px;
-	min-width:100px;
+	min-width:140px;
 	height:30px;
 	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
 	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
@@ -230,12 +234,12 @@ div.LEFT {
 	border-radius:5px
 }
 .tabs input[type="file"]:hover {
-	box-shadow:0 5px 5px 0 rgba(0,0,0,0.24),0 5px 10px 0 rgba(0,0,0,0.24)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs input[type="button"] {
 	font-size:14px;
 	min-width:100px;
-	height:40px;
+	height:25px;
 	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
 	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
 	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
@@ -244,7 +248,7 @@ div.LEFT {
 	border-radius:5px
 }
 .tabs input[type="button"]:hover {
-	box-shadow:0 5px 5px 0 rgba(0,0,0,0.24),0 5px 10px 0 rgba(0,0,0,0.24)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs span input[type="button"] {
 	font-size:14px;
@@ -258,7 +262,7 @@ div.LEFT {
 	border-radius:5px
 }
 .tabs span input[type="button"]:hover {
-	box-shadow:0 5px 5px 0 rgba(0,0,0,0.24),0 5px 10px 0 rgba(0,0,0,0.24)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs select {
 	min-width:230px;
@@ -273,7 +277,14 @@ div.LEFT {
 	border-radius:5px
 }
 .tabs select:hover {
-	box-shadow:0 5px 5px 0 rgba(0,0,0,0.24),0 5px 10px 0 rgba(0,0,0,0.24)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
+}
+.tabs option {
+  min-width: 230px;
+  color: #0;
+  border: 1px solid #fff;
+  background-color: #f8f8f8;
+  border-radius: 5px
 }
 .tabs label {
 	display:run-in;
@@ -321,6 +332,7 @@ table#stationsTable,table#stationsTable th,table#stationsTable td {
 	border:solid 1px;
 	border-collapse:collapse;
 	width:100%
+	overflow-y: hidden;
 }
 a.page {
 	font-size:18pt!important;
