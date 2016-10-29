@@ -55,32 +55,34 @@ Commands:
 ---------
 wifi.list			: give the list of received SSID
 wifi.con			: connect to the default SSID
-wifi.con("ssid","password")		: connect to the given ssid with password
+wifi.con("ssid","password")	: connect to the given ssid with password
 wifi.discon			: disconnect the current ssid
-wifi.status			: give #WIFI.STATUS#			start of the answer
-						5						the connection state
-						192.168.1.40			the current ip
-						255.255.255.0			the network mask
-						192.168.1.70			the network gateway
-						##WIFI.STATUS#			end of the answer
 wifi.station		: the current ssid and password
+wifi.status			: give #WIFI.STATUS#			start of the answer
+				5						the connection state
+				192.168.1.40			the current ip
+				255.255.255.0			the network mask
+				192.168.1.70			the network gateway
+				##WIFI.STATUS#			end of the answer
 
 cli.url("url")		: the name or ip of the station to play
 cli.path("/path")	: the path of the station to play
 cli.port("xxxx")	: the port number of the station to play						
-cli.start			: start to play the current station
-cli.stop			: stop the playing station
-cli.list			: list of the recorded stations
+cli.start		: start to play the current station
+cli.stop		: stop the playing station
+cli.list		: list of the recorded stations
 cli.play("xxx")		: play the xxx recorded station in the list (0 = stop)
 cli.vol("xxx")		: set the volume to xxx with xxx from 0 to 254 (max volume)
 cli.prev (or cli.previous)	: select the previous station in the list and play it
-cli.next			: select the next station in the list and play it
-cli.update			: start an OTA (on the air) update of the software
+cli.next		: select the next station in the list and play it
+cli.update		: start an OTA (on the air) update of the software
 cli.i2s("x")		: Change and record the I2S clock speed of the vs1053 GPIO5 MCLK for the i2s interface to external dac. 
-					: 0=48kHz, 1=96kHz, 2=192kHz, other equal 0
+			: 0=48kHz, 1=96kHz, 2=192kHz, other equal 0
 cli.uart("x")		: Change the baudrate of the uart on the next reset. 
-					  Valid x are: 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 76880, 115200, 230400
-sys.erase			: erase all recorded configuration and stations.
+			Valid x are: 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 76880, 115200, 230400
+			
+sys.erase		: erase all recorded configuration and stations.
+sys.heap		: show the heap size
 
 <enter> will display 
 #INFO:""#

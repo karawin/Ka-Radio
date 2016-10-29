@@ -178,7 +178,8 @@ ICACHE_FLASH_ATTR void saveStation(struct shoutcast_info *station, uint16_t posi
 	eeSetData((position+1)*256, station, 256);
 }
 ICACHE_FLASH_ATTR void saveMultiStation(struct shoutcast_info *station, uint16_t position, uint8_t number) {
-	if (position > NBSTATIONS-1) {printf("saveStation fails position=%d\n",position); return;}
+	while ((position +number-1) > NBSTATIONS-1) {printf("saveStation fails position=%d\n",position+number-1); number--; }
+	if (number <= 0) return;
 	eeSetData((position+1)*256, station, number*256);
 }
 

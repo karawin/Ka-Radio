@@ -161,7 +161,7 @@ ICACHE_FLASH_ATTR void theme() {
 //			if (device->theme) device->theme=false; else device->theme = true;
 			device->theme = !device->theme;
 			saveDeviceSettings(device);
-			printf("theme:%d\n",device->theme);
+//			printf("theme:%d\n",device->theme);
 			infree(device);	
 		}
 }
@@ -529,6 +529,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* aip = getParameterFromResponse("ip=", data, data_size);
 			char* amsk = getParameterFromResponse("msk=", data, data_size);
 			char* agw = getParameterFromResponse("gw=", data, data_size);
+			char* aua = getParameterFromResponse("ua=", data, data_size);
 			char* adhcp = getParameterFromResponse("dhcp=", data, data_size);
 //			printf("rec:%s\nwifi received  valid:%s,val:%d, ssid:%s, pasw:%s, aip:%s, amsk:%s, agw:%s, adhcp:%s \n",data,valid,val,ssid,pasw,aip,amsk,agw,adhcp);
 			if (val) {
@@ -542,12 +543,14 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				if (adhcp!= NULL) if (strlen(adhcp)!=0) if (strcmp(adhcp,"true")==0)device->dhcpEn = 1; else device->dhcpEn = 0;
 				strcpy(device->ssid,(ssid==NULL)?"":ssid);
 				strcpy(device->pass,(pasw==NULL)?"":pasw);
-				saveDeviceSettings(device);		
 			}
+			strcpy(device->ua,(aua==NULL)?"":aua);
+			saveDeviceSettings(device);					
 			int json_length ;
-			json_length =56+
+			json_length =64+ //56
 			strlen(device->ssid) +
 			strlen(device->pass) +
+			strlen(device->ua)+
 			sprintf(tmpip,"%d.%d.%d.%d",device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3])+
 			sprintf(tmpmsk,"%d.%d.%d.%d",device->mask[0], device->mask[1],device->mask[2], device->mask[3])+
 			sprintf(tmpgw,"%d.%d.%d.%d",device->gate[0], device->gate[1],device->gate[2], device->gate[3])+
@@ -560,14 +563,14 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				respOk(conn);
 			}
 			else {				
-				sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"dhcp\":\"%s\"}",
+				sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\"}",
 				json_length,
-				device->ssid,device->pass,tmpip,tmpmsk,tmpgw,adhcp	);
+				device->ssid,device->pass,tmpip,tmpmsk,tmpgw,device->ua,adhcp	);
 //				printf("wifi Buf: %s\n",buf);
 				write(conn, buf, strlen(buf));
 				infree(buf);
 			}
-			if (ssid) infree(ssid); if (pasw) infree(pasw); if (aip) infree(aip);if (amsk) infree(amsk);if (agw) infree(agw);
+			if (ssid) infree(ssid); if (pasw) infree(pasw); if (aip) infree(aip);if (amsk) infree(amsk);if (agw) infree(agw);if (aua) infree(aua);
 			if (valid) infree(valid);if (adhcp) infree(adhcp);
 		}	
 		infree(device);
@@ -704,8 +707,8 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 	{
 		memset(buf,0,reclen);
 		if (setsockopt (client_sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
-				printf("setsockopt failed\n");
-		while (((recbytes = read(client_sock , buf, reclen)) > 0)) { // For now we assume max. reclen bytes for request
+				printf("server setsockopt SO_RCVTIMEO failed\n");
+			while (((recbytes = read(client_sock , buf, reclen)) > 0)) { // For now we assume max. reclen bytes for request
 			if (recbytes < 0) {
 				if (errno != EAGAIN )
 				{

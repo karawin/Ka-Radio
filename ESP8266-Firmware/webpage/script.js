@@ -357,6 +357,7 @@ function wifi(valid) {
 			chkip(document.getElementById('mask'));
 			document.getElementById('gw').value = arr["gw"];
 			chkip(document.getElementById('gw'));
+			document.getElementById('ua').value = arr["ua"];
 			if (arr["dhcp"] == "1")
 				document.getElementById("dhcp").setAttribute("checked","");
 			else
@@ -366,7 +367,7 @@ function wifi(valid) {
 	}
 	xhr.open("POST","wifi",false);
 	xhr.setRequestHeader(content,ctype);
-	xhr.send("valid=" + valid +"&ssid=" + document.getElementById('ssid').value + "&pasw=" + document.getElementById('passwd').value + "&ip=" + document.getElementById('ip').value+"&msk=" + document.getElementById('mask').value+"&gw=" + document.getElementById('gw').value+"&dhcp=" + document.getElementById('dhcp').checked+"&");
+	xhr.send("valid=" + valid +"&ssid=" + document.getElementById('ssid').value + "&pasw=" + document.getElementById('passwd').value + "&ip=" + document.getElementById('ip').value+"&msk=" + document.getElementById('mask').value+"&gw=" + document.getElementById('gw').value+"&ua=" + document.getElementById('ua').value+"&dhcp=" + document.getElementById('dhcp').checked+"&");
 }
 function instantPlay() {
 	try{

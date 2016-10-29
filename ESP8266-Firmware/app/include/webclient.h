@@ -13,8 +13,8 @@
 #define METANAME 0
 #define ICY_HEADERS_COUNT 9
 #define ICY_HEADER_COUNT 10
-//2000
-#define RECEIVE 2000
+//2000 1440 1460
+#define RECEIVE 1450
 
 extern uint16_t currentStation;
 

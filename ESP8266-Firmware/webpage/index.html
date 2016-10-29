@@ -17,7 +17,7 @@
 				<div class="RIGHT">
 				<a href="https://github.com/karawin/Ka-Radio" target="_blank">KaraWin</a><br/>
 				<a href="https://github.com/PiotrSperka/ESP8266-WebRadio" target="_blank">PiotrSperka</a><br/>
-				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.1.0</a>
+				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.1.1</a>
 				</div>
 			<div id="HEAD">
 			<span class="bold4"><span id="meta">Karadio</span></span>
@@ -97,7 +97,7 @@
 						</div>
 						<!--<h1>Manage stations</h1>--><br/>
 						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list">
-						<input type="button" id="stsave" disabled="true" style="margin:0px auto" title="This will reload the stations from the WebRadio" onClick="stChanged()"  value="Save the modified list">
+						<input type="button" id="stsave" disabled="true" style="margin:0px auto" title="This will save all stations to the WebRadio" onClick="stChanged()"  value="Save the modified list">
 						<input type="button" style="margin:0px auto" id="clear" title="Warning: This will clear all stations.\n Be sure to save them before." onClick="clearList()"  value="Clear all stations"><br/>				
 						<br/>
 
@@ -157,7 +157,7 @@
 						<input type="button" style="float:right;" id="clear" title="Warning: This will clear all stations.\n Be sure to save them before." onClick="clearList()"  value="Clear all stations"><br/>				
 						<br/>-->
 						</p>
-					<h1>Wifi</h1>
+					<h1>Wifi & Network</h1>
 						<p>
 						<span class="bold">AP SSID:</span>
 						<input  id="ssid" type="text" />
@@ -173,6 +173,9 @@
 						<span class="bold">Gateway:</span>
 						<input id="gw" type="text" oninput="chkip(this)" /><br/>
 						<input type="button" value="Validate" onclick="valid()" /><br/>						
+						<span class="bold">User Agent:</span>
+						<input id="ua" type="text" value="Karadio/1.1" /><br/>
+						<input type="button" value="Validate" onclick="wifi(0)" /><br/>						
 						</p>
 					<h1>Upgrade to:</h1>
 						<p>

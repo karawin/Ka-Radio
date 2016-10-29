@@ -106,7 +106,7 @@ void uartInterfaceTask(void *pvParameters) {
 	wifi_station_connect();
 	while ((wifi_station_get_connect_status() != STATION_GOT_IP)&&(!conn))
 	{	
-		printf("\nIn I: %d status: %d\n",i,wifi_station_get_connect_status());
+		printf("In I: %d status: %d\n",i,wifi_station_get_connect_status());
 			FlashOn = FlashOff = 40;
 //			while (wifi_station_get_connect_status() != STATION_GOT_IP) 
 			{	
@@ -114,7 +114,7 @@ void uartInterfaceTask(void *pvParameters) {
 //				if (i++ >= 20) break; // 2 seconds
 				i++;
 			}	
-			if (i >= 20)
+			if (i >= 15)
 			{
 /*				printf("Config not found\nTrying smartconfig\n");
 				FlashOn = FlashOff = 100;
@@ -182,7 +182,7 @@ void uartInterfaceTask(void *pvParameters) {
 	// read adc to see if it is a nodemcu with adc dividor
 		if (system_adc_read() < 400) adcdiv = 3;
 			else adcdiv = 1;
-	FlashOn = 200;FlashOff = 10;	
+	FlashOn = 190;FlashOff = 10;	
 	while(1) {
 		while(1) {
 			int c = uart_getchar_ms(100);
@@ -200,9 +200,9 @@ void uartInterfaceTask(void *pvParameters) {
 //	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 //	printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 		
-		for(t = 0; t<64; t++) tmp[t] = 0;
+//		for(t = 0; t<64; t++) tmp[t] = 0;
+		memset(tmp,0,64);
 		t = 0;
-//		vTaskDelay(20); // 250ms
 	}
 }
 
@@ -321,8 +321,8 @@ void user_init(void)
 {
 	struct device_settings *device;
 	uint32_t uspeed;
-	REG_SET_BIT(0x3ff00014, BIT(0));
-	system_update_cpu_freq(SYS_CPU_160MHZ);
+//	REG_SET_BIT(0x3ff00014, BIT(0));
+//	system_update_cpu_freq(SYS_CPU_160MHZ);
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
 	xTaskHandle pxCreatedTask;
     Delay(300);
@@ -348,11 +348,11 @@ void user_init(void)
 	printf("t0 task: %x\n",pxCreatedTask);
 	xTaskCreate(uartInterfaceTask, "t1", 244, NULL, 2, &pxCreatedTask); // 244
 	printf("t1 task: %x\n",pxCreatedTask);
-	xTaskCreate(vsTask, "t4", 370, NULL,4, &pxCreatedTask); //370
+	xTaskCreate(vsTask, "t4", 370, NULL,5, &pxCreatedTask); //370
 	printf("t4 task: %x\n",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 820, NULL, 5, &pxCreatedTask); // 810
+	xTaskCreate(clientTask, "t3", 820, NULL, 6, &pxCreatedTask); // 820
 	printf("t3 task: %x\n",pxCreatedTask);
-	xTaskCreate(serverTask, "t2", 220, NULL, 4, &pxCreatedTask); //220
+	xTaskCreate(serverTask, "t2", 230, NULL, 4, &pxCreatedTask); //220
 	printf("t2 task: %x\n",pxCreatedTask);
 
 }

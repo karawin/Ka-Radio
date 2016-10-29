@@ -20,7 +20,8 @@ struct device_settings {
 	uint8_t i2sspeed; // 0 = 48kHz, 1 = 96kHz, 2 = 128kHz
 	uint32_t uartspeed;
 	uint8_t theme;
-	uint8_t future[100];
+	char ua[40];
+	uint8_t future[60];
 };
 
 struct shoutcast_info {

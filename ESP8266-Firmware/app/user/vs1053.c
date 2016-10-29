@@ -182,14 +182,13 @@ ICACHE_FLASH_ATTR void VS1053_regtest()
 	int MP3Mode = VS1053_ReadRegister(SPI_MODE);
 	int MP3Clock = VS1053_ReadRegister(SPI_CLOCKF);
 	int vsVersion ;
-	printf("SCI_Mode (0x4800) = 0x%X\r\n",MP3Mode);
-	printf("SCI_Status (0x48) = 0x%X\r\n",MP3Status);
+	printf("SCI_Mode (0x4800) = 0x%X\n",MP3Mode);
+	printf("SCI_Status (0x48) = 0x%X\n",MP3Status);
 
 	vsVersion = (MP3Status >> 4) & 0x000F; //Mask out only the four version bits
-	printf("VS Version (VS1053 is 4) = %d\r\n",vsVersion);
+	printf("VS Version (VS1053 is 4) = %d\n",vsVersion);
 	//The 1053B should respond with 4. VS1001 = 0, VS1011 = 1, VS1002 = 2, VS1053 = 3
-//	printf("SCI_ClockF = 0x%X\r\n",MP3Clock);
-	printf("SCI_ClockF = 0x%X\r\n",MP3Clock);
+	printf("SCI_ClockF = 0x%X\n",MP3Clock);
 }
 /*
 void VS1053_PluginLoad()
@@ -213,7 +212,7 @@ ICACHE_FLASH_ATTR void VS1053_I2SRate(uint8_t speed){ // 0 = 48kHz, 1 = 96kHz, 2
 }
 
 ICACHE_FLASH_ATTR void VS1053_Start(){
-//	struct device_settings *device;
+	struct device_settings *device;
 	VS1053_ResetChip();
 	Delay(100);
 // these 4 lines makes board to run on mp3 mode, no soldering required anymore
@@ -227,15 +226,16 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	VS1053_WriteRegister(SPI_CLOCKF,0x60,0x00);
 //	VS1053_WriteRegister(SPI_MODE, (SM_LINE1 | SM_SDINEW)>>8 , SM_RESET); // soft reset
 	VS1053_SoftwareReset();
-	VS1053_WriteRegister(SPI_MODE, SM_SDINEW>>8, SM_LAYER12); //mode 
+	VS1053_WriteRegister(SPI_MODE, (SM_SDINEW|SM_LINE1)>>8, SM_LAYER12); //mode 
 	while(VS1053_checkDREQ() == 0);
 	
 // enable I2C dac output
 	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x17); //
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0xF0); //
 	VS1053_I2SRate(0);	
+	VS1053_regtest();
 
-/*	
+	
 	device = getDeviceSettings();
 	Delay(300);
 	VS1053_SetVolume( device->vol);	
@@ -245,25 +245,24 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	VS1053_SetBassFreq(device->freqbass);
 	VS1053_SetSpatial(device->spacial);
 	incfree(device,"device");	
-*/	
 	
-	VS1053_regtest();
+	
 }
 
 ICACHE_FLASH_ATTR int VS1053_SendMusicBytes(uint8_t* music, uint16_t quantity){
 	if(quantity ==0) return 0;
 	spi_take_semaphore();
-	VS1053_SPI_SpeedUp();
-	while(VS1053_checkDREQ() == 0) ;
-	SDI_ChipSelect(SET);
 	int o = 0;
+	while(VS1053_checkDREQ() == 0) ;
+	VS1053_SPI_SpeedUp();
+	SDI_ChipSelect(SET);
 	while(quantity)
 	{
 		if(VS1053_checkDREQ()) 
 		{
 			int t = quantity;
 			int k;
-			if(t > 32) t = 32;
+			if(t > 32) t = 32;				
 			for (k=o; k < o+t; k++)
 			{
 				SPIPutChar(music[k]);
@@ -460,11 +459,15 @@ ICACHE_FLASH_ATTR uint16_t VS1053_GetSampleRate(){
 /* to start and stop a new stream */
 ICACHE_FLASH_ATTR void VS1053_flush_cancel(uint8_t mode) {  // 0 only fillbyte  1 before play    2 cancel play
 //  int8_t endFillByte = (int8_t) (Mp3ReadWRAM(para_endFillByte) & 0xFF);
-	VS1053_WriteRegister(SPI_WRAMADDR,MaskAndShiftRight(para_endFillByte,0xFF00,8), (para_endFillByte & 0x00FF) );
-	int8_t endFillByte = (int8_t) VS1053_ReadRegister(SPI_WRAM) & 0xFF;
-	uint8_t buf[513];
-	int y;
-	for (y = 0; y < 513; y++) buf[y] = endFillByte;
+	int8_t endFillByte ;
+	int16_t y;
+	uint8_t buf[513];	
+	if (mode != 2)
+	{
+		VS1053_WriteRegister(SPI_WRAMADDR,MaskAndShiftRight(para_endFillByte,0xFF00,8), (para_endFillByte & 0x00FF) );		
+		endFillByte = (int8_t) VS1053_ReadRegister(SPI_WRAM) & 0xFF;
+		for (y = 0; y < 513; y++) buf[y] = endFillByte;
+	}
 
   if (mode != 0) //set CANCEL
   {
@@ -477,15 +480,17 @@ ICACHE_FLASH_ATTR void VS1053_flush_cancel(uint8_t mode) {  // 0 only fillbyte  
 	while (VS1053_ReadRegister(SPI_MODE)& SM_CANCEL)
 	{	  
 		if (mode == 1) VS1053_SendMusicBytes( buf, 32); //1
-		else vTaskDelay(2); //2  
+		else vTaskDelay(1); //2  
 //		printf ("Wait CANCEL clear\n");
-		if (y++ > 513) 
+		if (y++ > 200) 
 		{
 			VS1053_Start();
 			break;
-		}
-		
-	}	 
+		}		
+	}	
+	VS1053_WriteRegister(SPI_WRAMADDR,MaskAndShiftRight(para_endFillByte,0xFF00,8), (para_endFillByte & 0x00FF) );
+	endFillByte = (int8_t) VS1053_ReadRegister(SPI_WRAM) & 0xFF;
+	for (y = 0; y < 513; y++) buf[y] = endFillByte;	
 	for ( y = 0; y < 4; y++)	VS1053_SendMusicBytes( buf, 513); // 4*513 = 2052
   } else
   {
