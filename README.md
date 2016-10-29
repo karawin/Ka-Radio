@@ -2,6 +2,16 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations<BR/>
+###Release 1.1.1 <br/>
+<font color="red">New features:</font><br/>
+- The user agent for http request can be set for some special streams.
+   Example: http://pcradio.ru/player/listradio/pcradio_ru.xml which need a user agent= pcradio.
+   This pcradio user agent is already implemented automatically in the code when a pcradio station is encountered.
+- Better station start and stop. (no more strange noises).
+- Many bugs removed thanks to users feedback's. 
+
+Built on 2016/10/29 
+
 ###Release 1.1.0 <br/>
 <font color="red">New features:</font><br/>
 - Drag an drop on the stations list: rearrange the list by dragging a line to another one. Save the change when asked.
