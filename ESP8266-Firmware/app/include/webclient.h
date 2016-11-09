@@ -50,6 +50,7 @@ void clientInit();
 uint8_t clientIsConnected();
 
 void clientSetURL(char* url);
+void clientSetName(char* name,uint16_t index);
 void clientSetPath(char* path);
 void clientSetPort(uint16_t port);
 struct icyHeader* clientGetHeader();

@@ -76,7 +76,17 @@ ICACHE_FLASH_ATTR uint8_t clientIsConnected() {
 	}
 	return 1;
 }
-
+ICACHE_FLASH_ATTR void dump(uint8_t* from, uint32_t len )
+{
+	uint32_t i = 0;
+	uint8_t* addr ;
+	addr =  from;
+	for (i;i<len;i+=16){
+		printf("\n%x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x ",addr,addr[0],addr[1],addr[2],addr[3],addr[4],addr[5],addr[6],addr[7],addr[8],addr[9],addr[10],addr[11],addr[12],addr[13],addr[14],addr[15]);
+		addr+=16;
+	}	
+	printf("\n");
+}
 ICACHE_FLASH_ATTR struct icyHeader* clientGetHeader()
 {	
 	return &header;
@@ -146,9 +156,9 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 					new[j++] = '\\';
 					new[j++] =(str)[i] ;
 				}else	// pseudo ansi utf8 convertion
-					if ((str[i] > 192) && (str[i+1] < 128)){
-					new[j++] = 195;
-					new[j++] =(str)[i]-64 ;
+					if ((str[i] > 192) && (str[i+1] < 0x80)){ // 128 = 0x80
+					new[j++] = 195; // 192 = 0xC0   195 = 0xC3
+					new[j++] =(str)[i]-64 ; // 64 = 0x40
 				} else new[j++] =(str)[i] ;
 			}
 			incfree(str,"str");
@@ -202,8 +212,15 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 			return;}
 
 		strcpy(header.members.mArr[METADATA], t);
+//		dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
 		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],len);
-		printf("##CLI.META#: %s\n",header.members.mArr[METADATA]);
+//		dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
+		printf("##CLI.META#: %s\n",header.members.mArr[METADATA]); 
+		while ((header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == ' ')||
+			(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\r')||
+		(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\n')
+		)
+			header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] = 0; // avoid blank at end
 // send station name if no metadata
 		if (strlen(header.members.mArr[METADATA])!=0)			
 			t_end = header.members.mArr[METADATA];
@@ -337,8 +354,8 @@ ICACHE_FLASH_ATTR bool clientSaveOneHeader(char* t, uint16_t len, uint8_t header
 	int i;
 	for(i = 0; i<len+1; i++) header.members.mArr[header_num][i] = 0;
 	strncpy(header.members.mArr[header_num], t, len);
-	printf("##CLI.ICY%d#: %s\n",header_num,header.members.mArr[header_num]);
 	header.members.mArr[header_num] = stringify(header.members.mArr[header_num],len);
+	printf("##CLI.ICY%d#: %s\n",header_num,header.members.mArr[header_num]);
 //	printf("header after num:%d addr:0x%x  cont:\"%s\"\n",header_num,header.members.mArr[header_num],header.members.mArr[header_num]);
 	return true;
 }
@@ -390,6 +407,10 @@ ICACHE_FLASH_ATTR bool clientParseHeader(char* s)
 		return ret;
 }
 
+ICACHE_FLASH_ATTR void clientSetName(char* name,uint16_t index)
+{
+	printf("##CLI.NAMESET#: %d %s\n",index,name);
+}
 ICACHE_FLASH_ATTR void clientSetURL(char* url)
 {
 	int l = strlen(url)+1;
@@ -433,19 +454,10 @@ ICACHE_FLASH_ATTR void clientDisconnect()
 	//connect = 0;
 	xSemaphoreGive(sDisconnect);
 	printf("##CLI.STOPPED#\n");
+	vTaskDelay(10);
 	clearHeaders();
 }
-ICACHE_FLASH_ATTR void dump(uint8_t* from, uint32_t len )
-{
-	uint32_t i = 0;
-	uint8_t* addr ;
-	addr =  from;
-	for (i;i<len;i+=16){
-		printf("\n%x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x ",addr,addr[0],addr[1],addr[2],addr[3],addr[4],addr[5],addr[6],addr[7],addr[8],addr[9],addr[10],addr[11],addr[12],addr[13],addr[14],addr[15]);
-		addr+=16;
-	}	
-	printf("\n");
-}
+
 IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 {
 	static int metad ;

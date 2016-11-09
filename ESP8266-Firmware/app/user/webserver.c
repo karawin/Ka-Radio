@@ -223,9 +223,8 @@ ICACHE_FLASH_ATTR void playStation(char* id) {
 	struct shoutcast_info* si;
 	char answer[22];
 	struct device_settings *device;
-	
-	si = getStation(atoi(id));
 	currentStation = atoi(id) ;
+	si = getStation(currentStation);
 
 		if(si != NULL &&si->domain && si->file) {
 			int i;
@@ -236,7 +235,7 @@ ICACHE_FLASH_ATTR void playStation(char* id) {
 				if(!clientIsConnected())break;
 				vTaskDelay(4);
 			}
-	
+			clientSetName(si->name,currentStation);
 			clientSetURL(si->domain);
 			clientSetPath(si->file);
 			clientSetPort(si->port);
