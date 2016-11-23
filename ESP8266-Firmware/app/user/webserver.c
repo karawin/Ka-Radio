@@ -9,6 +9,8 @@ xSemaphoreHandle semclient = NULL ;
 
 os_timer_t sleepTimer;
 uint32_t sleepDelay;
+os_timer_t wakeTimer;
+uint32_t wakeDelay;
 
 void *inmalloc(size_t n)
 {
@@ -166,11 +168,19 @@ ICACHE_FLASH_ATTR void theme() {
 		}
 }
 
-void sleepCallback(void *pArg) {
+ICACHE_RAM_ATTR void sleepCallback(void *pArg) {
 	if (--sleepDelay == 0)
 	{
 		os_timer_disarm(&sleepTimer);
 		clientSilentDisconnect(); // stop the player
+	}		
+}
+ICACHE_RAM_ATTR void wakeCallback(void *pArg) {
+	if (--wakeDelay == 0)
+	{
+		os_timer_disarm(&wakeTimer);
+		clientSilentDisconnect();
+		clientSilentConnect(); // start the player
 	}		
 }
 
@@ -185,6 +195,18 @@ ICACHE_FLASH_ATTR void startSleep(uint32_t delay)
 ICACHE_FLASH_ATTR void stopSleep(){
 //	printf("stopDelayDelay\n");
 	os_timer_disarm(&sleepTimer);
+}
+ICACHE_FLASH_ATTR void startWake(uint32_t delay)
+{
+//	printf("Wake Delay:%d\n",delay);
+	if (delay == 0) return;
+	wakeDelay = delay*60; // minutes to seconds
+	os_timer_disarm(&wakeTimer);
+	os_timer_arm(&wakeTimer, 1000, true); // 1 second and rearm	
+}
+ICACHE_FLASH_ATTR void stopWake(){
+//	printf("stopDelayWake\n");
+	os_timer_disarm(&wakeTimer);
 }
 
 // treat the received message of the websocket
@@ -203,7 +225,7 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 		sprintf(answer,"{\"wsvol\":\"%s\"}",payload+6);
 		websocketlimitedbroadcast(socket,answer, strlen(answer));
 	}
-	if (strstr(payload,"startSleep=")!= NULL)
+	else if (strstr(payload,"startSleep=")!= NULL)
 	{
 		if (strstr(payload,"&") != NULL)
 			*strstr(payload,"&")=0;
@@ -211,6 +233,14 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 		startSleep(atoi(payload+11));
 	}
 	else if (strstr(payload,"stopSleep")!= NULL){stopSleep();}
+	else if (strstr(payload,"startWake=")!= NULL)
+	{
+		if (strstr(payload,"&") != NULL)
+			*strstr(payload,"&")=0;
+		else return;
+		startWake(atoi(payload+10));
+	}
+	else if (strstr(payload,"stopWake")!= NULL){stopWake();}
 	//monitor
 	else if (strstr(payload,"monitor")!= NULL){wsMonitor();}
 	else if (strstr(payload,"upgrade")!= NULL){update_firmware();}
@@ -811,7 +841,8 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
     semclient = xSemaphoreCreateCounting(2,2); 
 	websocketinit();
 	os_timer_setfn(&sleepTimer, sleepCallback, NULL);
-	int stack = 340;
+	os_timer_setfn(&wakeTimer, wakeCallback, NULL);
+	int stack = 340; //340
 	
 	while (1) {
         bzero(&server_addr, sizeof(struct sockaddr_in));

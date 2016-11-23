@@ -160,6 +160,12 @@ ICACHE_FLASH_ATTR uint16_t VS1053_ReadRegister(uint8_t addressbyte){
 	return result;
 }
 
+ICACHE_FLASH_ATTR void WriteVS10xxRegister(unsigned short addr,unsigned short val)
+{
+	VS1053_WriteRegister((uint8_t)addr&0xff, (uint8_t)((val&0xFF00)>>8), (uint8_t)(val&0xFF));
+}
+
+
 ICACHE_FLASH_ATTR void VS1053_ResetChip(){
 	ControlReset(SET);
 	Delay(500);
@@ -235,6 +241,9 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	VS1053_I2SRate(0);	
 	VS1053_regtest();
 
+// plugin flac
+	LoadUserCode() ;	
+	
 	
 	device = getDeviceSettings();
 	Delay(300);

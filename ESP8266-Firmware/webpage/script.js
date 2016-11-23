@@ -1,7 +1,7 @@
 var content = "Content-type",
 	ctype = "application/x-www-form-urlencoded",
 	cjson = "application/json";
-var intervalid , websocket,urlmonitor , e, playing = false, curtab = "tab-content1",stchanged = false,maxStation = 255;
+var intervalid , timeid, websocket,urlmonitor , e, playing = false, curtab = "tab-content1",stchanged = false,maxStation = 255;
 const karadio = "Karadio";
 
 function openwebsocket(){	
@@ -45,7 +45,17 @@ function openwebsocket(){
 	}
 }
 function wsplayStation($arr){
-	document.getElementById('stationsSelect').selectedIndex = $arr;
+	var i;
+	select = document.getElementById('stationsSelect');
+	opt = select.options;
+	for (i=0; i< maxStation;i++)
+	{
+		id = opt[i].value.split(":");
+		id = id[0];
+		if (id == $arr) break;
+	}
+	if (i == maxStation) i = 0;
+	select.selectedIndex = i;
 }
 
 function playMonitor($arr){
@@ -125,28 +135,99 @@ function valid() {
 	wifi(1);
     alert("System reboot. Please change your browser address to the new one.");
 }
+function dtime() {
+	var d = new Date(), elt = document.getElementById('sminutes'),eltw = document.getElementById('wminutes');
+	document.getElementById("time").innerHTML = d.toLocaleTimeString();	
+	if ((!isNaN(elt.innerHTML))&&(elt.innerHTML != "0") )
+		--elt.innerHTML;
+	if ((!isNaN(elt.innerHTML))&&(elt.innerHTML == 0)) elt.innerHTML = "0";
+	if ((!isNaN(eltw.innerHTML))&&(eltw.innerHTML != "0") )
+		--eltw.innerHTML;
+	if ((!isNaN(eltw.innerHTML))&&(eltw.innerHTML == 0)) eltw.innerHTML = "0";
+}
 
 function labelSleep(label){
-	document.getElementById('sleepdelay').value = label;	
+	document.getElementById('sminutes').innerHTML = label;	
+}
+function sleepup(e)
+{
+	if (e.keyCode == 13) startSleep();
 }
 function startSleep(){
-	var val = document.getElementById('sleepdelay').value;
-	if(Number.isInteger(parseInt(val,10))){
-		websocket.send("startSleep=" + val+"&");
+	var valm,h0,h1;
+	var cur = new Date();
+	var hop = document.getElementById("sleepdelay").value.split(":");
+	h0 = parseInt(hop[0],10);
+	h1 = parseInt(hop[1],10);
+	if(!isNaN(h0)){
+		if (!isNaN(h1)) // time mode
+		{
+			fut = new Date(cur.getFullYear(),cur.getMonth(), cur.getDate(),h0,h1,0 );
+			if (fut.getTime() > cur.getTime())
+				valm = Math.round((fut.getTime() - cur.getTime())/60000) ; //seconds
+			else valm = 1440 - Math.round((cur.getTime() - fut.getTime())/60000) ; //seconds
+			if (valm == 0)
+			if (fut.getTime() > cur.getTime() )   valm = 1; // 1 minute mini
+			else valm = 1440;
+		} else valm = h0; // minute mode
+		websocket.send("startSleep=" +valm +"&");
 		labelSleep("Started, Good night!");
-		window.setTimeout(labelSleep, 3000 ,val);	
+		window.setTimeout(labelSleep, 2000 ,(valm*60)-2);	
 	} else
 	{
 		labelSleep("Error, try again");
-		window.setTimeout(labelSleep, 2000 ,"1");
+		window.setTimeout(labelSleep, 2000 ,"0");
 	}	
 }
+
 function stopSleep(){
 	var a = document.getElementById("sleepdelay").value;
     websocket.send("stopSleep");
-    labelSleep("Stopped");
-    window.setTimeout(labelSleep, 2000, a);	
+    labelSleep("0");
+//    window.setTimeout(labelSleep, 2000, a);	
 }
+
+function labelWake(label){
+	document.getElementById('wminutes').innerHTML = label;	
+}
+function wakeup(e)
+{
+	if (e.keyCode == 13) startWake();
+}
+function startWake(){
+	var valm,h0,h1;
+	var cur = new Date();
+	var hop = document.getElementById("wakedelay").value.split(":");
+	h0 = parseInt(hop[0],10);
+	h1 = parseInt(hop[1],10);
+	if(!isNaN(h0)){
+		if (!isNaN(h1)) // time mode
+		{
+			fut = new Date(cur.getFullYear(),cur.getMonth(), cur.getDate(),h0,h1,0 );
+			if (fut.getTime() > cur.getTime())
+				valm = Math.round((fut.getTime() - cur.getTime())/60000) ; //seconds
+			else valm = 1440 - Math.round((cur.getTime() - fut.getTime())/60000) ; //seconds
+			if (valm == 0)
+			if (fut.getTime() > cur.getTime() )   valm = 1; // 1 minute mini
+			else valm = 1440;
+		} else valm = h0; // minute mode
+		websocket.send("startWake=" +valm +"&");
+		labelWake("Started");
+		window.setTimeout(labelWake, 2000 ,(valm*60)-2);	
+	} else
+	{
+		labelWake("Error, try again");
+		window.setTimeout(labelWake, 2000 ,"0");
+	}	
+}
+
+function stopWake(){
+	var a = document.getElementById("wakedelay").value;
+    websocket.send("stopWake");
+    labelWake("0");
+}
+
+
 
 function promptworking(label) {
 	document.getElementById('meta').innerHTML = label;
@@ -415,7 +496,8 @@ function playStation() {
 //	checkwebsocket();
 		mpause();
 		select = document.getElementById('stationsSelect');
-		id = select.options[select.selectedIndex].id;
+		id = select.options[select.selectedIndex].value.split(":");
+		id = id[0];
 		localStorage.setItem('selindexstore', select.selectedIndex.toString());
 		xhr = new XMLHttpRequest();
 		xhr.open("POST","play",false);
@@ -782,18 +864,21 @@ function loadStations(/*page*/) {
 function loadStationsList(max) {
 	var foundNull = false,id,opt,arr,select, liste= [],i;
 	select = document.getElementById("stationsSelect");
+	//clear Select
     for(i = select.options.length - 1 ; i >= 0 ; i--)
     {
         select.remove(i);
     }
+	
 	function cploadStationsList(id,arr) {
 		foundNull = false;
 			if(arr["Name"].length > 0) 
 			{
 				opt = document.createElement('option');
 				opt.appendChild(document.createTextNode(id+": \t"+arr["Name"]));
-				opt.id = id;
-				select.appendChild(opt);
+//				opt.id = id;
+//				select.appendChild(opt);
+				select.add(opt);
 			} else foundNull = true;
 			return foundNull;
 	}		
@@ -807,8 +892,8 @@ function loadStationsList(max) {
 			try {
 				arr = JSON.parse(localStorage.getItem(idstr));
 			} catch(e){console.log("error"+e);}
-//			foundNull = cploadStationsList(id,arr);
-			liste.push(arr);
+			foundNull = cploadStationsList(id,arr);
+//			liste.push(arr);
 		}
 		else
 		try {
@@ -819,8 +904,8 @@ function loadStationsList(max) {
 						arr = JSON.parse(xhr.responseText);
 					} catch(e){console.log("error"+e);}
 					localStorage.setItem(idstr,xhr.responseText);
-//					foundNull = cploadStationsList(id,arr);
-					liste.push(arr);
+					foundNull = cploadStationsList(id,arr);
+//					liste.push(arr);
 				}
 			}
 			xhr.open("POST","getStation",false);
@@ -829,14 +914,14 @@ function loadStationsList(max) {
 		} catch(e){console.log("error"+e); id--;}
 	}
 	
-
+/*
 	var map = liste.map(function(e, i) {
 		return { index: i, value: e.Name.toLowerCase() };
 	})
-/*	map.sort(function(a, b) {
+	map.sort(function(a, b) {
 		return +(a.value > b.value) || +(a.value === b.value) - 1;
 	});
-*/
+
 	// on utilise un objet final pour les résultats
 	var result = map.map(function(e){
 		return {index: e.index, value:liste[e.index]};
@@ -844,11 +929,12 @@ function loadStationsList(max) {
 	for(id=0; id < maxStation; id++) {
 		foundNull = cploadStationsList(result[id].index,result[id].value);
 	}	
-	
+*/	
 	promptworking("");
 	select.disabled = false;
 	select.options.selectedIndex= parseInt(localStorage.getItem('selindexstore'));
 //	getSelIndex();
+
 }
 /*	
 function getSelIndex() {
@@ -898,6 +984,8 @@ document.addEventListener("DOMContentLoaded", function() {
 		});
 	if (intervalid != 0)  window.clearTimeout(intervalid);
 	intervalid = 0;
+	if (timeid != 0)  window.clearInterval(timeid);
+	timeid = window.setInterval(dtime,1000);
 	loadStationsList(maxStation);
 	checkwebsocket();
 	refresh();

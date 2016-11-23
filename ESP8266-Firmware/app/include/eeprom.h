@@ -18,9 +18,9 @@ struct device_settings {
 	uint16_t currentstation;  // 
 	uint8_t autostart; // 0: stopped, 1: playing
 	uint8_t i2sspeed; // 0 = 48kHz, 1 = 96kHz, 2 = 128kHz
-	uint32_t uartspeed;
-	uint8_t theme;
-	char ua[40];
+	uint32_t uartspeed; // serial baud
+	uint8_t theme;  // 0 ligth blue, 1 Dark brown
+	char ua[40]; // user agent
 	uint8_t future[60];
 };
 
@@ -30,6 +30,8 @@ struct shoutcast_info {
 	char name[65];
 	uint16_t port;	//port
 };
+
+
 
 uint8_t eeGetByte(uint32_t address);
 void eeSetByte(uint32_t address, uint8_t data);

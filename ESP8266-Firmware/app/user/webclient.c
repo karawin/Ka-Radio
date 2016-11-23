@@ -241,18 +241,17 @@ ICACHE_FLASH_ATTR void wsStationNext()
 {
 	char answer[22];
 	struct shoutcast_info* si =NULL;
-	if (currentStation <255)
-		si = getStation(++currentStation);
-	else 
-	{
-		currentStation = 0;
-		si = getStation(currentStation);
-	}		
-	if(si != NULL && (strcmp(si->domain,"")!=0) && (strcmp( si->file,"")!= 0))
-	{
-		sprintf(answer,"%d",currentStation);
-		playStation	(answer);
-	} else currentStation--;
+	do {
+		++currentStation;
+		if (currentStation >= 255)
+			currentStation = 0;
+		if (si != NULL) incfree(si,"wsstation");
+		si = getStation(currentStation);	
+	}
+	while (si == NULL || ((si != NULL)&&(strcmp(si->domain,"")==0)) || ((si != NULL)&&(strcmp( si->file,"")== 0)));
+
+	sprintf(answer,"%d",currentStation);
+	playStation	(answer);
 	incfree(si,"wsstation");
 }
 // websocket: previous station
@@ -260,14 +259,18 @@ ICACHE_FLASH_ATTR void wsStationPrev()
 {
 	char answer[22];
 	struct shoutcast_info* si = NULL;
-	if (currentStation >0)
-		si = getStation(--currentStation);
-	else return;
-	if(si != NULL && (strcmp(si->domain,"")!=0) && (strcmp( si->file,"")!= 0))
-	{
-		sprintf(answer,"%d",currentStation);
-		playStation	(answer);
-	} else currentStation++;
+	do {
+		if (currentStation >0)
+		{	
+			if (si != NULL) incfree(si,"wsstation");
+			si = getStation(--currentStation);
+		}	
+		else return;
+	}
+	while (si == NULL || ((si != NULL)&&(strcmp(si->domain,"")==0)) || ((si != NULL)&&(strcmp( si->file,"")== 0)));
+
+	sprintf(answer,"%d",currentStation);
+	playStation	(answer);
 	incfree(si,"wsstation");
 }
 
@@ -444,6 +447,15 @@ ICACHE_FLASH_ATTR void clientConnect()
 		clientDisconnect();
 	}
 }
+ICACHE_FLASH_ATTR void clientSilentConnect()
+{
+	cstatus = C_HEADER;
+	if(server ) {
+		xSemaphoreGive(sConnect);
+	} else {
+		clientSilentDisconnect();
+	}
+}
 ICACHE_FLASH_ATTR void clientSilentDisconnect()
 {
 	xSemaphoreGive(sDisconnect);
@@ -454,8 +466,8 @@ ICACHE_FLASH_ATTR void clientDisconnect()
 	//connect = 0;
 	xSemaphoreGive(sDisconnect);
 	printf("##CLI.STOPPED#\n");
-	vTaskDelay(10);
-	clearHeaders();
+//	vTaskDelay(10);
+//	clearHeaders();
 }
 
 IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
@@ -864,7 +876,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 					if ( bytes_read > 0 )
 //if (cstatus != C_DATA) // test
 							clientReceiveCallback(sockfd,bufrec, bytes_read);
-					if(xSemaphoreTake(sDisconnect, 0)) break;	
+					if(xSemaphoreTake(sDisconnect, 0)){ clearHeaders(); break;	}
 				}
 				while ( bytes_read > 0 );
 			} else

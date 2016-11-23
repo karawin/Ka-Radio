@@ -109,6 +109,7 @@ void Delay(uint32_t nTime);
 void ControlReset(uint8_t State);
 void SCI_ChipSelect(uint8_t State);
 void SDI_ChipSelect(uint8_t State);
+void WriteVS10xxRegister(unsigned short addr,unsigned short val);
 void VS1053_WriteRegister(uint8_t addressbyte,
 		uint8_t highbyte, uint8_t lowbyte);
 uint16_t VS1053_ReadRegister(uint8_t addressbyte);

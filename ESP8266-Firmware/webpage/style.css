@@ -196,7 +196,7 @@ div.LEFT {
 }
 .tabs input[type="text"] {
 	font-size:12px;
-	min-width:140px;
+	width:140px;
 	height:20px;
 	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
 	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
@@ -208,9 +208,23 @@ div.LEFT {
 .tabs input[type="text"]:hover {
 	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
+.tabs [id^="sw"] input[type="text"] {
+	font-size:14px;
+	min-width:70px;
+	height:20px;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
+	border-radius:5px
+}
+.tabs [id^="sw"] input[type="text"]:hover {
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
+}
 .tabs input[type="password"] {
-	font-size:12px;
-	min-width:140px;
+	font-size:14px;
+	width:140px;
 	height:20px;
 	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
 	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
@@ -249,6 +263,20 @@ div.LEFT {
 }
 .tabs input[type="button"]:hover {
 	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
+}
+.tabs [id^="sw"] input[type="button"] {
+	font-size:14px;
+	min-width:50px;
+	height:25px;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
+	border-radius:5px
+}
+.tabs [id^="sw"] nput[type="button"]:hover {
+  box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs span input[type="button"] {
 	font-size:14px;

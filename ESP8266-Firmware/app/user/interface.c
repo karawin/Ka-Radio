@@ -331,19 +331,37 @@ ICACHE_FLASH_ATTR void clientPlay(char *s)
     }	
 }
 
-ICACHE_FLASH_ATTR void clientList()
+ICACHE_FLASH_ATTR void clientList(char *s)
 {
 	struct shoutcast_info* si;
-	int i;
+	int i = 0,j = 255;
 	printf("\n#CLI.LIST#\n");
-	for (i = 0;i <256;i++)
+	char *t = strstr(s, "(\"");
+	if(t != NULL)
+	{	
+		char *t_end  = strstr(t, "\")")-2;
+		if(t_end <= 0)
+		{
+			printf("\n##CLI.CMD_ERROR#");
+			return;
+		}	
+		i = atoi(t+2);
+		j = i+1;
+	}
+	
+	for (i ;i <j;i++)
 	{
 		si = getStation(i);
-		if (si->port != 0)
-			printf("%3d: %s, %s:%d%s\n",i,si->name,si->domain,si->port,si->file);	
-		free(si);
+		if (si !=NULL)
+		{
+			if(si->port !=0)
+			{	
+				printf("%3d: %s, %s:%d%s\n",i,si->name,si->domain,si->port,si->file);	
+			}
+			free(si);
+		}	
 	}	
-	printf("\n##CLI.LIST#\n");
+	printf("##CLI.LIST#\n");
 }
 ICACHE_FLASH_ATTR void clientI2S(char* s)
 {
@@ -446,16 +464,16 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
     else if(startsWith("cli.url", tmp)) clientParseUrl(tmp);
     else if(startsWith("cli.path", tmp)) clientParsePath(tmp);
     else if(startsWith("cli.port", tmp)) clientParsePort(tmp);
-    else if(strcmp(tmp, "cli.start") == 0) clientConnect();
+	else if(strcmp(tmp, "cli.start") == 0) {clientDisconnect();clientConnect();}
     else if(strcmp(tmp, "cli.stop") == 0) clientDisconnect();
-    else if(strcmp(tmp, "cli.list") == 0) clientList();
+    else if(startsWith("cli.list", tmp)) clientList(tmp);
     else if(strcmp(tmp, "cli.next") == 0) wsStationNext();
     else if(strncmp(tmp, "cli.previous",8) == 0) wsStationPrev();
     else if(startsWith("cli.play",tmp)) clientPlay(tmp);
 	else if(startsWith("cli.vol",tmp)) clientVol(tmp);
     else if(strcmp(tmp, "sys.erase") == 0) eeEraseAll();
     else if(strcmp(tmp, "sys.heap") == 0) heapSize();
-    else if(strcmp(tmp, "cli.upd") == 0) update_firmware();
+    else if(strcmp(tmp, "sys.upd") == 0) update_firmware();
     else if(startsWith("cli.i2s",tmp)) clientI2S(tmp);
     else if(startsWith("cli.uart",tmp)) clientUart(tmp);
 	else printInfo(tmp);

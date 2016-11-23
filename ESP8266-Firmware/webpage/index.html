@@ -17,7 +17,7 @@
 				<div class="RIGHT">
 				<a href="https://github.com/karawin/Ka-Radio" target="_blank">KaraWin</a><br/>
 				<a href="https://github.com/PiotrSperka/ESP8266-WebRadio" target="_blank">PiotrSperka</a><br/>
-				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.1.1</a>
+				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.1.2</a>
 				</div>
 			<div id="HEAD">
 			<span class="bold4"><span id="meta">Karadio</span></span>
@@ -60,13 +60,17 @@
 						I'm sorry; your browser doesn't support HTML5 <code>audio</code>.
 					</audio>
 				 
-				<h1>Sleep mode</h1>
-					<p>
-					<input type="button" value="Start Sleep"  onClick="startSleep()" > &nbsp;
-					<input type="button" value="Stop Sleep"  onClick="stopSleep()"></p>
-					<p>
-					<span class="bold1">Minute(s): </span><input type="text" id="sleepdelay"><br>
-
+				<h1>Sleep / Wake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="time">time</span></h1>
+					<p id="sw">
+					<span class="bold1" title="Time mode: HH:MM, or Delay mode (minutes): MM"> Sleep(i) : </span><input type="text" id="sleepdelay" onkeyup="sleepup(event)"> 
+					&nbsp;<input type="button" value="Start"  onClick="startSleep()"><input type="button" value="Stop"  onClick="stopSleep()">
+					&nbsp;&nbsp;  In: <span id="sminutes">0</span> Sec.
+					</p>
+					<p id="sw">
+					<span class="bold1" title="Time mode: HH:MM, or Delay mode (minutes): MM"> Wake(i) : </span><input type="text" id="wakedelay" onkeyup="wakeup(event)">
+					&nbsp;<input type="button" value="Start"  onClick="startWake()"><input type="button" value="Stop"  onClick="stopWake()">
+					 &nbsp;&nbsp; In: <span id="wminutes">0</span> Sec. 
+					</p>
 				<h1>Instant play</h1>
 					<p>
 					<span class="bold1">URL: </span><input type="text" id="instant_url" name="url"><br>
@@ -96,9 +100,9 @@
 							</form>
 						</div>
 						<!--<h1>Manage stations</h1>--><br/>
-						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list">
-						<input type="button" id="stsave" disabled="true" style="margin:0px auto" title="This will save all stations to the WebRadio" onClick="stChanged()"  value="Save the modified list">
-						<input type="button" style="margin:0px auto" id="clear" title="Warning: This will clear all stations.\n Be sure to save them before." onClick="clearList()"  value="Clear all stations"><br/>				
+						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list(i)">
+						<input type="button" id="stsave" disabled="true" style="margin:0px auto" title="This will save all stations to the WebRadio" onClick="stChanged()"  value="Save the modified list(i)">
+						<input type="button" style="margin:0px auto" id="clear" title="Warning: This will clear all stations.\n Be sure to save them before." onClick="clearList()"  value="Clear all stations(i)"><br/>				
 						<br/>
 
 						<table id = "stationsTable" style="table-layout: fixed; width: 100%;">
@@ -147,12 +151,12 @@
 						<p>
 						<input type="button"  onClick="saveTextAsFile()" value="Save Stations from WebRadio"> 
 						<span style="display:inline-block;">To 
-						<input type="text" style="width:200;" value="WebStations.txt" id="filesave"></span>
+						<input type="text" style="width:300px;" value="WebStations.txt" id="filesave"></span>
 <!--						<a HREF="" download="WebStations.txt" id="downloadlink" style="display: none;">Download it</a>
  -->
 						<br/><br/>
 						<input type="button"   onClick="downloadStations()" value="Load Stations to WebRadio"> <span style="display:inline-block;">From 
-						<input type="file" style="width:300;" id="fileload"></span><br/><br/>
+						<input type="file" style="width:300px;" id="fileload"></span><br/><br/>
 <!--						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list">
 						<input type="button" style="float:right;" id="clear" title="Warning: This will clear all stations.\n Be sure to save them before." onClick="clearList()"  value="Clear all stations"><br/>				
 						<br/>-->
@@ -163,7 +167,7 @@
 						<input  id="ssid" type="text" />
 						<br/>
 						<span class="bold"> AP PASSWORD:</span>
-						<input id="passwd" type="password" />
+						<input id="passwd" type="password"  />
 						<br/> <span class="bold"> Use DHCP:</span><input id="dhcp" type=checkbox onclick="clickdhcp()" /><br/>
 						<span class="bold">Ip:</span>
 						<input  id="ip" type="text" oninput="chkip(this)" />
