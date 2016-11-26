@@ -770,14 +770,12 @@ IRAM_ATTR void vsTask(void *pvParams) {
 	incfree(device,"device");	
 	VS1053_SPI_SpeedUp();
 	while(1) {
-		if(playing) {
-			
+		if(playing) {			
 			size = bufferRead(b, VSTASKBUF);
 			s = 0; 			
 			while(s < size) 
 			{
 				s += VS1053_SendMusicBytes(b+s, size-s);
-//				VS1053_SendMusicBytes(b, size);
 //				printf("s:%d  size:%d\n",s,size);
 			}
 			vTaskDelay(1);			
@@ -909,10 +907,10 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 */
 			if (playing)
 			{		
-				volume = VS1053_GetVolume();
-				VS1053_SetVolume(0);
 				VS1053_flush_cancel(2);
 				playing = 0;
+				volume = VS1053_GetVolume();
+				VS1053_SetVolume(0);
 			}	
 
 			bufferReset();

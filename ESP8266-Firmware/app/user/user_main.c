@@ -350,9 +350,9 @@ void user_init(void)
 	printf("t1 task: %x\n",pxCreatedTask);
 	xTaskCreate(vsTask, "t4", 370, NULL,5, &pxCreatedTask); //370
 	printf("t4 task: %x\n",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 820, NULL, 6, &pxCreatedTask); // 820
+	xTaskCreate(clientTask, "t3", 830, NULL, 6, &pxCreatedTask); // 830
 	printf("t3 task: %x\n",pxCreatedTask);
-	xTaskCreate(serverTask, "t2", 230, NULL, 4, &pxCreatedTask); //220
+	xTaskCreate(serverTask, "t2", 230, NULL, 4, &pxCreatedTask); //230
 	printf("t2 task: %x\n",pxCreatedTask);
 
 }

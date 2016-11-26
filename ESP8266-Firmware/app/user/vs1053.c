@@ -21,6 +21,10 @@
 #include "osapi.h"
 #include <math.h>
 
+	int vsVersion ; // the version of the chip
+//	SS_VER is 0 for VS1001, 1 for VS1011, 2 for VS1002, 3 for VS1003, 4 for VS1053 and VS8053, 5 for VS1033, 7 for VS1103, and 6 for VS1063.
+
+
 extern volatile uint32_t PIN_OUT;
 extern volatile uint32_t PIN_OUT_SET;
 extern volatile uint32_t PIN_OUT_CLEAR;
@@ -187,7 +191,7 @@ ICACHE_FLASH_ATTR void VS1053_regtest()
 	int MP3Status = VS1053_ReadRegister(SPI_STATUS);
 	int MP3Mode = VS1053_ReadRegister(SPI_MODE);
 	int MP3Clock = VS1053_ReadRegister(SPI_CLOCKF);
-	int vsVersion ;
+//	int vsVersion ;
 	printf("SCI_Mode (0x4800) = 0x%X\n",MP3Mode);
 	printf("SCI_Status (0x48) = 0x%X\n",MP3Status);
 
@@ -208,7 +212,7 @@ void VS1053_PluginLoad()
 
 ICACHE_FLASH_ATTR void VS1053_I2SRate(uint8_t speed){ // 0 = 48kHz, 1 = 96kHz, 2 = 128kHz
     if (speed > 2) speed = 0;
-	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x40); //address of GPIO_ODATA is 0xC017	
+//	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x40); //address of GPIO_ODATA is 0xC017	
 //	VS1053_WriteRegister(SPI_WRAM, 0x00,0x8); //reset I2S_CF_ENA
 	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x40); //address of GPIO_ODATA is 0xC017	
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0x8|speed); //
@@ -239,11 +243,10 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x17); //
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0xF0); //
 	VS1053_I2SRate(0);	
-	VS1053_regtest();
-
-// plugin flac
-	LoadUserCode() ;	
 	
+	VS1053_regtest();
+// plugin patch
+//	if (vsVersion == 4) LoadUserCode() ;	// vs1053b patch
 	
 	device = getDeviceSettings();
 	Delay(300);

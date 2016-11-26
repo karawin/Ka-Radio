@@ -7,9 +7,9 @@
 char lowmemory[] = { "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 10\r\n\r\n\", \"low memory\")"};
 xSemaphoreHandle semclient = NULL ;
 
-os_timer_t sleepTimer;
+LOCAL os_timer_t sleepTimer;
 uint32_t sleepDelay;
-os_timer_t wakeTimer;
+LOCAL os_timer_t wakeTimer;
 uint32_t wakeDelay;
 
 void *inmalloc(size_t n)
@@ -168,14 +168,14 @@ ICACHE_FLASH_ATTR void theme() {
 		}
 }
 
-ICACHE_RAM_ATTR void sleepCallback(void *pArg) {
+ICACHE_FLASH_ATTR void sleepCallback(void *pArg) {
 	if (--sleepDelay == 0)
 	{
 		os_timer_disarm(&sleepTimer);
 		clientSilentDisconnect(); // stop the player
 	}		
 }
-ICACHE_RAM_ATTR void wakeCallback(void *pArg) {
+ICACHE_FLASH_ATTR void wakeCallback(void *pArg) {
 	if (--wakeDelay == 0)
 	{
 		os_timer_disarm(&wakeTimer);
@@ -186,26 +186,26 @@ ICACHE_RAM_ATTR void wakeCallback(void *pArg) {
 
 ICACHE_FLASH_ATTR void startSleep(uint32_t delay)
 {
-//	printf("Delay:%d\n",delay);
+	printf("Delay:%d\n",delay);
 	if (delay == 0) return;
 	sleepDelay = delay*60; // minutes to seconds
 	os_timer_disarm(&sleepTimer);
 	os_timer_arm(&sleepTimer, 1000, true); // 1 second and rearm	
 }
 ICACHE_FLASH_ATTR void stopSleep(){
-//	printf("stopDelayDelay\n");
+	printf("stopDelayDelay\n");
 	os_timer_disarm(&sleepTimer);
 }
 ICACHE_FLASH_ATTR void startWake(uint32_t delay)
 {
-//	printf("Wake Delay:%d\n",delay);
+	printf("Wake Delay:%d\n",delay);
 	if (delay == 0) return;
 	wakeDelay = delay*60; // minutes to seconds
 	os_timer_disarm(&wakeTimer);
 	os_timer_arm(&wakeTimer, 1000, true); // 1 second and rearm	
 }
 ICACHE_FLASH_ATTR void stopWake(){
-//	printf("stopDelayWake\n");
+	printf("stopDelayWake\n");
 	os_timer_disarm(&wakeTimer);
 }
 
@@ -648,7 +648,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			pvParams->buf = pbuf;
 			pvParams->len = buflen;
 //			printf("GET websocket\n");
-			while (xTaskCreate( websocketTask,"t11",320,(void *) pvParams,4, &pxCreatedTask )!= pdPASS)  //310
+			while (xTaskCreate( websocketTask,"t11",310,(void *) pvParams,4, &pxCreatedTask )!= pdPASS)  //310
 			{
 				printf("ws xTaskCreate  failed. Retry\n");
 				vTaskDelay(100);
@@ -840,6 +840,8 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
 //	portBASE_TYPE uxHighWaterMark;
     semclient = xSemaphoreCreateCounting(2,2); 
 	websocketinit();
+	os_timer_disarm(&sleepTimer);
+	os_timer_disarm(&wakeTimer);
 	os_timer_setfn(&sleepTimer, sleepCallback, NULL);
 	os_timer_setfn(&wakeTimer, wakeCallback, NULL);
 	int stack = 340; //340
