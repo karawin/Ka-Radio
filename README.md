@@ -2,38 +2,7 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations<BR/>
-###Release 1.1.1 <br/>
-<font color="red">New features:</font><br/>
-- The user agent for http request can be set for some special streams.
-   Example: http://pcradio.ru/player/listradio/pcradio_ru.xml which need a user agent= pcradio.
-   This pcradio user agent is already implemented automatically in the code when a pcradio station is encountered.
-- Better station start and stop. (no more strange noises).
-- Many bugs removed thanks to users feedback's. 
-
-Built on 2016/10/29 
-
-###Release 1.1.0 <br/>
-<font color="red">New features:</font><br/>
-- Drag an drop on the stations list: rearrange the list by dragging a line to another one. Save the change when asked.
-- Themes toggle between light blue and dark marron theme with a click on the logo.
-- Sleep mode to stop the play after a delay.
-- Functions on the web page are optimized. 
-- Many minor improvements on the code and the web page.
-
-###Release 1.0.10 <br/>
-<font color="red">New features:</font><br/>
-- New uart interface command: cli.uart("x")<br/>
- With x the uart baudrate at the next reset and permanently.<br/>
-List of valid baudrate: 1200,2400,4800,9600,14400,19200,28800,38400,57600,76880,115200,230400<br/>
-The command will reply with<br/>
-##CLI.UART= 115200# on the next reset.<br/>
-<br/>
-- New Station selection with number<br/>
-- Stations management in one page<br/>
-- abort button on station edition.<br/>
-<font color="red">Corrected:</font><br/>
-- The I2S interface was not working. Thanks  Discover1977 for the test
-<BR/>
+###Release 1.1.3 <br/>
 
 <BR/>
 Attention:<br/>
