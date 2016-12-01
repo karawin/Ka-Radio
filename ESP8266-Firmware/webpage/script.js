@@ -830,7 +830,7 @@ function loadStations(/*page*/) {
 			for(key in arr){
 				td = document.createElement('TD');
 				td.style="word-break: break-all;overflow-wrap: break-word; word-wrap: break-word;";
-				if(arr[key].length > 64) arr[key] = "Error";
+				if(arr[key].length > 116) arr[key] = "Error";
 				td.appendChild(document.createTextNode(arr[key]));
 				tr.appendChild(td);
 			}
