@@ -82,7 +82,7 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 				sprintf(buf, "HTTP/1.1 500 Internal Server Error\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n", (f!=NULL ? f->type : "text/plain"), 0);
 				write(conn, buf, strlen(buf));
 				printf("serveFile inmalloc error\n");
-				if (con) free(con);
+				incfree(con);
 				return ;
 		}	
 //		printf("serveFile socket:%d,  %s. Length: %d  sliced in %d\n",conn,name,length,gpart);		
@@ -121,20 +121,20 @@ ICACHE_FLASH_ATTR char* getParameter(char* sep,char* param, char* data, uint16_t
 		if(p_end != NULL ) {
 			if (p_end==p) return NULL;
 			char* t = inmalloc(p_end-p + 1);
-			if (t == NULL) { printf("getParameterFromResponse inmalloc fails\n"); return NULL;}
+			if (t == NULL) { printf("getParameterF inmalloc fails\n"); return NULL;}
 			int i;
 			for(i=0; i<(p_end-p + 1); i++) t[i] = 0;
 			strncpy(t, p, p_end-p);
 //			printf("getParam: in: \"%s\"   \"%s\"\n",data,t);
 			return t;
-		}
+		} else return NULL;
 	} else return NULL;
 }
 ICACHE_FLASH_ATTR char* getParameterFromResponse(char* param, char* data, uint16_t data_length) {
 	return getParameter("&",param,data, data_length) ;
 }
-ICACHE_FLASH_ATTR char* getParameterFromCommands(char* param, char* data, uint16_t data_length) {
-	return getParameter("?",param,data, data_length) ;
+ICACHE_FLASH_ATTR char* getParameterFromComment(char* param, char* data, uint16_t data_length) {
+	return getParameter("\"",param,data, data_length) ;
 }
 
 ICACHE_FLASH_ATTR void respOk(int conn)
@@ -248,13 +248,11 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 }
 
 
-	
-ICACHE_FLASH_ATTR void playStation(char* id) {
+ICACHE_FLASH_ATTR void playStationInt(int sid) {
 	struct shoutcast_info* si;
 	char answer[22];
 	struct device_settings *device;
-	currentStation = atoi(id) ;
-	si = getStation(currentStation);
+	si = getStation(sid);
 
 		if(si != NULL &&si->domain && si->file) {
 			int i;
@@ -265,7 +263,7 @@ ICACHE_FLASH_ATTR void playStation(char* id) {
 				if(!clientIsConnected())break;
 				vTaskDelay(4);
 			}
-			clientSetName(si->name,currentStation);
+			clientSetName(si->name,sid);
 			clientSetURL(si->domain);
 			clientSetPath(si->file);
 			clientSetPort(si->port);
@@ -278,13 +276,40 @@ ICACHE_FLASH_ATTR void playStation(char* id) {
 		}
 
 	infree(si);
-	sprintf(answer,"{\"wsstation\":\"%d\"}",currentStation);
+	sprintf(answer,"{\"wsstation\":\"%d\"}",sid);
 	websocketbroadcast(answer, strlen(answer));
 	device = getDeviceSettings();
-	device->currentstation = currentStation;
+	device->currentstation = sid;
 	saveDeviceSettings(device);
 	incfree(device,"playStation");
+
+}
 	
+ICACHE_FLASH_ATTR void playStation(char* id) {
+	struct shoutcast_info* si;
+	char answer[22];
+	struct device_settings *device;
+	currentStation = atoi(id) ;
+	playStationInt(currentStation);	
+}
+
+// replace special  json char
+ICACHE_FLASH_ATTR void pathParse(char* str)
+{
+	int i = 0;
+	char* pend;
+	uint8_t cc;
+	if (str == NULL) return;
+	for (i; i< strlen(str);i++)
+	{
+		if (str[i] == '%')
+		{
+			cc = strtol(&str[i+1], &pend,16);
+			str[i] = cc;			
+			str[i+1]=0;
+			strcat(str, pend);
+		}
+	}
 }
 
 ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int conn) {
@@ -297,6 +322,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		if(data_size > 0) {
 			char* url = getParameterFromResponse("url=", data, data_size);
 			char* path = getParameterFromResponse("path=", data, data_size);
+			pathParse(path);
 			char* port = getParameterFromResponse("port=", data, data_size);
 //			int i;
 			if(url != NULL && path != NULL && port != NULL) {
@@ -310,16 +336,16 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				clientSetURL(url);
 				clientSetPath(path);
 				clientSetPort(atoi(port));
-				clientConnect();
+				clientConnectOnce();
 				for (i = 0;i<100;i++)
 				{
 					if (clientIsConnected()) break;
 					vTaskDelay(5);
 				}
 			} 
-			if(url) infree(url);
-			if(path) infree(path);
-			if(port) infree(port);
+			infree(url);
+			infree(path);
+			infree(port);
 		}
 	} else if(strcmp(name, "/soundvol") == 0) {
 		if(data_size > 0) {
@@ -431,6 +457,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				id = getParameterFromResponse("id=", data, data_size);
 				url = getParameterFromResponse("url=", data, data_size);
 				file = getParameterFromResponse("file=", data, data_size);
+				pathParse(file);
 				name = getParameterFromResponse("name=", data, data_size);
 				port = getParameterFromResponse("port=", data, data_size);
 //				printf("nb:%d,si:%x,nsi:%x,id:%s,url:%s,file:%s\n",i,si,nsi,id,url,file);
@@ -665,26 +692,46 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			if(c_end == NULL) return false;
 			*(c_end-1) = 0;
 			c_end = strstr(c,"?");
-			if(c_end != NULL) // commands
+//			
+// command api, 		
+			if(c_end != NULL) // commands api
 			{
 				char* param;
 //				printf("GET commands  socket:%d command:%s\n",conn,c);
+// uart command
 				param = strstr(c,"uart") ;
 				if (param != NULL) {UART_SetBaudrate(0, 115200);}	
+// volume command				
 				param = getParameterFromResponse("volume=", c, strlen(c)) ;
 				if ((param != NULL)&&(atoi(param)>=0)&&(atoi(param)<=254))
 				{	
 					setVolume(param);
 					wsVol(param);
 				}	
-				if (param!= NULL) incfree(param);
+				incfree(param);
+// play command				
 				param = getParameterFromResponse("play=", c, strlen(c)) ;
-				if (param != NULL) {playStation(param);incfree(param);}
+				if (param != NULL) {playStation(param);free(param);}
+// start command				
+				param = strstr(c,"start") ;
+				if (param != NULL) {playStationInt(currentStation);}
+// stop command				
 				param = strstr(c,"stop") ;
-				if (param != NULL) {clientDisconnect();}
-				respOk(conn);
+				if (param != NULL) {clientDisconnect();free(param);}
+// instantplay command				
+				param = getParameterFromComment("instant=", c, strlen(c)) ;
+				if (param != NULL) {
+					clientDisconnect();
+					pathParse(param);
+//					printf("Instant param:%s\n",param);
+					clientParsePlaylist(param);clientConnectOnce();
+					free(param);
+				}
+				
+				respOk(conn); // response OK to the origin
 			}
 			else // file
+// file get			
 			{
 				if(strlen(c) > 32) return false;
 //				printf("GET file  socket:%d file:%s\n",conn,c);
@@ -693,6 +740,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			}
 		}
 	} else if( (c = strstr(buf, "POST ")) != NULL) {
+// a post request		
 //		printf("POST socket: %d\n",conn);
 		char fname[32];
 		uint8_t i;
@@ -718,7 +766,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 
 
 
-
+// Server child to handle a request from a browser.
 ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 #define RECLEN	638
 	struct timeval timeout; 
@@ -833,6 +881,8 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 //	printf("Client exit socket:%d result %d \n",client_sock,result);
 	vTaskDelete( NULL );	
 }	
+
+// main server task. Create a child per request.
 ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
 	struct sockaddr_in server_addr, client_addr;
 	int server_sock, client_sock;

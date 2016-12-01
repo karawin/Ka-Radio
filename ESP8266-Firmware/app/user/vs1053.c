@@ -197,7 +197,7 @@ ICACHE_FLASH_ATTR void VS1053_regtest()
 
 	vsVersion = (MP3Status >> 4) & 0x000F; //Mask out only the four version bits
 	printf("VS Version (VS1053 is 4) = %d\n",vsVersion);
-	//The 1053B should respond with 4. VS1001 = 0, VS1011 = 1, VS1002 = 2, VS1053 = 3
+	//The 1053B should respond with 4. VS1001 = 0, VS1011 = 1, VS1002 = 2, VS1003 = 3, VS1054 = 4
 	printf("SCI_ClockF = 0x%X\n",MP3Clock);
 }
 /*
@@ -212,6 +212,7 @@ void VS1053_PluginLoad()
 
 ICACHE_FLASH_ATTR void VS1053_I2SRate(uint8_t speed){ // 0 = 48kHz, 1 = 96kHz, 2 = 128kHz
     if (speed > 2) speed = 0;
+	if (vsVersion != 4) return;
 //	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x40); //address of GPIO_ODATA is 0xC017	
 //	VS1053_WriteRegister(SPI_WRAM, 0x00,0x8); //reset I2S_CF_ENA
 	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x40); //address of GPIO_ODATA is 0xC017	
@@ -239,12 +240,15 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	VS1053_WriteRegister(SPI_MODE, (SM_SDINEW|SM_LINE1)>>8, SM_LAYER12); //mode 
 	while(VS1053_checkDREQ() == 0);
 	
-// enable I2C dac output
-	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x17); //
-	VS1053_WriteRegister(SPI_WRAM, 0x00,0xF0); //
-	VS1053_I2SRate(0);	
-	
 	VS1053_regtest();
+// enable I2C dac output
+   if (vsVersion == 4) // only 1053
+   {
+		VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x17); //
+		VS1053_WriteRegister(SPI_WRAM, 0x00,0xF0); //
+		VS1053_I2SRate(0);	
+   }
+	
 // plugin patch
 //	if (vsVersion == 4) LoadUserCode() ;	// vs1053b patch
 	
@@ -496,7 +500,7 @@ ICACHE_FLASH_ATTR void VS1053_flush_cancel(uint8_t mode) {  // 0 only fillbyte  
 //		printf ("Wait CANCEL clear\n");
 		if (y++ > 200) 
 		{
-			VS1053_Start();
+			if (mode == 1) VS1053_Start();
 			break;
 		}		
 	}	

@@ -24,8 +24,9 @@ static enum clientStatus cstatus;
 
 xSemaphoreHandle sConnect, sConnected, sDisconnect, sHeader;
 
-static uint8_t connect = 0, playing = 0;
+static uint8_t connect = 0, playing = 0, once = 0;
 static uint8_t volume = 0;
+
 
 
 /* TODO:
@@ -96,10 +97,10 @@ ICACHE_FLASH_ATTR struct icyHeader* clientGetHeader()
 ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 {
   char* str; 
-  char path[80] = "/";
-  char url[80]; 
+  char path[116] = "/";
+  char url[73]; 
   char port[5] = "80";
-  int remove;
+  int remove = 0;
   int i = 0; int j = 0;
   str = strstr(s,"<location>http://");  //for xspf
   if (str != NULL) remove = 17;
@@ -108,10 +109,16 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 	str = strstr(s,"http://");
 	if (str != NULL) remove = 7;
   }
-  if (str != NULL)
+  if (str ==NULL) 
+  {	  
+	str = strstr(s,"https://");
+	if (str != NULL) remove = 8;
+  } 
+  if (str != NULL) 
+  
   {
 	str += remove; //skip http://
-	while ((str[i] != '/')&&(str[i] != ':')&&(str[i] != 0x0a)&&(str[i] != 0x0d)) {url[j] = str[i]; i++ ;j++;}
+	while ((str[i] != '/')&&(str[i] != ':')&&(str[i] != 0x0a)&&(str[i] != 0x0d)&&(j<78)) {url[j] = str[i]; i++ ;j++;}
 	url[j] = 0;
 	j = 0;
 	if (str[i] == ':')  //port
@@ -122,9 +129,10 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 	j = 0;
 	if ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<'))
 	{	
-	  while ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<')) {path[j] = str[i]; i++; j++;}
+	  while ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<')&&(j<116)) {path[j] = str[i]; i++; j++;}
 	  path[j] = 0;
 	}
+	
 	if (strncmp(url,"localhost",9)!=0) clientSetURL(url);
 	clientSetPath(path);
 	clientSetPort(atoi(port));
@@ -239,7 +247,6 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 // websocket: next station
 ICACHE_FLASH_ATTR void wsStationNext()
 {
-	char answer[22];
 	struct shoutcast_info* si =NULL;
 	do {
 		++currentStation;
@@ -250,14 +257,12 @@ ICACHE_FLASH_ATTR void wsStationNext()
 	}
 	while (si == NULL || ((si != NULL)&&(strcmp(si->domain,"")==0)) || ((si != NULL)&&(strcmp( si->file,"")== 0)));
 
-	sprintf(answer,"%d",currentStation);
-	playStation	(answer);
+	playStationInt	(currentStation);
 	incfree(si,"wsstation");
 }
 // websocket: previous station
 ICACHE_FLASH_ATTR void wsStationPrev()
 {
-	char answer[22];
 	struct shoutcast_info* si = NULL;
 	do {
 		if (currentStation >0)
@@ -269,8 +274,7 @@ ICACHE_FLASH_ATTR void wsStationPrev()
 	}
 	while (si == NULL || ((si != NULL)&&(strcmp(si->domain,"")==0)) || ((si != NULL)&&(strcmp( si->file,"")== 0)));
 
-	sprintf(answer,"%d",currentStation);
-	playStation	(answer);
+	playStationInt	(currentStation);
 	incfree(si,"wsstation");
 }
 
@@ -332,6 +336,7 @@ ICACHE_FLASH_ATTR void wsHeaders()
 	incfree (wsh,"wsh");
 }	
 
+//Clear all ICY and META infos
 ICACHE_FLASH_ATTR void clearHeaders()
 {
 	uint8_t header_num;
@@ -410,6 +415,7 @@ ICACHE_FLASH_ATTR bool clientParseHeader(char* s)
 		return ret;
 }
 
+
 ICACHE_FLASH_ATTR void clientSetName(char* name,uint16_t index)
 {
 	printf("##CLI.NAMESET#: %d %s\n",index,name);
@@ -440,6 +446,18 @@ ICACHE_FLASH_ATTR void clientSetPort(uint16_t port)
 ICACHE_FLASH_ATTR void clientConnect()
 {
 	cstatus = C_HEADER;
+	once = 0;
+	if(server) incfree(server,"server");
+	if((server = (struct hostent*)gethostbyname(clientURL))) {
+		xSemaphoreGive(sConnect);
+	} else {
+		clientDisconnect();
+	}
+}
+ICACHE_FLASH_ATTR void clientConnectOnce()
+{
+	cstatus = C_HEADER;
+	once = 1; // play one time
 	if(server) incfree(server,"server");
 	if((server = (struct hostent*)gethostbyname(clientURL))) {
 		xSemaphoreGive(sConnect);
@@ -450,6 +468,7 @@ ICACHE_FLASH_ATTR void clientConnect()
 ICACHE_FLASH_ATTR void clientSilentConnect()
 {
 	cstatus = C_HEADER;
+	once = 0;
 	if(server ) {
 		xSemaphoreGive(sConnect);
 	} else {
@@ -742,9 +761,9 @@ int jj = 0;
 			if (len >0) bufferWrite(pdata+rest, len);	
 		}
 // ---------------			
-		if(!playing && (getBufferFree() < (BUFFER_SIZE/2))) {
+	if ((!playing )&& (getBufferFree() < (BUFFER_SIZE/2))) {
 			playing=1;
-			vTaskDelay(30);
+			if (once == 0)vTaskDelay(20);
 			if (VS1053_GetVolume()==0) VS1053_SetVolume(volume);
 			printf("##CLI.PLAYING#\n");
 		}	
@@ -851,13 +870,12 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 					sprintf(bufrec, "GET %s HTTP/1.1\r\nHost: %s\r\nicy-metadata: 1\r\nUser-Agent: %s\r\n\r\n", clientPath,clientURL,useragent); 
 //printf("st:%d, Client Sent:\n%s\n",cstatus,bufrec);
 				}
-				send(sockfd, bufrec, strlen(bufrec), 0);
-								
+				send(sockfd, bufrec, strlen(bufrec), 0);								
 				xSemaphoreTake(sConnected, 0);
-
-/*				if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
+///// set timeout
+				if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
 					printf("setsockopt failed\n");
-*/				
+//////				
 				int ipt = IPTOS_THROUGHPUT;
 				int ndl = 1;
 				if (setsockopt (sockfd, IPPROTO_IP,IP_TOS, &ipt,sizeof(int)) < 0)
@@ -885,36 +903,53 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				vTaskDelay(200);	
 			}	
 			/*---Clean up---*/
-			if (bytes_read <= 0 ) 
-			{					
-					if (playing) 
+			if (bytes_read <= 0 )  //nothing received or error or disconnected
+			{				
+					if ((playing)&&(once == 0))  // try restart
 					{
 						clientDisconnect(); 
 						clientConnect();
+						printf("##CLI.PLAYING#\n");
 					}	
-					else{
-						clientSaveOneHeader("Not Found", 9,METANAME);
-						wsHeaders();						
-						vTaskDelay(300);	
-						clientDisconnect(); 
-					}						
+					else if (!playing){ // nothing played
+						// some data not played						
+						if ((!playing )&& (getBufferFree() < (BUFFER_SIZE))) {						
+							playing=1;
+							vTaskDelay(1);
+							if (VS1053_GetVolume()==0) VS1053_SetVolume(volume);
+							printf("##CLI.PLAYING#\n");
+							while (getBufferFree() < (BUFFER_SIZE)) vTaskDelay(200);							
+							vTaskDelay(200);
+							playing=0;
+							clientDisconnect(); 
+						}	
+						//						
+						else{  // nothing received
+							clientSaveOneHeader("Not Found", 9,METANAME);
+							wsHeaders();
+						}
+					}	
+					else{  //playing once and no more received stream
+						while (getBufferFree() < (BUFFER_SIZE)) vTaskDelay(200);
+						vTaskDelay(200);
+						clientDisconnect(); 						
+					}					
 			}//jpc
-			
-			
-/*
+						
+/*			// marker for heap size (debug)
 			uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 			printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 */
-			if (playing)
+			if (playing)  // stop clean
 			{		
-				VS1053_flush_cancel(2);
-				playing = 0;
 				volume = VS1053_GetVolume();
 				VS1053_SetVolume(0);
+				VS1053_flush_cancel(2);
+				playing = 0;
 			}	
 
 			bufferReset();
-			shutdown(sockfd,SHUT_RDWR);
+			shutdown(sockfd,SHUT_RDWR); // stop the socket
 			vTaskDelay(10);	
 			close(sockfd);
 //			printf("WebClient Socket closed\n");

@@ -66,6 +66,7 @@
 #define SM_LINE1            0x4000
 #define para_endFillByte    0x1E06
 //public functions
+extern int vsVersion;
 void 	VS1053_HW_init();
 void 	VS1053_SineTest();
 void 	VS1053_I2SRATE(uint8_t speed);

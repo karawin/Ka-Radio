@@ -48,7 +48,7 @@ enum clientStatus {C_HEADER0, C_HEADER, C_HEADER1,C_METADATA, C_DATA, C_PLAYLIST
 
 void clientInit();
 uint8_t clientIsConnected();
-
+bool clientParsePlaylist(char* s);
 void clientSetURL(char* url);
 void clientSetName(char* name,uint16_t index);
 void clientSetPath(char* path);

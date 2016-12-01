@@ -451,13 +451,16 @@ function wifi(valid) {
 	xhr.send("valid=" + valid +"&ssid=" + document.getElementById('ssid').value + "&pasw=" + document.getElementById('passwd').value + "&ip=" + document.getElementById('ip').value+"&msk=" + document.getElementById('mask').value+"&gw=" + document.getElementById('gw').value+"&ua=" + document.getElementById('ua').value+"&dhcp=" + document.getElementById('dhcp').checked+"&");
 }
 function instantPlay() {
+	var curl;
 	try{
 		xhr = new XMLHttpRequest();
 		xhr.open("POST","instant_play",false);
 		xhr.setRequestHeader(content,ctype);
-		if (!(document.getElementById('instant_path').value.substring(0, 1) === "/")) document.getElementById('instant_path').value = "/" + document.getElementById('instant_path').value;
+		curl = document.getElementById('instant_path').value;
+		if (!(curl.substring(0, 1) === "/")) curl = "/" + curl;
 		document.getElementById('instant_url').value = document.getElementById('instant_url').value.replace(/^https?:\/\//,'');
-		xhr.send("url=" + document.getElementById('instant_url').value + "&port=" + document.getElementById('instant_port').value + "&path=" + document.getElementById('instant_path').value+"&");
+		curl = fixedEncodeURIComponent (curl);
+		xhr.send("url=" + document.getElementById('instant_url').value + "&port=" + document.getElementById('instant_port').value + "&path=" + curl+"&");
 	} catch(e){console.log("error"+e);}
 }
 
@@ -529,18 +532,27 @@ function saveSoundSettings() {
 			 + "&spacial=" + document.getElementById('spacial_range').value
 			 + "&");
 }
+
+function fixedEncodeURIComponent (str) {
+  return str.replace(/[&]/g, function(c) {
+    return '%' + c.charCodeAt(0).toString(16);
+  });
+}
 function saveStation() {
 	var file = document.getElementById('add_path').value,
-		url = document.getElementById('add_url').value;
+		url = document.getElementById('add_url').value,jfile;
 	if (!(file.substring(0, 1) === "/")) file = "/" + file;
+	console.log("Path: "+file);
+    jfile = fixedEncodeURIComponent (file);
+	console.log("JSON: "+jfile);
 	url = url.replace(/^https?:\/\//,'');
 	try{
 		xhr = new XMLHttpRequest();
 		xhr.open("POST","setStation",false);
 		xhr.setRequestHeader(content,ctype);
-		xhr.send("nb=" + 1+"&id=" + document.getElementById('add_slot').value + "&url=" + url + "&name=" + document.getElementById('add_name').value + "&file=" + file + "&port=" + document.getElementById('add_port').value+"&&");
+		xhr.send("nb=" + 1+"&id=" + document.getElementById('add_slot').value + "&url=" + url + "&name=" + document.getElementById('add_name').value + "&file=" + jfile + "&port=" + document.getElementById('add_port').value+"&&");
 		localStorage.setItem(document.getElementById('add_slot').value,"{\"Name\":\""+document.getElementById('add_name').value+"\",\"URL\":\""+url+"\",\"File\":\""+file+"\",\"Port\":\""+document.getElementById('add_port').value+"\"}");
-	} catch(e){console.log("error "+e);}
+	} catch(e){console.log("error save "+e);}
 	abortStation(); // to erase the edit field
 	loadStations();
 	loadStationsList(maxStation);
