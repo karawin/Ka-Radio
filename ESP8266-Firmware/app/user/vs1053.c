@@ -406,12 +406,14 @@ ICACHE_FLASH_ATTR uint8_t	VS1053_GetBassFreq(){
 }
 
 ICACHE_FLASH_ATTR uint8_t	VS1053_GetSpatial(){
+	if (vsVersion != 4) return 0;
 	uint16_t spatial = (VS1053_ReadRegister(SPI_MODE) & 0x0090) >>4;
 //	printf("GetSpatial: %d\n",(spatial&1) | ((spatial>>2) & 2));
 	return ((spatial&1) | ((spatial>>2) & 2));
 }
 
 ICACHE_FLASH_ATTR void VS1053_SetSpatial(uint8_t num){
+	if (vsVersion != 4) return ;
 	uint16_t spatial = VS1053_ReadRegister(SPI_MODE);
 	if (num >=0 && num <= 3)
 	{	
