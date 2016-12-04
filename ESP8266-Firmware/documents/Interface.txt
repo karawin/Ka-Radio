@@ -3,9 +3,15 @@ ____________________________________
 Any browser or wget can be used to send basic commands to the webradio.
 Commands are:
 stop			: stop playing the current station.
-play=xxx		: with xxx from 0 to 255  play the station xxx
+start			: start playing the current station.
+play=xxx		: with xxx from 0 to 254  play the station xxx
 volume=xxx		: with xxx from 0 to 254  change the volume to xxx
 uart			: uart baudrate at 115200 not saved on next reset
+instant="http://your url" : instant play a site
+Example: http://192.168.1.253/?instant="http://api.voicerss.org/?f=32khz_16bit_stereo&key=29334415954d491b85535df4eb4dd821&hl=en-us&src=hello?the-sun-is-yellow?and-i-like-it"
+the url must begin with http:// or https:// and be surrounded by " and no space char allowed.
+
+Volume may be combined with other command.
 Example: 192.168.1.253/?volume=50&play=128
 
 Reminder: the url without parameter is the full web interface.
@@ -70,12 +76,11 @@ cli.path("/path")	: the path of the station to play
 cli.port("xxxx")	: the port number of the station to play						
 cli.start		: start to play the current station
 cli.stop		: stop the playing station
-cli.list		: list of the recorded stations
+cli.list[("x")]		: list of the recorded stations or only one
 cli.play("xxx")		: play the xxx recorded station in the list (0 = stop)
 cli.vol("xxx")		: set the volume to xxx with xxx from 0 to 254 (max volume)
 cli.prev (or cli.previous)	: select the previous station in the list and play it
 cli.next		: select the next station in the list and play it
-cli.update		: start an OTA (on the air) update of the software
 cli.i2s("x")		: Change and record the I2S clock speed of the vs1053 GPIO5 MCLK for the i2s interface to external dac. 
 			: 0=48kHz, 1=96kHz, 2=192kHz, other equal 0
 cli.uart("x")		: Change the baudrate of the uart on the next reset. 
@@ -83,6 +88,7 @@ cli.uart("x")		: Change the baudrate of the uart on the next reset.
 			
 sys.erase		: erase all recorded configuration and stations.
 sys.heap		: show the heap size
+sys.update		: start an OTA (on the air) update of the software
 
 <enter> will display 
 #INFO:""#
