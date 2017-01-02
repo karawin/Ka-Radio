@@ -232,9 +232,17 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x19); //address of GPIO_ODATA is 0xC019
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0x00); //GPIO_ODATA=0
 	Delay(100);
-	
+
 	while(VS1053_checkDREQ() == 0);
-	VS1053_WriteRegister(SPI_CLOCKF,0x60,0x00);
+
+	int MP3Status = VS1053_ReadRegister(SPI_STATUS);
+	vsVersion = (MP3Status >> 4) & 0x000F; //Mask out only the four version bits
+	
+   if (vsVersion == 4) // only 1053  	
+		VS1053_WriteRegister(SPI_CLOCKF,0x90,0x00); // enable SC_ADD
+	else	
+		VS1053_WriteRegister(SPI_CLOCKF,0xb0,0x00);
+	
 //	VS1053_WriteRegister(SPI_MODE, (SM_LINE1 | SM_SDINEW)>>8 , SM_RESET); // soft reset
 	VS1053_SoftwareReset();
 	VS1053_WriteRegister(SPI_MODE, (SM_SDINEW|SM_LINE1)>>8, SM_LAYER12); //mode 
@@ -269,7 +277,7 @@ ICACHE_FLASH_ATTR int VS1053_SendMusicBytes(uint8_t* music, uint16_t quantity){
 	if(quantity ==0) return 0;
 	spi_take_semaphore();
 	int o = 0;
-	while(VS1053_checkDREQ() == 0) ;
+	while(VS1053_checkDREQ() == 0) vTaskDelay(1);
 	VS1053_SPI_SpeedUp();
 	SDI_ChipSelect(SET);
 	while(quantity)

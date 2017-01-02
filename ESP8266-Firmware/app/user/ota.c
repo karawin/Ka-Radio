@@ -115,6 +115,5 @@ void update_firmware(void)
         os_printf("upgrade error\n");
     }
 	
-//	free (serv);
 
 }

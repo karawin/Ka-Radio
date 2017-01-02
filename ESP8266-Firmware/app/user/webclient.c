@@ -447,7 +447,7 @@ ICACHE_FLASH_ATTR void clientConnect()
 {
 	cstatus = C_HEADER;
 	once = 0;
-	if(server) incfree(server,"server");
+//	if(server != NULL) {incfree(server,"server");server = NULL;}
 	if((server = (struct hostent*)gethostbyname(clientURL))) {
 		xSemaphoreGive(sConnect);
 	} else {
@@ -458,7 +458,7 @@ ICACHE_FLASH_ATTR void clientConnectOnce()
 {
 	cstatus = C_HEADER;
 	once = 1; // play one time
-	if(server) incfree(server,"server");
+//	if(server != NULL) {incfree(server,"server1");server = NULL;}
 	if((server = (struct hostent*)gethostbyname(clientURL))) {
 		xSemaphoreGive(sConnect);
 	} else {
@@ -469,7 +469,7 @@ ICACHE_FLASH_ATTR void clientSilentConnect()
 {
 	cstatus = C_HEADER;
 	once = 0;
-	if(server ) {
+	if(server != NULL) {
 		xSemaphoreGive(sConnect);
 	} else {
 		clientSilentDisconnect();
@@ -876,17 +876,19 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
 					printf("setsockopt failed\n");
 //////				
-				int ipt = IPTOS_THROUGHPUT;
+/*				int ipt = IPTOS_THROUGHPUT;
 				int ndl = 1;
 				if (setsockopt (sockfd, IPPROTO_IP,IP_TOS, &ipt,sizeof(int)) < 0)
 					printf("setsockopt1 failed\n");
 				if (setsockopt (sockfd, IPPROTO_TCP,TCP_NODELAY,&ndl,sizeof(int)) < 0)
 					printf("setsockopt2 failed\n"); 
-
+				if (setsockopt (sockfd, IPPROTO_TCP,TCP_NODELAY,&ndl,sizeof(int)) < 0)
+					printf("setsockopt2 failed\n"); 
+*/
 				do
 				{
 					bytes_read = recvfrom(sockfd, bufrec,RECEIVE, 0, NULL, NULL);						
-//printf("  %d  ", bytes_read);
+printf("  %d  ", bytes_read);
 //if (bytes_read < 1000 )  
 //printf(" Client Rec:%d\n%s\n",bytes_read,bufrec);
 					if ( bytes_read > 0 )

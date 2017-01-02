@@ -145,12 +145,13 @@ ICACHE_FLASH_ATTR void respOk(int conn)
 
 ICACHE_FLASH_ATTR void setVolume(char* vol) {
 		struct device_settings *device;
+		uint8_t uvol = atoi(vol);
 		device = getDeviceSettings();
 		if(vol) {
 //			printf("setVol: \"%s\"\n",vol);
-			VS1053_SetVolume(atoi(vol));
+			VS1053_SetVolume(uvol);
 			if (device != NULL)
-				if (device->vol != (atoi(vol))){ device->vol = (atoi(vol));saveDeviceSettings(device);}
+				if (device->vol != (uvol)){ device->vol = uvol;saveDeviceSettings(device);}
 		}
 		if (device != NULL) infree(device);			
 }
@@ -186,38 +187,38 @@ ICACHE_FLASH_ATTR void wakeCallback(void *pArg) {
 
 ICACHE_FLASH_ATTR void startSleep(uint32_t delay)
 {
-	printf("Delay:%d\n",delay);
+//	printf("Delay:%d\n",delay);
 	if (delay == 0) return;
 	sleepDelay = delay*60; // minutes to seconds
 	os_timer_disarm(&sleepTimer);
 	os_timer_arm(&sleepTimer, 1000, true); // 1 second and rearm	
 }
 ICACHE_FLASH_ATTR void stopSleep(){
-	printf("stopDelayDelay\n");
+//	printf("stopDelayDelay\n");
 	os_timer_disarm(&sleepTimer);
 }
 ICACHE_FLASH_ATTR void startWake(uint32_t delay)
 {
-	printf("Wake Delay:%d\n",delay);
+//	printf("Wake Delay:%d\n",delay);
 	if (delay == 0) return;
 	wakeDelay = delay*60; // minutes to seconds
 	os_timer_disarm(&wakeTimer);
 	os_timer_arm(&wakeTimer, 1000, true); // 1 second and rearm	
 }
 ICACHE_FLASH_ATTR void stopWake(){
-	printf("stopDelayWake\n");
+//	printf("stopDelayWake\n");
 	os_timer_disarm(&wakeTimer);
 }
 
 // treat the received message of the websocket
 void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t length)
 {
-	char answer[17];
 	struct device_settings *device;
 	//wsvol
 //	printf("websocketHandle: %s\n",payload);
 	if (strstr(payload,"wsvol=")!= NULL)
 	{
+		char answer[17];
 		if (strstr(payload,"&") != NULL)
 			*strstr(payload,"&")=0;
 		else return;

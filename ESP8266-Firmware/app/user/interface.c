@@ -455,6 +455,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 	int i;
 	for(i=0;i<size;i++) tmp[i] = s[i];
 	tmp[size] = 0;
+//	printf("cmd=%s\n",tmp);
 	if(strcmp(tmp, "wifi.list") == 0) wifiScan();
 	else if(strcmp(tmp, "wifi.con") == 0) wifiConnectMem();
 	else if(startsWith("wifi.con", tmp)) wifiConnect(tmp);
@@ -473,7 +474,8 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 	else if(startsWith("cli.vol",tmp)) clientVol(tmp);
     else if(strcmp(tmp, "sys.erase") == 0) eeEraseAll();
     else if(strcmp(tmp, "sys.heap") == 0) heapSize();
-    else if(strcmp(tmp, "sys.upd") == 0) update_firmware();
+    else if(strcmp(tmp, "sys.boot") == 0) system_restart();
+    else if(strcmp(tmp,"sys.update") == 0) update_firmware();
     else if(startsWith("cli.i2s",tmp)) clientI2S(tmp);
     else if(startsWith("cli.uart",tmp)) clientUart(tmp);
 	else printInfo(tmp);

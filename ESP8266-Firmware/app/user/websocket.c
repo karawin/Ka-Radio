@@ -27,7 +27,7 @@ void *inwmalloc(size_t n)
 }	
 void inwfree(void *p,char* from)
 {
-	free(p);
+	if (p != NULL) free(p);
 //	printf ("ws free of %x,  from %s             Heap size: %d\n",p,from,xPortGetFreeHeapSize( ));
 } 
  

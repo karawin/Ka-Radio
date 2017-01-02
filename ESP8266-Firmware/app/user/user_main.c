@@ -50,7 +50,7 @@ void uartInterfaceTask(void *pvParameters) {
 	printf("watermark wsTask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
 */
 	int t = 0;
-	for(t = 0; t<64; t++) tmp[t] = 0;
+	for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
 	t = 0;
 	uart_rx_init();
 	printf("UART READY TO READ\n");
@@ -168,10 +168,8 @@ void uartInterfaceTask(void *pvParameters) {
 	VS1053_I2SRate(device->i2sspeed);
 	if (device->autostart ==1)
 	{	
-		char cur[10];
-		sprintf(cur,"%d",device->currentstation);
 		vTaskDelay(100); //1000 ms
-		playStation(cur);
+		playStationInt(device->currentstation);
 	}
 //
 	free(info);
@@ -192,7 +190,7 @@ void uartInterfaceTask(void *pvParameters) {
 				if((char)c == '\n') break;
 				tmp[t] = (char)c;
 				t++;
-				if(t == 64) t = 0;
+				if(t == sizeof(tmp)) t = 0;
 			}
 			switchCommand() ;  // hardware panel of command
 		}
@@ -200,8 +198,7 @@ void uartInterfaceTask(void *pvParameters) {
 //	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 //	printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 		
-//		for(t = 0; t<64; t++) tmp[t] = 0;
-		memset(tmp,0,64);
+		for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
 		t = 0;
 	}
 }
@@ -324,6 +321,7 @@ void user_init(void)
 //	REG_SET_BIT(0x3ff00014, BIT(0));
 //	system_update_cpu_freq(SYS_CPU_160MHZ);
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
+
 	xTaskHandle pxCreatedTask;
     Delay(300);
 	device = getDeviceSettings();
@@ -342,7 +340,6 @@ void user_init(void)
 	clientInit();
 //	VS1053_HW_init();
 	Delay(100);	
-	TCP_WND = 2 * TCP_MSS;
 
 	xTaskCreate(testtask, "t0", 80, NULL, 1, &pxCreatedTask); // DEBUG/TEST 80
 	printf("t0 task: %x\n",pxCreatedTask);
