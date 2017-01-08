@@ -32,9 +32,10 @@
 
 void uart_div_modify(int no, unsigned int freq);
 
-	struct station_config config;
-	int FlashOn = 5,FlashOff = 5;
-	sc_status status = 0;
+//	struct station_config config;
+int FlashOn = 5,FlashOff = 5;
+sc_status status = 0;
+	
 void cb(sc_status stat, void *pdata)
 {
 	printf("SmartConfig status received: %d\n",status);
@@ -44,7 +45,10 @@ void cb(sc_status stat, void *pdata)
 
 void uartInterfaceTask(void *pvParameters) {
 	char tmp[64];
-	bool conn = false;
+//	bool conn = false;
+	uint8 ap = 0;
+	int i = 0;	
+	uint8 maxap;
 	int uxHighWaterMark;
 /*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 	printf("watermark wsTask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
@@ -55,18 +59,25 @@ void uartInterfaceTask(void *pvParameters) {
 	uart_rx_init();
 	printf("UART READY TO READ\n");
 	
-	wifi_station_set_auto_connect(false);
-	wifi_station_set_hostname("WifiWebRadio");
-
+//-------------------------
+// AP Connection management
+//-------------------------
 	struct ip_info *info;
 	struct device_settings *device;
-	struct station_config *config;
+	struct station_config* config;
+	wifi_station_set_auto_connect(false);
+//	wifi_station_set_reconnect_policy(false);
+	wifi_station_set_hostname("WifiWebRadio");
+	wifi_station_ap_number_set(2); // only 	
+	
 	device = getDeviceSettings();
 	config = malloc(sizeof(struct station_config));
 	info = malloc(sizeof(struct ip_info));
 	wifi_get_ip_info(STATION_IF, info);
-	wifi_station_get_config_default(config);
-
+//	wifi_station_get_config_default(config);
+	if ((device->ssid[0] == 0xFF)&& (device->ssid2[0] == 0xFF) )  {eeEraseAll(); device = getDeviceSettings();} // force init of eeprom
+	
+	printf("AP1: %s, AP2: %s\n",device->ssid,device->ssid2);
 		
 	if ((strlen(device->ssid)==0)||(device->ssid[0]==0xff)/*||(device->ipAddr[0] ==0)*/) // first use
 	{
@@ -77,8 +88,8 @@ void uartInterfaceTask(void *pvParameters) {
 		IPADDR2_COPY(&device->ipAddr, &info->ip);
 		IPADDR2_COPY(&device->mask, &info->netmask);
 		IPADDR2_COPY(&device->gate, &info->gw);
-		strcpy(device->ssid,config->ssid);
-		strcpy(device->pass,config->password);
+//		strcpy(device->ssid,config->ssid);
+//		strcpy(device->pass,config->password);
 		device->dhcpEn = true;
 		wifi_set_ip_info(STATION_IF, info);
 		saveDeviceSettings(device);	
@@ -98,44 +109,43 @@ void uartInterfaceTask(void *pvParameters) {
 		wifi_station_dhcpc_stop();
 		wifi_set_ip_info(STATION_IF, info);
 	} 
+	
 	printf(" Station Ip: %d.%d.%d.%d\n",(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
-	printf("DHCP: 0x%x\nDevice: Ip: %d.%d.%d.%d\n",device->dhcpEn,device->ipAddr[0], device->ipAddr[1], device->ipAddr[2], device->ipAddr[3]);
-	int i = 0;	
-	printf("\nI: %d status: %d\n",i,wifi_station_get_connect_status());
-	wifi_station_set_reconnect_policy(false);
+
+//	printf("DHCP: 0x%x\n Device: Ip: %d.%d.%d.%d\n",device->dhcpEn,device->ipAddr[0], device->ipAddr[1], device->ipAddr[2], device->ipAddr[3]);
+//	printf("\nI: %d status: %d\n",i,wifi_station_get_connect_status());
+//	wifi_station_set_auto_connect(true);
+//	wifi_station_ap_change(ap);
 	wifi_station_connect();
-	while ((wifi_station_get_connect_status() != STATION_GOT_IP)&&(!conn))
+	i = 0;
+	while ((wifi_station_get_connect_status() != STATION_GOT_IP))
 	{	
-		printf("In I: %d status: %d\n",i,wifi_station_get_connect_status());
-			FlashOn = FlashOff = 40;
-//			while (wifi_station_get_connect_status() != STATION_GOT_IP) 
-			{	
-				vTaskDelay(100);// 100 ms
-//				if (i++ >= 20) break; // 2 seconds
-				i++;
-			}	
-			if (i >= 15)
+		printf("Trying %s,  I: %d status: %d\n",config->ssid,i,wifi_station_get_connect_status());
+		FlashOn = FlashOff = 40;
+
+		vTaskDelay(400);//  ms
+		if (( strlen(config->ssid) ==0)||  (wifi_station_get_connect_status() == STATION_WRONG_PASSWORD)||(wifi_station_get_connect_status() == STATION_CONNECT_FAIL)||(wifi_station_get_connect_status() == STATION_NO_AP_FOUND))
+		{ 
+			if ((strlen(device->ssid2) > 0)&& (ap <1))
 			{
-/*				printf("Config not found\nTrying smartconfig\n");
-				FlashOn = FlashOff = 100;
-				smartconfig_set_type(SC_TYPE_ESPTOUCH);
-				smartconfig_start(cb);
-				printf("smartConfig started. Waiting for ios or android 'ESP8266 SmartConfig' application\n");
-				i = 0;
-				while (status != SC_STATUS_LINK) 
-				{	
-					vTaskDelay(10); //100 ms
-					if (i++ >= 100) break; // 100 seconds
-					printf(".");
-				}	
-				if (i >= 100)*/
-				{
+			strcpy(config->ssid,device->ssid2);
+			strcpy(config->password,device->pass2);
+			wifi_station_set_config(config);
+			printf(" Status: %d\n",wifi_station_get_connect_status());
+			ap++;
+			}
+			else i = 6;
+		}
+		i++;
+	
+		if (i >= 6)
+		{
 					printf("\n");
 //					smartconfig_stop();
 					FlashOn = 10;FlashOff = 200;
 					vTaskDelay(200);
-					printf("Config not found\n");
-					printf("\n");
+					printf("Config not found\n\n");
+					saveDeviceSettings(device);	
 					printf("The default AP is  WifiWebRadio. Connect your wifi to it.\nThen connect a webbrowser to 192.168.4.1 and go to Setting\n");
 					printf("Erase the database and set ssid, password and ip's field\n");
 					struct softap_config *apconfig;
@@ -145,23 +155,21 @@ void uartInterfaceTask(void *pvParameters) {
 					strcpy (apconfig->ssid,"WifiWebRadio");
 					apconfig->ssid_len = 12;					
 					wifi_softap_set_config(apconfig);
-					conn = true; 
+//					conn = true; 
 					free(apconfig);
 					break;
-				}
-//				else smartconfig_stop();
-			}// else {wifi_station_set_reconnect_policy(true);} // success
+		}//
 
 	}
 	wifi_station_set_reconnect_policy(true);
 	// update device info
 	wifi_get_ip_info(STATION_IF, info);
-	wifi_station_get_config(config);
+//	wifi_station_get_config(config);
 	IPADDR2_COPY(&device->ipAddr, &info->ip);
 	IPADDR2_COPY(&device->mask, &info->netmask);
 	IPADDR2_COPY(&device->gate, &info->gw);
-	strcpy(device->ssid,config->ssid);
-	strcpy(device->pass,config->password);
+//	strcpy(device->ssid,config->ssid);
+//	strcpy(device->pass,config->password);
 	saveDeviceSettings(device);			
 //autostart	
 	printf("autostart: playing:%d, currentstation:%d\n",device->autostart,device->currentstation);

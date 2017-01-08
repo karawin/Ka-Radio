@@ -41,6 +41,7 @@ char clientURL[256]= {0,0};
 char clientPath[256] = {0,0};
 uint16_t clientPort = 80;
 
+
 struct hostent *server = NULL;
 
 
@@ -193,14 +194,12 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 		t = strstr(t,"StreamTitle='");
 		if (t!= NULL) {t += 13;found = true;} else t = s;
 		len = strlen(t);
-//		printf("Len= %d t= %s\n",len,t);
 		if ((t_end != NULL)&&(len >=3)) t_end -= 3;
 		else {
 			if (t_end != NULL) t_end -=1;
 			else
 			if (len >=2) {t_end = t+len-2;found = true;} 
 			else t_end = t+len;
-//			printf("Len5= %d t= %s\n",len,t);
 		}
 		if (found)
 		{	
@@ -228,12 +227,15 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 			(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\r')||
 		(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\n')
 		)
+		{
 			header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] = 0; // avoid blank at end
+		}	
+
 // send station name if no metadata
 		if (strlen(header.members.mArr[METADATA])!=0)			
 			t_end = header.members.mArr[METADATA];
 		else	
-			t_end = header.members.single.name;
+			t_end = (header.members.single.name ==NULL)?"":header.members.single.name;
 		char* title = incmalloc(strlen(t_end)+15);
 		if (title != NULL)
 		{
@@ -241,7 +243,6 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 			websocketbroadcast(title, strlen(title));
 			incfree(title,"title");
 		} else printf("clientsaveMeta malloc title fails\n"); 
-	
 }	
 
 // websocket: next station
@@ -443,11 +444,11 @@ ICACHE_FLASH_ATTR void clientSetPort(uint16_t port)
 	printf("##CLI.PORTSET#: %d\n",port);
 }
 
+
 ICACHE_FLASH_ATTR void clientConnect()
 {
 	cstatus = C_HEADER;
 	once = 0;
-//	if(server != NULL) {incfree(server,"server");server = NULL;}
 	if((server = (struct hostent*)gethostbyname(clientURL))) {
 		xSemaphoreGive(sConnect);
 	} else {
@@ -458,7 +459,6 @@ ICACHE_FLASH_ATTR void clientConnectOnce()
 {
 	cstatus = C_HEADER;
 	once = 1; // play one time
-//	if(server != NULL) {incfree(server,"server1");server = NULL;}
 	if((server = (struct hostent*)gethostbyname(clientURL))) {
 		xSemaphoreGive(sConnect);
 	} else {
@@ -761,10 +761,12 @@ int jj = 0;
 			if (len >0) bufferWrite(pdata+rest, len);	
 		}
 // ---------------			
-	if ((!playing )&& (getBufferFree() < (BUFFER_SIZE/2))) {
+	if ((!playing )&& ((getBufferFree() < (BUFFER_SIZE/2)) ||(once ==1)) ) {
+			volume = VS1053_GetVolume();
+			VS1053_SetVolume(0);
 			playing=1;
-			if (once == 0)vTaskDelay(20);
-			if (VS1053_GetVolume()==0) VS1053_SetVolume(volume);
+			if (once == 0)vTaskDelay(30);
+			VS1053_SetVolume(volume);
 			printf("##CLI.PLAYING#\n");
 		}	
     }
@@ -858,6 +860,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				char *t0 = strstr(clientPath, ".m3u");
 				if (t0 == NULL)  t0 = strstr(clientPath, ".pls");
 				if (t0 == NULL)  t0 = strstr(clientPath, ".xspf");				
+				if (t0 == NULL)  t0 = strstr(clientPath, ".m3u8");				
 				if (t0 != NULL)  // a playlist asked
 				{
 				  cstatus = C_PLAYLIST;
@@ -868,8 +871,8 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 //					if ((strcmp(clientPath,"/") ==0)&&(cstatus != C_HEADER0)) clientSetPath("/;");
 					if (strcmp(clientURL,"stream.pcradio.biz") ==0) strcpy(useragent,"pcradio");
 					sprintf(bufrec, "GET %s HTTP/1.1\r\nHost: %s\r\nicy-metadata: 1\r\nUser-Agent: %s\r\n\r\n", clientPath,clientURL,useragent); 
-//printf("st:%d, Client Sent:\n%s\n",cstatus,bufrec);
 				}
+//printf("st:%d, Client Sent:\n%s\n",cstatus,bufrec);
 				send(sockfd, bufrec, strlen(bufrec), 0);								
 				xSemaphoreTake(sConnected, 0);
 ///// set timeout
@@ -888,7 +891,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				do
 				{
 					bytes_read = recvfrom(sockfd, bufrec,RECEIVE, 0, NULL, NULL);						
-printf("  %d  ", bytes_read);
+//printf("  %d  ", bytes_read);
 //if (bytes_read < 1000 )  
 //printf(" Client Rec:%d\n%s\n",bytes_read,bufrec);
 					if ( bytes_read > 0 )
@@ -948,6 +951,8 @@ printf("  %d  ", bytes_read);
 				VS1053_SetVolume(0);
 				VS1053_flush_cancel(2);
 				playing = 0;
+				vTaskDelay(20);	
+				VS1053_SetVolume(volume);
 			}	
 
 			bufferReset();

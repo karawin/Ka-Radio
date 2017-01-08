@@ -239,7 +239,8 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	vsVersion = (MP3Status >> 4) & 0x000F; //Mask out only the four version bits
 	
    if (vsVersion == 4) // only 1053  	
-		VS1053_WriteRegister(SPI_CLOCKF,0x90,0x00); // enable SC_ADD
+//		VS1053_WriteRegister(SPI_CLOCKF,0x78,0x00); // SC_MULT = x3, SC_ADD= x2
+		VS1053_WriteRegister(SPI_CLOCKF,0x90,0x00); // SC_MULT = x3.5, SC_ADD= x1.5
 	else	
 		VS1053_WriteRegister(SPI_CLOCKF,0xb0,0x00);
 	

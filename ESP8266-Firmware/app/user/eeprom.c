@@ -13,7 +13,7 @@
 #define NBSTATIONS		192*/
 #define EEPROM_OLDSTART	0x3F0000 // Last 64k of flash (32Mbits or 4 MBytes)
 #define EEPROM_START	0x3E0000 // Last 128k of flash (32Mbits or 4 MBytes)
-#define EEPROM1_START	0x3D0000 // Last 128k of flash (32Mbits or 4 MBytes)
+#define EEPROM_START1	0x3D0000 // Last 128k of flash (32Mbits or 4 MBytes)
 #define EEPROM_SIZE		0xFFFF	 // until xffff , 
 #define NBOLDSTATIONS	192
 #define NBSTATIONS		255
@@ -86,15 +86,19 @@ uint32_t* eebuf= malloc(4096);
 }
 
 
-
-
-ICACHE_FLASH_ATTR void eeGetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
+ICACHE_FLASH_ATTR void eeGetDatax(uint32_t eeprom, int address, void* buffer, int size) { // address, size in BYTES !!!!
 int result;
-	result = spi_flash_read(EEPROM_START + address, (uint32 *)buffer, size);
-
+	result = spi_flash_read(eeprom + address, (uint32 *)buffer, size);
 }
 
-ICACHE_FLASH_ATTR void eeSetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
+ICACHE_FLASH_ATTR void eeGetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
+	eeGetDatax(EEPROM_START,address,buffer,size);
+}
+ICACHE_FLASH_ATTR void eeGetData1(int address, void* buffer, int size) { // address, size in BYTES !!!!
+	eeGetDatax(EEPROM_START1,address,buffer,size);
+}
+
+ICACHE_FLASH_ATTR void eeSetDatax(uint32_t eeprom,int address, void* buffer, int size) { // address, size in BYTES !!!!
 	uint8_t* inbuf = buffer;
 int result;
 uint32_t* eebuf= malloc(4096);
@@ -109,7 +113,7 @@ int i = 0;
 	if (eebuf != NULL)
 	{
 	while(1) {
-		uint32_t sector = (EEPROM_START + address) & 0xFFF000;
+		uint32_t sector = (eeprom + address) & 0xFFF000;
 		spi_flash_read(sector, (uint32 *)eebuf, 4096);
 		spi_flash_erase_sector(sector >> 12);
 		
@@ -129,6 +133,14 @@ int i = 0;
 	free (eebuf);
 	} else printf("eebuf malloc fails\n");
 }
+
+ICACHE_FLASH_ATTR void eeSetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
+	eeSetDatax(EEPROM_START, address, buffer, size);
+}
+ICACHE_FLASH_ATTR void eeSetData1(int address, void* buffer, int size) { // address, size in BYTES !!!!
+	eeSetDatax(EEPROM_START1, address, buffer, size);
+}
+
 ICACHE_FLASH_ATTR void eeSetClear(int address,uint8_t* eebuf) { // address, size in BYTES !!!!
 		int i;
 		uint32_t sector = (EEPROM_START + address) & 0xFFF000;
@@ -138,9 +150,19 @@ ICACHE_FLASH_ATTR void eeSetClear(int address,uint8_t* eebuf) { // address, size
 		free (eebuf);
 }
 
+ICACHE_FLASH_ATTR void eeSetClear1(int address,uint8_t* eebuf) { // address, size in BYTES !!!!
+		int i;
+		uint32_t sector = (EEPROM_START1 + address) & 0xFFF000;
+		spi_flash_erase_sector(sector >> 12);
+		for(i=0; i<4096; i++) eebuf[i] = 0;	
+		spi_flash_write(sector, (uint32 *)eebuf, 4096);
+		free (eebuf);
+}
+
 ICACHE_FLASH_ATTR void eeEraseAll() {
 uint8_t* buffer= malloc(4096);
 int i = 0;
+//	printf("erase All\n");
 	while (buffer == NULL) 
 	{
 		vTaskDelay(10); 
@@ -151,9 +173,12 @@ int i = 0;
 	{
 		for(i=0; i<4096; i++) buffer[i] = 0;			
 		for(i=0; i<EEPROM_SIZE; i+=4096) {
+//			printf("erase from %x \n",i);
 			eeSetClear(i,buffer);
+//			eeSetClear1(i,buffer);
 			vTaskDelay(1); // avoid watchdog
 		}
+		printf("erase All done\n");
 	}
 }
 ICACHE_FLASH_ATTR void eeEraseStations() {
@@ -169,7 +194,7 @@ ICACHE_FLASH_ATTR void eeEraseStations() {
 	if (buffer != NULL) 
 	{
 		for(i=0; i<4096; i++) buffer[i] = 0;		
-		eeSetData(256, buffer, 256*15);
+		eeSetData(256, buffer, 256*15); // 0xF00
 
 		for (i=1;i<16;i++)
 		{
@@ -180,6 +205,7 @@ ICACHE_FLASH_ATTR void eeEraseStations() {
 		free(buffer);
 	} else printf("eeEraseStations malloc fails\n");
 }
+
 ICACHE_FLASH_ATTR void saveStation(struct shoutcast_info *station, uint16_t position) {
 	if (position > NBSTATIONS-1) {printf("saveStation fails position=%d\n",position); return;}
 	eeSetData((position+1)*256, station, 256);

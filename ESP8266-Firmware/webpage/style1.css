@@ -276,7 +276,7 @@ border:1px solid #444;
 	height:25px;
 	color: #f8f8f8;
 	background: #554;
-	border:1px solid #444;
+	border:1px solid #994;
 	border-radius:5px
 }
 .tabs input[type="button"]:hover {
@@ -288,7 +288,7 @@ border:1px solid #444;
 	height:25px;
 	color: #f8f8f8;
 	background: #554;
-	border:1px solid #444;
+	border:1px solid #994;
 	border-radius:5px
 }
 .tabs [id^="sw"] nput[type="button"]:hover {
@@ -300,7 +300,7 @@ border:1px solid #444;
 	height:30px; 
 	color: #f8f8f8;
 	background: #554;
-	border:1px solid #444;
+	border:1px solid #994;
 	border-radius:5px
 }
 .tabs span input[type="button"]:hover {

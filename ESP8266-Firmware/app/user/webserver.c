@@ -11,6 +11,7 @@ LOCAL os_timer_t sleepTimer;
 uint32_t sleepDelay;
 LOCAL os_timer_t wakeTimer;
 uint32_t wakeDelay;
+int8_t clientOvol = 0;
 
 void *inmalloc(size_t n)
 {
@@ -143,15 +144,37 @@ ICACHE_FLASH_ATTR void respOk(int conn)
 		write(conn, resp, strlen(resp));
 }
 
+ICACHE_FLASH_ATTR void clientSetOvol(int8_t ovol)
+{
+	clientOvol = ovol;
+	printf("##CLI.OVOLSET#: %d\n",ovol);
+}
+
+ICACHE_FLASH_ATTR void setOffsetVolume(void) {
+		struct device_settings *device;
+		device = getDeviceSettings();
+		int16_t uvol;
+		uvol = device->vol+clientOvol;
+		if (uvol > 254) uvol = 254;
+		if (uvol <=0) uvol = 1;
+//			printf("setOffsetVol: %d\n",clientOvol);
+			VS1053_SetVolume(uvol);
+		infree(device);			
+}
+
 ICACHE_FLASH_ATTR void setVolume(char* vol) {
 		struct device_settings *device;
-		uint8_t uvol = atoi(vol);
+		uint8_t ivol = atoi(vol);
+		int16_t uvol = atoi(vol);
+		uvol += clientOvol;
+		if (uvol > 254) uvol = 254;
+		if (uvol <=0) uvol = 1;
 		device = getDeviceSettings();
 		if(vol) {
-//			printf("setVol: \"%s\"\n",vol);
+//			printf("setVol: \"%s + %d\"\n",vol,clientOvol);
 			VS1053_SetVolume(uvol);
 			if (device != NULL)
-				if (device->vol != (uvol)){ device->vol = uvol;saveDeviceSettings(device);}
+				if (device->vol != (ivol)){ device->vol = ivol;saveDeviceSettings(device);}
 		}
 		if (device != NULL) infree(device);			
 }
@@ -268,7 +291,9 @@ ICACHE_FLASH_ATTR void playStationInt(int sid) {
 			clientSetURL(si->domain);
 			clientSetPath(si->file);
 			clientSetPort(si->port);
+			clientSetOvol(si->ovol);
 			clientConnect();
+			setOffsetVolume();
 			for (i = 0;i<100;i++)
 			{
 				if (clientIsConnected()) break;
@@ -337,7 +362,9 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				clientSetURL(url);
 				clientSetPath(path);
 				clientSetPort(atoi(port));
+				clientSetOvol(0);
 				clientConnectOnce();
+				setOffsetVolume();
 				for (i = 0;i<100;i++)
 				{
 					if (clientIsConnected()) break;
@@ -409,8 +436,8 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 					if (strlen(si->domain) > sizeof(si->domain)) si->domain[sizeof(si->domain)-1] = 0; //truncate if any (rom crash)
 					if (strlen(si->file) > sizeof(si->file)) si->file[sizeof(si->file)-1] = 0; //truncate if any (rom crash)
 					if (strlen(si->name) > sizeof(si->name)) si->name[sizeof(si->name)-1] = 0; //truncate if any (rom crash)
-					sprintf(ibuf, "%d", si->port);
-					int json_length = strlen(si->domain) + strlen(si->file) + strlen(si->name) + strlen(ibuf) + 40;
+					sprintf(ibuf, "%d%d", si->ovol,si->port);
+					int json_length = strlen(si->domain) + strlen(si->file) + strlen(si->name) + strlen(ibuf) + 50;
 					buf = inmalloc(json_length + 75);
 					if (buf == NULL)
 					{	
@@ -419,8 +446,9 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 					}
 					else {				
 						for(i = 0; i<sizeof(buf); i++) buf[i] = 0;
-						sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: %d\r\n\r\n{\"Name\":\"%s\",\"URL\":\"%s\",\"File\":\"%s\",\"Port\":\"%d\"}",
-						json_length, si->name, si->domain, si->file, si->port);
+						sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: %d\r\n\r\n{\"Name\":\"%s\",\"URL\":\"%s\",\"File\":\"%s\",\"Port\":\"%d\",\"ovol\":\"%d\"}",
+						json_length, si->name, si->domain, si->file,si->port,si->ovol);
+//				printf("getStation Buf len:%d : %s\n",strlen(buf),buf);						
 						write(conn, buf, strlen(buf));
 						infree(buf);
 					}
@@ -440,7 +468,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			if (nb) {unb = atoi(nb); infree(nb);}
 			else unb = 1;
 //			printf("unb init:%d\n",unb);
-			char* id; char* url; char* file; char* name; char* port;
+			char* id; char* url; char* file; char* name; char* port; char* ovol;
 			struct shoutcast_info *si =  inmalloc(sizeof(struct shoutcast_info)*unb);
 			struct shoutcast_info *nsi ;
 			if (si == NULL) {
@@ -461,22 +489,25 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				pathParse(file);
 				name = getParameterFromResponse("name=", data, data_size);
 				port = getParameterFromResponse("port=", data, data_size);
+				ovol = getParameterFromResponse("ovol=", data, data_size);
 //				printf("nb:%d,si:%x,nsi:%x,id:%s,url:%s,file:%s\n",i,si,nsi,id,url,file);
 				if(id ) {
 					if (i == 0) uid = atoi(id);
 					if ((atoi(id) >=0) && (atoi(id) < 255))
 					{	
 						if(url && file && name && port) {
-//							if (strlen(url) > sizeof(nsi->domain)) url[sizeof(nsi->domain)-1] = 0; //truncate if any
+							if (strlen(url) > sizeof(nsi->domain)) url[sizeof(nsi->domain)-1] = 0; //truncate if any
 							strcpy(nsi->domain, url);
-//							if (strlen(file) > sizeof(nsi->file)) url[sizeof(nsi->file)-1] = 0; //truncate if any
+							if (strlen(file) > sizeof(nsi->file)) url[sizeof(nsi->file)-1] = 0; //truncate if any
 							strcpy(nsi->file, file);
-//							if (strlen(name) > sizeof(nsi->name)) url[sizeof(nsi->name)-1] = 0; //truncate if any
+							if (strlen(name) > sizeof(nsi->name)) url[sizeof(nsi->name)-1] = 0; //truncate if any
 							strcpy(nsi->name, name);
+							nsi->ovol = (ovol==NULL)?0:atoi(ovol);
 							nsi->port = atoi(port);
 						}
 					} 					
 				} 
+				infree(ovol);
 				infree(port);
 				infree(name);
 				infree(file);
@@ -583,6 +614,8 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			if(valid != NULL) if (strcmp(valid,"1")==0) val = true;
 			char* ssid = getParameterFromResponse("ssid=", data, data_size);
 			char* pasw = getParameterFromResponse("pasw=", data, data_size);
+			char* ssid2 = getParameterFromResponse("ssid2=", data, data_size);
+			char* pasw2 = getParameterFromResponse("pasw2=", data, data_size);
 			char* aip = getParameterFromResponse("ip=", data, data_size);
 			char* amsk = getParameterFromResponse("msk=", data, data_size);
 			char* agw = getParameterFromResponse("gw=", data, data_size);
@@ -600,13 +633,17 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				if (adhcp!= NULL) if (strlen(adhcp)!=0) if (strcmp(adhcp,"true")==0)device->dhcpEn = 1; else device->dhcpEn = 0;
 				strcpy(device->ssid,(ssid==NULL)?"":ssid);
 				strcpy(device->pass,(pasw==NULL)?"":pasw);
+				strcpy(device->ssid2,(ssid2==NULL)?"":ssid2);
+				strcpy(device->pass2,(pasw2==NULL)?"":pasw2);				
 			}
 			strcpy(device->ua,(aua==NULL)?"":aua);
 			saveDeviceSettings(device);					
 			int json_length ;
-			json_length =64+ //56
+			json_length =86+ //64
 			strlen(device->ssid) +
 			strlen(device->pass) +
+			strlen(device->ssid2) +
+			strlen(device->pass2) +
 			strlen(device->ua)+
 			sprintf(tmpip,"%d.%d.%d.%d",device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3])+
 			sprintf(tmpmsk,"%d.%d.%d.%d",device->mask[0], device->mask[1],device->mask[2], device->mask[3])+
@@ -620,19 +657,20 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				respOk(conn);
 			}
 			else {				
-				sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\"}",
+				sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ssid2\":\"%s\",\"pasw2\":\"%s\",\"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\"}",
 				json_length,
-				device->ssid,device->pass,tmpip,tmpmsk,tmpgw,device->ua,adhcp	);
-//				printf("wifi Buf: %s\n",buf);
+				device->ssid,device->pass,device->ssid2,device->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp	);
+//				printf("wifi Buf len:%d : %s\n",strlen(buf),buf);
 				write(conn, buf, strlen(buf));
 				infree(buf);
 			}
-			if (ssid) infree(ssid); if (pasw) infree(pasw); if (aip) infree(aip);if (amsk) infree(amsk);if (agw) infree(agw);if (aua) infree(aua);
-			if (valid) infree(valid);if (adhcp) infree(adhcp);
+			infree(ssid); infree(pasw);infree(ssid2); infree(pasw2);  
+			infree(aip);infree(amsk);infree(agw);infree(aua);
+			infree(valid); infree(adhcp);
 		}	
 		infree(device);
 		if (val){
-			vTaskDelay(200);		
+			vTaskDelay(400);		
 			system_restart_enhance(SYS_BOOT_NORMAL_BIN, system_get_userbin_addr());	
 		}	
 		return;
@@ -676,7 +714,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			pvParams->buf = pbuf;
 			pvParams->len = buflen;
 //			printf("GET websocket\n");
-			while (xTaskCreate( websocketTask,"t11",310,(void *) pvParams,4, &pxCreatedTask )!= pdPASS)  //310
+			while (xTaskCreate( websocketTask,"t11",320,(void *) pvParams,4, &pxCreatedTask )!= pdPASS)  //310
 			{
 				printf("ws xTaskCreate  failed. Retry\n");
 				vTaskDelay(100);

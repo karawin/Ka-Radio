@@ -65,16 +65,18 @@ function playMonitor($arr){
 	{
 		monitor = document.getElementById("audio");	
 		if (urlmonitor.endsWith("/"))
-			monitor.src = urlmonitor+";";
-		else monitor.src = urlmonitor;	
+			var src = urlmonitor+ ";";
+		else 	src = urlmonitor;
+		monitor.src = src;
 		monitor.play();
 	}
 }	
 function mplay(){
 	monitor = document.getElementById("audio");
 	if (urlmonitor.endsWith("/"))
-		monitor.src = urlmonitor+";";
-	else monitor.src = urlmonitor;
+		var src = urlmonitor + ";";
+	else 	src = urlmonitor;
+	monitor.src = src;
 	monitor.volume = document.getElementById("volm_range").value / 100;
 	while (monitor.networkState == 2);
 	monitor.play();
@@ -373,6 +375,19 @@ function theme(){
 	window.location.reload(true); // force reload from the server
 }
 
+function resetEQ() {
+	document.getElementById('treble_range').value = 0;
+	onRangeChange('treble_range', 'treble_span', 1.5, false);
+	document.getElementById('bass_range').value = 0;	
+	onRangeChange('bass_range', 'bass_span', 1, false);
+	document.getElementById('treblefreq_range').value = 1;
+	onRangeChangeFreqTreble('treblefreq_range', 'treblefreq_span', 1, false);
+	document.getElementById('bassfreq_range').value = 2;
+	onRangeChangeFreqBass('bassfreq_range', 'bassfreq_span', 10, false);
+	document.getElementById('spacial_range').value = 0;
+	onRangeChangeSpatial('spacial_range', 'spacial_span');
+}
+
 function onRangeChange($range, $spanid, $mul, $rotate, $nosave) {
 	var val = document.getElementById($range).value;
 	if($rotate) val = document.getElementById($range).max - val;
@@ -432,6 +447,8 @@ function wifi(valid) {
 			var arr = JSON.parse(xhr.responseText);
 			document.getElementById('ssid').value = arr["ssid"];
 			document.getElementById('passwd').value = arr["pasw"];
+			document.getElementById('ssid2').value = arr["ssid2"];
+			document.getElementById('passwd2').value = arr["pasw2"];
 			document.getElementById('ip').value = arr["ip"];
 			chkip(document.getElementById('ip'));
 			document.getElementById('mask').value = arr["msk"];
@@ -448,7 +465,7 @@ function wifi(valid) {
 	}
 	xhr.open("POST","wifi",false);
 	xhr.setRequestHeader(content,ctype);
-	xhr.send("valid=" + valid +"&ssid=" + document.getElementById('ssid').value + "&pasw=" + document.getElementById('passwd').value + "&ip=" + document.getElementById('ip').value+"&msk=" + document.getElementById('mask').value+"&gw=" + document.getElementById('gw').value+"&ua=" + document.getElementById('ua').value+"&dhcp=" + document.getElementById('dhcp').checked+"&");
+	xhr.send("valid=" + valid +"&ssid=" + document.getElementById('ssid').value + "&pasw=" + document.getElementById('passwd').value +"&ssid2=" + document.getElementById('ssid2').value + "&pasw2=" + document.getElementById('passwd2').value + "&ip=" + document.getElementById('ip').value+"&msk=" + document.getElementById('mask').value+"&gw=" + document.getElementById('gw').value+"&ua=" + document.getElementById('ua').value+"&dhcp=" + document.getElementById('dhcp').checked+"&");
 }
 function instantPlay() {
 	var curl;
@@ -550,8 +567,8 @@ function saveStation() {
 		xhr = new XMLHttpRequest();
 		xhr.open("POST","setStation",false);
 		xhr.setRequestHeader(content,ctype);
-		xhr.send("nb=" + 1+"&id=" + document.getElementById('add_slot').value + "&url=" + url + "&name=" + document.getElementById('add_name').value + "&file=" + jfile + "&port=" + document.getElementById('add_port').value+"&&");
-		localStorage.setItem(document.getElementById('add_slot').value,"{\"Name\":\""+document.getElementById('add_name').value+"\",\"URL\":\""+url+"\",\"File\":\""+file+"\",\"Port\":\""+document.getElementById('add_port').value+"\"}");
+		xhr.send("nb=" + 1+"&id=" + document.getElementById('add_slot').value + "&url=" + url + "&name=" + document.getElementById('add_name').value + "&file=" + jfile + "&ovol=" + document.getElementById('ovol').value+"&port=" + document.getElementById('add_port').value+"&&");
+		localStorage.setItem(document.getElementById('add_slot').value,"{\"Name\":\""+document.getElementById('add_name').value+"\",\"URL\":\""+url+"\",\"File\":\""+file+"\",\"Port\":\""+document.getElementById('add_port').value+"\",\"ovol\":\""+document.getElementById('ovol').value+"\"}");
 	} catch(e){console.log("error save "+e);}
 	abortStation(); // to erase the edit field
 	loadStations();
@@ -563,6 +580,7 @@ function abortStation() {
 }
 function editStation(id) {
 	var arr; 
+//	if (stchanged) stChanged();
 	function cpedit(arr) {
 			document.getElementById('add_url').value = arr["URL"];
 			document.getElementById('add_name').value = arr["Name"];
@@ -570,6 +588,7 @@ function editStation(id) {
 			if (arr["Port"] == "0") arr["Port"] = "80";
 			document.getElementById('add_port').value = arr["Port"];
 			document.getElementById('editStationDiv').style.display = "block";
+			document.getElementById('ovol').value = arr["ovol"];
 			setMainHeight("tab-content2");
 	}
 	document.getElementById('add_slot').value = id;
@@ -603,10 +622,11 @@ function refreshList() {
 	intervalid =window.setTimeout(refreshListtemp, 2);
 }
 function refreshListtemp() {
-	
+	if (stchanged) stChanged();
 	localStorage.clear();
 	loadStationsList(maxStation);
-//	window.location.reload(false);
+	loadStations();
+
 	promptworking("");
 	refresh();
 }
@@ -672,7 +692,7 @@ function checkversion()
 	checkhistory();
 }
 
-// refresh the stations list by reading in the webradio
+// refresh the stations list by reading a file
 function downloadStations()
 {
 	var i,indmax,tosend,arr,reader,lines,line,file;
@@ -684,8 +704,9 @@ function downloadStations()
 		}
 		reader.onload = function(e){
 			function fillInfo(ind,arri){
+				if (!arri["ovol"]) arri["ovol"]= "0";
 				tosend = tosend+"&id="+ind + "&url="+arri["URL"] +"&name="+ arri["Name"]+ "&file="+arri["File"] + "&port=" + arri["Port"]+"&";
-				localStorage.setItem(ind,"{\"Name\":\""+arri["Name"]+"\",\"URL\":\""+arri["URL"] +"\",\"File\":\""+arri["File"]+"\",\"Port\":\""+arri["Port"]+"\"}");
+				localStorage.setItem(ind,"{\"Name\":\""+arri["Name"]+"\",\"URL\":\""+arri["URL"] +"\",\"File\":\""+arri["File"]+"\",\"Port\":\""+arri["Port"] +"\",\"ovol\":\""+arri["ovol"]  +"\"}");
 			}	
 			// Entire file
 			//console.log(this.result);
@@ -746,7 +767,8 @@ function moveNodes(a, b){
 	for (txt=0;txt<maxStation;txt++)
 	{
 		pa1.rows[txt].cells[0].innerText = txt.toString();
-		pa1.rows[txt].cells[5].innerHTML = "<a href=\"#\" onClick=\"editStation("+ txt.toString()+")\">Edit</a>";
+//		pa1.rows[txt].cells[6].innerHTML = "<a href=\"#\" onClick=\"editStation("+ txt.toString()+")\">Edit</a>";
+		pa1.rows[txt].cells[6].innerHTML = b.parentNode.rows[txt].cells[6].innerHTML ;
 	}
 	stchanged = true;
 	document.getElementById("stsave").disabled = false;
@@ -769,8 +791,9 @@ function stChanged()
 				url=tbody.rows[ind].cells[2].innerText;
 				file=tbody.rows[ind].cells[3].innerText;
 				port= tbody.rows[ind].cells[4].innerText;
-				localStorage.setItem(id,"{\"Name\":\""+name+"\",\"URL\":\""+url +"\",\"File\":\""+file+"\",\"Port\":\""+port+"\"}");
-				tosend = tosend+"&id="+id + "&url="+ url+"&name="+ name+ "&file="+file + "&port=" +port+"&";
+				ovol = tbody.rows[ind].cells[5].innerText;
+				localStorage.setItem(id,"{\"Name\":\""+name+"\",\"URL\":\""+url +"\",\"File\":\""+file+"\",\"Port\":\""+port+"\",\"ovol\":\""+ovol+"\"}");
+				tosend = tosend+"&id="+id + "&url="+ url+"&name="+ name+ "&file="+file + "&port=" +port+"&ovol=" +ovol+"&";
 	}
 	promptworking("Working.. Please Wait"); // some time to display promptworking
 	if (stchanged && confirm("The list is modified. Do you want to save the modified list?"))

@@ -64,7 +64,7 @@ void switchCommand() {
 		}		
 		if (!inside)
 		{	
-			if (adc < 200) // stop
+			if (adc < 220) // stop
 			{
 				inside = true;
 				clientDisconnect();
@@ -168,7 +168,7 @@ ICACHE_FLASH_ATTR void wifiConnect(char* cmd)
 
 	if( wifi_station_connect() ) {
 		struct device_settings* devset = getDeviceSettings();
-		for(i = 0; i < 64; i++) devset->ssid[i] = 0;
+		for(i = 0; i < 32; i++) devset->ssid[i] = 0;
 		for(i = 0; i < 64; i++) devset->pass[i] = 0;
 		for(i = 0; i < strlen(cfg->ssid); i++) devset->ssid[i] = cfg->ssid[i];
 		for(i = 0; i < strlen(cfg->password); i++) devset->pass[i] = cfg->password[i];

@@ -15,9 +15,9 @@
 		<div id="MAIN">
 				<div class="LEFT"><img title="Click on the logo to change the theme" onClick= "theme()" src="logo.png"></div>
 				<div class="RIGHT">
-				<a href="https://github.com/karawin/Ka-Radio" target="_blank">KaraWin</a><br/>
-				<a href="https://github.com/PiotrSperka/ESP8266-WebRadio" target="_blank">PiotrSperka</a><br/>
-				<a href="https://github.com/karawin/ESP8266-WebRadio" target="_blank">V1.1.3</a>
+				<a href="https://github.com/karawin/Ka-Radio" target="_blank">V1.1.4</a><br/>
+				<a href="http://www.karawin.fr" target="_blank" >By KaraWin</a><br/>
+				<a href="https://github.com/PiotrSperka/ESP8266-WebRadio" style="font-size:8px" target="_blank">From PiotrSperka</a>
 				</div>
 			<div id="HEAD">
 			<span class="bold4"><span id="meta">Karadio</span></span>
@@ -56,7 +56,7 @@
 					<input type="button" value="Stop"  onClick="mstop()"></p><p>
                     <span class="bold2">Volume</span><br/>
 					<input type="range" id="volm_range" name="volm"  onChange="mvol(this.value/100)" min=0 max=100 style="height:25px;" ></p></br>
-					<audio  volume="1"  id="audio" src=""  onerror="monerror()">
+					<audio  volume="1"  id="audio" src=""  class="audio_sound" onerror="monerror()">
 						I'm sorry; your browser doesn't support HTML5 <code>audio</code>.
 					</audio>
 				 
@@ -93,7 +93,8 @@
 									<span class="bold">Name: </span><input type="text" id="add_name" name="name"><br>
 									<span class="bold">URL: </span><input type="text" id="add_url" name="url"><br>
 									<span class="bold">Port: </span><input type="text" id="add_port" name="port" value="80"><br>
-									<span class="bold">Path: </span><input type="text" id="add_path" name="path" value="/"><br><br>
+									<span class="bold">Path: </span><input type="text" id="add_path" name="path" value="/"><br>
+									<span class="bold">Volume offset: </span><input type="range" id="ovol" name="ovol"   min=-127 max=127 value=0><br><br>
 									<input type="button"  onClick="saveStation()" value="save">&nbsp;
 									<input type="button"  onClick="abortStation()" value="abort">
 								</p><hr> 
@@ -106,38 +107,18 @@
 						<br/>
 
 						<table id = "stationsTable" style="table-layout: fixed; width: 100%;">
-							<thead><tr><td style="width:8%">No.</td><td style="width:33%; ">Name</td><td style="width:20%">URL</td><td style="width:20%">File</td><td style="width:10%">Port</td><td style="width:9%"></td></tr></thead>
+							<thead><tr><td style="width:8%">No.</td><td style="width:30%; ">Name</td><td style="width:20%">URL</td><td style="width:20%">File</td><td style="width:8%">Port</td><td style="width:4%">Vol</td><td style="width:9%"></td></tr></thead>
 							<tbody>  							
 							</tbody>
 						</table>
-<!--						<form>
-						<span class="bold2">Select: </span>
-							<a class="page" href="#" onClick="loadStations(1);">1</a>
-							<a class="page" href="#" onClick="loadStations(2);">2</a>
-							<a class="page" href="#" onClick="loadStations(3);">3</a>
-							<a class="page" href="#" onClick="loadStations(4);">4</a>
-							<a class="page" href="#" onClick="loadStations(5);">5</a>
-							<a class="page" href="#" onClick="loadStations(6);">6</a>
-							<a class="page" href="#" onClick="loadStations(7);">7</a>
-							<a class="page" href="#" onClick="loadStations(8);">8</a>
-							<a class="page" href="#" onClick="loadStations(9);">9</a>
-							<a class="page" href="#" onClick="loadStations(10);">10</a>
-							<a class="page" href="#" onClick="loadStations(11);">11</a>
-							<a class="page" href="#" onClick="loadStations(12);">12</a>
-							<a class="page" href="#" onClick="loadStations(13);">13</a>
-							<a class="page" href="#" onClick="loadStations(14);">14</a>
-							<a class="page" href="#" onClick="loadStations(15);">15</a>
-							<a class="page" href="#" onClick="loadStations(16);">16</a>
-						
-						</form>
--->						
+		
 					</div>
 				</li>
 				<li>
 					<input type="radio" name="tabs" id="tab3" />
-					<label for="tab3">Settings</label>
+					<label for="tab3">Setting</label>
 					<div id="tab-content3" class="tab-content">
-					<h1>Sound</h1>
+					<h1>Sound Setting &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="Reset" onClick="resetEQ()"/></h1>
 						<p>
 						<span class="bold">Treble control: </span><input type="range" id="treble_range" name="treble"  onChange="onRangeChange('treble_range', 'treble_span', 1.5, false)" min=-8 max=7 > <span id="treble_span"></span><br>
 						<span class="bold">Treble frequency: </span><input type="range" id="treblefreq_range" name="treblefreq"  onChange="onRangeChangeFreqTreble('treblefreq_range', 'treblefreq_span', 1, false)" min=1 max=15 > <span id="treblefreq_span"></span><br>
@@ -147,44 +128,47 @@
 						<br/>
 						<span class="bold">Volume: </span><input type="range" id="vol_range" name="vol"  onChange="onRangeVolChange(this.value,true)" min=0 max=254 > <span id="vol_span"></span><br>
 						</p>
-					<h1>Stations</h1>
+					<h1>Stations Save & Restore</h1>
 						<p>
 						<input type="button"  onClick="saveTextAsFile()" value="Save Stations from WebRadio"> 
-						<span style="display:inline-block;">To 
+						<span style="display:inline-block;">To &nbsp;&nbsp;&nbsp;
 						<input type="text" style="width:300px;" value="WebStations.txt" id="filesave"></span>
 <!--						<a HREF="" download="WebStations.txt" id="downloadlink" style="display: none;">Download it</a>
  -->
 						<br/><br/>
-						<input type="button"   onClick="downloadStations()" value="Load Stations to WebRadio"> <span style="display:inline-block;">From 
-						<input type="file" style="width:300px;" id="fileload"></span><br/><br/>
+						<input type="button"   onClick="downloadStations()" value="Restore Stations to WebRadio"> <span style="display:inline-block;">From 
+						<input type="file" style="width:300px;" id="fileload"></span><br/>
 <!--						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list">
 						<input type="button" style="float:right;" id="clear" title="Warning: This will clear all stations.\n Be sure to save them before." onClick="clearList()"  value="Clear all stations"><br/>				
 						<br/>-->
 						</p>
-					<h1>Wifi & Network</h1>
+					<h1>Wifi & Network &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="Validate" onclick="valid()" /></h1>
 						<p>
 						<span class="bold">AP SSID:</span>
-						<input  id="ssid" type="text" />
+						<input  id="ssid" type="text" /> <input  id="ssid2" type="text" />
 						<br/>
 						<span class="bold"> AP PASSWORD:</span>
-						<input id="passwd" type="password"  />
-						<br/> <span class="bold"> Use DHCP:</span><input id="dhcp" type=checkbox onclick="clickdhcp()" /><br/>
+						<input id="passwd" type="password"  /> <input id="passwd2" type="password"  />
+						</p>
+						<p>
+						<span class="bold"> Use DHCP:</span><input id="dhcp" type=checkbox onclick="clickdhcp()" /><br/>
 						<span class="bold">Ip:</span>
 						<input  id="ip" type="text" oninput="chkip(this)" />
 						<br/>
 						<span class="bold">Mask:</span>
 						<input id="mask" type="text" oninput="chkip(this)" value="255.255.255.0" /><br/>
 						<span class="bold">Gateway:</span>
-						<input id="gw" type="text" oninput="chkip(this)" /><br/>
-						<input type="button" value="Validate" onclick="valid()" /><br/>						
+						<input id="gw" type="text" oninput="chkip(this)" />
+							</p>						
+					<h1>HTML Option &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="Validate" onclick="wifi(0)" /></h1>
+						<p>						
 						<span class="bold">User Agent:</span>
-						<input id="ua" type="text" value="Karadio/1.1" /><br/>
-						<input type="button" value="Validate" onclick="wifi(0)" /><br/>						
+						<input id="ua" type="text" value="Karadio/1.1" />						
 						</p>
 					<h1>Upgrade to:</h1>
 						<p>
 						<span class="bold4" id="Version"></span><br/>
-						<input type=button value="Upgrade now" onclick="upgrade()" /><br/>	<br/>		
+						<input type=button value="Upgrade now" onclick="upgrade()" /><br/>		
 						<span class="bold4" id="History"></span><br/><br/>	
 						</p>
 					</div>

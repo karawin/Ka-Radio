@@ -1,13 +1,22 @@
 #pragma once
 
 #include "c_types.h"
-
+struct device_settings_ext {
+	uint8_t dhcpEn2;
+	uint8_t ipAddr2[4];
+	uint8_t mask2[4];
+	uint8_t gate2[4];	
+	char ssid2[64]; 
+	uint8_t pass2[64];
+	uint8_t  futur[115];
+};
 struct device_settings {
 	uint8_t dhcpEn;
 	uint8_t ipAddr[4];
 	uint8_t mask[4];
 	uint8_t gate[4];
-	char ssid[64];
+	char ssid[32]; 
+	char ssid2[32]; 
 	char pass[64];
 	uint8_t vol;
 	int8_t treble;
@@ -21,17 +30,20 @@ struct device_settings {
 	uint32_t uartspeed; // serial baud
 	uint8_t theme;  // 0 ligth blue, 1 Dark brown
 	char ua[40]; // user agent
-	uint8_t future[60];
+	uint8_t pass2[60];
 };
 
 struct shoutcast_info {
 	char domain[73]; //url
 	char file[116];  //path
-	char name[65];
+	char name[64];
+	int8_t ovol; // offset volume
 	uint16_t port;	//port
 };
 
-
+struct shoutcast_info_ext {
+	uint8_t  futur[256];
+};	
 
 uint8_t eeGetByte(uint32_t address);
 void eeSetByte(uint32_t address, uint8_t data);

@@ -14,7 +14,7 @@
 #define ICY_HEADERS_COUNT 9
 #define ICY_HEADER_COUNT 10
 //2000 1440 1460
-#define RECEIVE 1420
+#define RECEIVE 1500
 extern uint16_t currentStation;
 
 struct icyHeader
@@ -52,6 +52,7 @@ void clientSetURL(char* url);
 void clientSetName(char* name,uint16_t index);
 void clientSetPath(char* path);
 void clientSetPort(uint16_t port);
+
 struct icyHeader* clientGetHeader();
 void clientConnect();
 void clientDisconnect();
