@@ -28,7 +28,7 @@
 				<input type="radio" name="tabs" id="tab1" checked />
 				<label for="tab1">Main</label>
 				<div id="tab-content1" class="tab-content">
-				<h1>Select stations &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" checked  id="aplay" onClick="autoplay()"/> AutoPlay</h1>
+				<h1>Select stations &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox"  id="aplay" onClick="autoplay()"/> AutoPlay</h1>
 					<p>
 					<select id="stationsSelect" onchange="Select()" >
 					</select></p>
@@ -94,7 +94,7 @@
 									<span class="bold">URL: </span><input type="text" id="add_url" name="url"><br>
 									<span class="bold">Port: </span><input type="text" id="add_port" name="port" value="80"><br>
 									<span class="bold">Path: </span><input type="text" id="add_path" name="path" value="/"><br>
-									<span class="bold">Volume offset: </span><input type="range" id="ovol" name="ovol"   min=-127 max=127 value=0><br><br>
+									<span class="bold">Volume offset: </span><input type="range" id="ovol" name="ovol" step=2  min=-126 max=126 value=0><br><br>
 									<input type="button"  onClick="saveStation()" value="save">&nbsp;
 									<input type="button"  onClick="abortStation()" value="abort">
 								</p><hr> 
@@ -151,6 +151,7 @@
 						<input id="passwd" type="password"  /> <input id="passwd2" type="password"  />
 						</p>
 						<p>
+						<span class="bold"> Mac Address:</span><span id="Mac"></span><br/>
 						<span class="bold"> Use DHCP:</span><input id="dhcp" type=checkbox onclick="clickdhcp()" /><br/>
 						<span class="bold">Ip:</span>
 						<input  id="ip" type="text" oninput="chkip(this)" />

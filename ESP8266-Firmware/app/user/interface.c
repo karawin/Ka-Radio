@@ -67,7 +67,7 @@ void switchCommand() {
 			if (adc < 220) // stop
 			{
 				inside = true;
-				clientDisconnect();
+				clientDisconnect("Adc Stop");
 			}
 			else if ((adc >278) && (adc < 380)) //start
 			{
@@ -257,6 +257,7 @@ ICACHE_FLASH_ATTR void clientParseUrl(char* s)
 ICACHE_FLASH_ATTR void clientParsePath(char* s)
 {
     char *t = strstr(s, "(\"");
+	printf("cli.path: %s\n",t);
 	if(t == 0)
 	{
 		printf("\n##CLI.CMD_ERROR#");
@@ -274,6 +275,7 @@ ICACHE_FLASH_ATTR void clientParsePath(char* s)
         uint8_t tmp;
         for(tmp=0; tmp<(t_end-t+1); tmp++) path[tmp] = 0;
         strncpy(path, t+2, (t_end-t));
+	printf("cli.path: %s\n",path);
         clientSetPath(path);
         free(path);
     }
@@ -455,7 +457,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 	int i;
 	for(i=0;i<size;i++) tmp[i] = s[i];
 	tmp[size] = 0;
-//	printf("cmd=%s\n",tmp);
+	printf("size: %d, cmd=%s\n",size,tmp);
 	if(strcmp(tmp, "wifi.list") == 0) wifiScan();
 	else if(strcmp(tmp, "wifi.con") == 0) wifiConnectMem();
 	else if(startsWith("wifi.con", tmp)) wifiConnect(tmp);
@@ -465,8 +467,8 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
     else if(startsWith("cli.url", tmp)) clientParseUrl(tmp);
     else if(startsWith("cli.path", tmp)) clientParsePath(tmp);
     else if(startsWith("cli.port", tmp)) clientParsePort(tmp);
-	else if(strcmp(tmp, "cli.start") == 0) {clientDisconnect();clientConnect();}
-    else if(strcmp(tmp, "cli.stop") == 0) clientDisconnect();
+	else if(strcmp(tmp, "cli.start") == 0) {clientDisconnect("cli start");clientConnectOnce();}
+    else if(strcmp(tmp, "cli.stop") == 0) clientDisconnect("cli stop");
     else if(startsWith("cli.list", tmp)) clientList(tmp);
     else if(strcmp(tmp, "cli.next") == 0) wsStationNext();
     else if(strncmp(tmp, "cli.previous",8) == 0) wsStationPrev();

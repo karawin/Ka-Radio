@@ -44,7 +44,7 @@ void cb(sc_status stat, void *pdata)
 }
 
 void uartInterfaceTask(void *pvParameters) {
-	char tmp[64];
+	char tmp[255];
 //	bool conn = false;
 	uint8 ap = 0;
 	int i = 0;	
@@ -76,7 +76,7 @@ void uartInterfaceTask(void *pvParameters) {
 	wifi_get_ip_info(STATION_IF, info);
 //	wifi_station_get_config_default(config);
 	if ((device->ssid[0] == 0xFF)&& (device->ssid2[0] == 0xFF) )  {eeEraseAll(); device = getDeviceSettings();} // force init of eeprom
-	
+	if (device->ssid2[0] == 0xFF) {device->ssid2[0] = 0; device->pass2[0] = 0; }
 	printf("AP1: %s, AP2: %s\n",device->ssid,device->ssid2);
 		
 	if ((strlen(device->ssid)==0)||(device->ssid[0]==0xff)/*||(device->ipAddr[0] ==0)*/) // first use
@@ -351,13 +351,13 @@ void user_init(void)
 
 	xTaskCreate(testtask, "t0", 80, NULL, 1, &pxCreatedTask); // DEBUG/TEST 80
 	printf("t0 task: %x\n",pxCreatedTask);
-	xTaskCreate(uartInterfaceTask, "t1", 244, NULL, 2, &pxCreatedTask); // 244
+	xTaskCreate(uartInterfaceTask, "t1", 294, NULL, 6, &pxCreatedTask); // 244
 	printf("t1 task: %x\n",pxCreatedTask);
-	xTaskCreate(vsTask, "t4", 370, NULL,5, &pxCreatedTask); //370
+	xTaskCreate(vsTask, "t4", 370, NULL,4, &pxCreatedTask); //370
 	printf("t4 task: %x\n",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 830, NULL, 6, &pxCreatedTask); // 830
+	xTaskCreate(clientTask, "t3", 830, NULL, 5, &pxCreatedTask); // 830
 	printf("t3 task: %x\n",pxCreatedTask);
-	xTaskCreate(serverTask, "t2", 230, NULL, 4, &pxCreatedTask); //230
+	xTaskCreate(serverTask, "t2", 230, NULL, 3, &pxCreatedTask); //230
 	printf("t2 task: %x\n",pxCreatedTask);
 
 }

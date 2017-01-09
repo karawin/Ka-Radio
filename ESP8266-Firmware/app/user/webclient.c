@@ -452,7 +452,7 @@ ICACHE_FLASH_ATTR void clientConnect()
 	if((server = (struct hostent*)gethostbyname(clientURL))) {
 		xSemaphoreGive(sConnect);
 	} else {
-		clientDisconnect();
+		clientDisconnect("clientConnect");
 	}
 }
 ICACHE_FLASH_ATTR void clientConnectOnce()
@@ -462,7 +462,7 @@ ICACHE_FLASH_ATTR void clientConnectOnce()
 	if((server = (struct hostent*)gethostbyname(clientURL))) {
 		xSemaphoreGive(sConnect);
 	} else {
-		clientDisconnect();
+		clientDisconnect("clientConnectOnce");
 	}
 }
 ICACHE_FLASH_ATTR void clientSilentConnect()
@@ -480,11 +480,11 @@ ICACHE_FLASH_ATTR void clientSilentDisconnect()
 	xSemaphoreGive(sDisconnect);
 }
 
-ICACHE_FLASH_ATTR void clientDisconnect()
+ICACHE_FLASH_ATTR void clientDisconnect(char* from)
 {
 	//connect = 0;
 	xSemaphoreGive(sDisconnect);
-	printf("##CLI.STOPPED#\n");
+	printf("##CLI.STOPPED# from %s\n",from);
 //	vTaskDelay(10);
 //	clearHeaders();
 }
@@ -514,7 +514,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 			clientSaveOneHeader("404 Not Found", 13,METANAME);
 			wsHeaders();
 			vTaskDelay(200);
-			clientDisconnect();
+			clientDisconnect("C_DATA");
 			cstatus = C_HEADER;
 			return;
 		}	
@@ -524,10 +524,10 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 	case C_PLAYLIST:
          if (!clientParsePlaylist(pdata)) //need more
 		  cstatus = C_PLAYLIST1;
-		else {clientDisconnect();  }
+		else {clientDisconnect("C_PLAYLIST");  }
     break;
 	case C_PLAYLIST1:
-       clientDisconnect();	   
+       clientDisconnect("C_PLAYLIST1");	   
         clientParsePlaylist(pdata) ;//more?
 		cstatus = C_PLAYLIST;
 	break;
@@ -541,7 +541,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 			if( strcmp(t1,"Found")||strcmp(t1,"Temporarily")||strcmp(t1,"Moved"))
 			{
 				printf("Header: Moved\n");
-				clientDisconnect();
+				clientDisconnect("C_HEADER");
 				clientParsePlaylist(pdata);
 				cstatus = C_PLAYLIST;				
 			}	
@@ -560,7 +560,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 						if (t2 != NULL)
 						{
 							printf("Internal Server Error\n");
-							clientDisconnect();
+							clientDisconnect("Internal Server Error");
 							cstatus = C_HEADER;
 							
 						}
@@ -645,7 +645,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 						else {
 							printf("0D not found\n");
 							printf("len:%d, inpdata:%x, pdata:%x,chunked:%d  cchunk:%d, lc:%d, str:%s\n",len,inpdata,pdata,chunked,cchunk, lc,inpdata+cchunk );
-							clientDisconnect(); clientConnect();
+							clientDisconnect("chunk"); clientConnect();
 							lc = 0; 
 							break;
 						}
@@ -812,7 +812,6 @@ IRAM_ATTR void vsTask(void *pvParams) {
 ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 //1440	for MTU 
 	struct timeval timeout; 
-    timeout.tv_sec = 10000; // bug *1000 for seconds
     timeout.tv_usec = 0;
 	int sockfd;
 	int bytes_read;
@@ -876,6 +875,11 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				send(sockfd, bufrec, strlen(bufrec), 0);								
 				xSemaphoreTake(sConnected, 0);
 ///// set timeout
+				if (once == 0)
+					timeout.tv_sec = 10000; // bug *1000 for seconds
+				else
+					timeout.tv_sec = 2000; // bug *1000 for seconds
+
 				if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
 					printf("setsockopt failed\n");
 //////				
@@ -912,7 +916,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			{				
 					if ((playing)&&(once == 0))  // try restart
 					{
-						clientDisconnect(); 
+						clientDisconnect("try restart"); 
 						clientConnect();
 						printf("##CLI.PLAYING#\n");
 					}	
@@ -926,7 +930,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 							while (getBufferFree() < (BUFFER_SIZE)) vTaskDelay(200);							
 							vTaskDelay(200);
 							playing=0;
-							clientDisconnect(); 
+							clientDisconnect("data not played"); 
 						}	
 						//						
 						else{  // nothing received
@@ -937,7 +941,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 					else{  //playing once and no more received stream
 						while (getBufferFree() < (BUFFER_SIZE)) vTaskDelay(200);
 						vTaskDelay(200);
-						clientDisconnect(); 						
+						clientDisconnect("once"); 						
 					}					
 			}//jpc
 						

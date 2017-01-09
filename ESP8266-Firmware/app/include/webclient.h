@@ -55,7 +55,7 @@ void clientSetPort(uint16_t port);
 
 struct icyHeader* clientGetHeader();
 void clientConnect();
-void clientDisconnect();
+void clientDisconnect(char* from);
 void clientSilentDisconnect();
 void clientTask(void *pvParams);
 void vsTask(void *pvParams) ;

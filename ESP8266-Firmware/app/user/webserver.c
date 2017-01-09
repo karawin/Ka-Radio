@@ -281,7 +281,7 @@ ICACHE_FLASH_ATTR void playStationInt(int sid) {
 		if(si != NULL &&si->domain && si->file) {
 			int i;
 			vTaskDelay(5);
-			clientDisconnect();
+			clientDisconnect("playStationInt");
 			for (i = 0;i<100;i++)
 			{
 				if(!clientIsConnected())break;
@@ -352,7 +352,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* port = getParameterFromResponse("port=", data, data_size);
 //			int i;
 			if(url != NULL && path != NULL && port != NULL) {
-				clientDisconnect();
+				clientDisconnect("Post instant_play");
 				for (i = 0;i<100;i++)
 				{
 					if(!clientIsConnected())break;
@@ -540,7 +540,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 //	    int i;
 		if (clientIsConnected())
 		{	
-			clientDisconnect();
+			clientDisconnect("Post Stop");
 			for (i = 0;i<100;i++)
 			{
 				if (!clientIsConnected()) break;
@@ -556,7 +556,8 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		char tfreq[5]; sprintf(tfreq,"%d",VS1053_GetTrebleFreq());
 		char bfreq[5]; sprintf(bfreq,"%d",VS1053_GetBassFreq());
 		char spac[5]; sprintf(spac,"%d",VS1053_GetSpatial());
-		
+		device = getDeviceSettings();
+				
 		struct icyHeader *header = clientGetHeader();
 //		printf("icy start header %x\n",header);
 		char* not2;
@@ -564,7 +565,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		if (not2 ==NULL) not2=header->members.single.audioinfo;
 		if ((header->members.single.notice2 != NULL)&(strlen(header->members.single.notice2)==0)) not2=header->members.single.audioinfo;
 		int json_length ;
-		json_length =144+
+		json_length =155+ //144
 		((header->members.single.description ==NULL)?0:strlen(header->members.single.description)) +
 		((header->members.single.name ==NULL)?0:strlen(header->members.single.name)) +
 		((header->members.single.bitrate ==NULL)?0:strlen(header->members.single.bitrate)) +
@@ -584,7 +585,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			respOk(conn);
 		}
 		else {				
-			sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"descr\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\",\"meta\":\"%s\",\"vol\":\"%s\",\"treb\":\"%s\",\"bass\":\"%s\",\"tfreq\":\"%s\",\"bfreq\":\"%s\",\"spac\":\"%s\"}",
+			sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"descr\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\",\"meta\":\"%s\",\"vol\":\"%s\",\"treb\":\"%s\",\"bass\":\"%s\",\"tfreq\":\"%s\",\"bfreq\":\"%s\",\"spac\":\"%s\",\"auto\":\"%c\"}",
 			json_length,
 			(header->members.single.description ==NULL)?"":header->members.single.description,
 			(header->members.single.name ==NULL)?"":header->members.single.name,
@@ -594,11 +595,13 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			(not2 ==NULL)?"":not2 ,
 			(header->members.single.genre ==NULL)?"":header->members.single.genre,
 			(header->members.single.metadata ==NULL)?"":header->members.single.metadata,			
-			vol,treble,bass,tfreq,bfreq,spac);
+			vol,treble,bass,tfreq,bfreq,spac,
+			(device->autostart)?'1':'0' );
 //			printf("buf: %s\n",buf);
 			write(conn, buf, strlen(buf));
 			infree(buf);
 		}
+		infree(device);	
 		return;
 	} else if(strcmp(name, "/wifi") == 0)	
 	{
@@ -606,7 +609,6 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		char tmpip[16],tmpmsk[16],tmpgw[16];
 		struct device_settings *device;
 		device = getDeviceSettings();
-		
 		uint8_t a,b,c,d;
 				
 		if(data_size > 0) {
@@ -637,9 +639,12 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				strcpy(device->pass2,(pasw2==NULL)?"":pasw2);				
 			}
 			strcpy(device->ua,(aua==NULL)?"":aua);
-			saveDeviceSettings(device);					
+			saveDeviceSettings(device);		
+			uint8_t *macaddr = malloc(10*sizeof(uint8_t));
+			char* macstr = malloc(20*sizeof(char));
+			wifi_get_macaddr ( 0, macaddr );			
 			int json_length ;
-			json_length =86+ //64
+			json_length =95+ //64 //86
 			strlen(device->ssid) +
 			strlen(device->pass) +
 			strlen(device->ssid2) +
@@ -648,7 +653,8 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			sprintf(tmpip,"%d.%d.%d.%d",device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3])+
 			sprintf(tmpmsk,"%d.%d.%d.%d",device->mask[0], device->mask[1],device->mask[2], device->mask[3])+
 			sprintf(tmpgw,"%d.%d.%d.%d",device->gate[0], device->gate[1],device->gate[2], device->gate[3])+
-			sprintf(adhcp,"%d",device->dhcpEn);
+			sprintf(adhcp,"%d",device->dhcpEn)+
+			sprintf(macstr,MACSTR,MAC2STR(macaddr));
 
 			char *buf = inmalloc( json_length + 75);			
 			if (buf == NULL)
@@ -657,16 +663,16 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				respOk(conn);
 			}
 			else {				
-				sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ssid2\":\"%s\",\"pasw2\":\"%s\",\"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\"}",
+				sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ssid2\":\"%s\",\"pasw2\":\"%s\",\"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\",\"mac\":\"%s\"}",
 				json_length,
-				device->ssid,device->pass,device->ssid2,device->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp	);
+				device->ssid,device->pass,device->ssid2,device->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp,macstr);
 //				printf("wifi Buf len:%d : %s\n",strlen(buf),buf);
 				write(conn, buf, strlen(buf));
 				infree(buf);
 			}
 			infree(ssid); infree(pasw);infree(ssid2); infree(pasw2);  
 			infree(aip);infree(amsk);infree(agw);infree(aua);
-			infree(valid); infree(adhcp);
+			infree(valid); infree(adhcp); infree(macaddr); infree(macstr);
 		}	
 		infree(device);
 		if (val){
@@ -714,7 +720,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			pvParams->buf = pbuf;
 			pvParams->len = buflen;
 //			printf("GET websocket\n");
-			while (xTaskCreate( websocketTask,"t11",320,(void *) pvParams,4, &pxCreatedTask )!= pdPASS)  //310
+			while (xTaskCreate( websocketTask,"t11",320,(void *) pvParams,5, &pxCreatedTask )!= pdPASS)  //310
 			{
 				printf("ws xTaskCreate  failed. Retry\n");
 				vTaskDelay(100);
@@ -756,11 +762,11 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 				if (param != NULL) {playStationInt(currentStation);}
 // stop command				
 				param = strstr(c,"stop") ;
-				if (param != NULL) {clientDisconnect();free(param);}
+				if (param != NULL) {clientDisconnect("Web stop");free(param);}
 // instantplay command				
 				param = getParameterFromComment("instant=", c, strlen(c)) ;
 				if (param != NULL) {
-					clientDisconnect();
+					clientDisconnect("Web Instant");
 					pathParse(param);
 //					printf("Instant param:%s\n",param);
 					clientParsePlaylist(param);clientConnectOnce();

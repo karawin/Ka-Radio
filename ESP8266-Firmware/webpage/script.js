@@ -334,7 +334,10 @@ function icyResp(arr) {
 				{ document.getElementById('meta').innerHTML = karadio;setMainHeight(curtab);}			
 			if (arr["meta"]) document.getElementById('meta').innerHTML = arr["meta"].replace(/\\/g,"");
 //					else document.getElementById('meta').innerHTML = karadio;
-
+			if (arr["auto"] == "1")
+				document.getElementById("aplay").setAttribute("checked","");
+			else
+				document.getElementById("aplay").removeAttribute("checked") ;
 			setMainHeight(curtab); 
 }	
 function soundResp(arr) {			
@@ -460,6 +463,7 @@ function wifi(valid) {
 				document.getElementById("dhcp").setAttribute("checked","");
 			else
 				document.getElementById("dhcp").removeAttribute("checked") ;
+			document.getElementById('Mac').innerHTML = arr["mac"];
 			clickdhcp();
 		}
 	}
