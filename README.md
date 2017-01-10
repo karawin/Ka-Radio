@@ -25,8 +25,7 @@ See also https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053
 
 
 #### Loading the esp8266
-- https://github.com/karawin/ESP8266-WebRadio/blob/Ka-Radio/ESP8266-Firmware/bin/upgrade/user1.4096.new.4.bin 
-- https://github.com/karawin/ESP8266-WebRadio/blob/Ka-Radio/ESP8266-Firmware/bin/upgrade/user2.4096.new.4.bin 
+The binaries are on ESP8266-Firmware/bin/upgrade/
 
 #### First use
 - If the acces point of your router is not known, the webradio inits itself as an AP. Connect your wifi to the ssid "WifiWebRadio",  
