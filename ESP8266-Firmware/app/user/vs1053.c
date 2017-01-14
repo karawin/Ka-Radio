@@ -332,6 +332,7 @@ uint8_t value = (log10(255/((float)xMinusHalfdB+1)) * 105.54571334);
 if (value == 255) value = 254;
 //printf("xMinusHalfdB=%d  value=%d\n",xMinusHalfdB,value);
 	VS1053_WriteRegister(SPI_VOL,value,value);
+	if (xMinusHalfdB != 0) printf("##CLI.VOL %d\n",xMinusHalfdB);
 }
 
 /**

@@ -25,11 +25,38 @@ void setVolumew(char* vol)
 	setVolume(vol);	
 	wsVol(vol);
 }	
+
+void setVolumePlus()
+{
+	uint8_t vol;
+	char Vol[22];
+	vol = VS1053_GetVolume();
+	if (vol <244) 
+	{	
+		vol+=10;	
+//		printf("vol %d   vol1 %d\n",vol,vol1);					
+		sprintf(Vol,"%d",vol);
+		setVolumew(Vol);
+	}
+}
+void setVolumeMinus()
+{
+	uint8_t vol;
+	char Vol[22];
+	vol = VS1053_GetVolume();
+	if (vol >10) 
+	{	
+		vol-=10;
+//		printf("vol %d   vol1 %d\n",vol,vol1);					
+		sprintf(Vol,"%d",vol);
+		setVolumew(Vol);
+	}
+}
+
 unsigned short adcdiv;	
 // Read the command panel
 void switchCommand() {
 	int adc;
-	uint8_t vol;
 	char Vol[22];
 	if (adcdiv == 0) return; // no panel
 
@@ -42,25 +69,11 @@ void switchCommand() {
 		
 		if ((adc >400) && (adc < 580)) // volume +
 		{
-			vol = VS1053_GetVolume();
-			if (vol <244) 
-			{	
-				vol+=10;	
-//				printf("vol %d   vol1 %d\n",vol,vol1);					
-				sprintf(Vol,"%d",vol);
-				setVolumew(Vol);
-			}
+			setVolumePlus();
 		}
 		else if ((adc >730) && (adc < 830)) // volume -
 		{
-			vol = VS1053_GetVolume();
-			if (vol >10) 
-			{	
-				vol-=10;
-//				printf("vol %d   vol1 %d\n",vol,vol1);					
-				sprintf(Vol,"%d",vol);
-				setVolumew(Vol);
-			}
+			setVolumeMinus();
 		}		
 		if (!inside)
 		{	
@@ -359,6 +372,7 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 			if(si->port !=0)
 			{	
 				printf("%3d: %s, %s:%d%s\n",i,si->name,si->domain,si->port,si->file);	
+				vTaskDelay(1);
 			}
 			free(si);
 		}	
@@ -424,13 +438,16 @@ ICACHE_FLASH_ATTR void clientVol(char *s)
     char *t = strstr(s, "(\"");
 	if(t == 0)
 	{
-		printf("\n##CLI.CMD_ERROR#");
+//		printf("\n##CLI.CMD_ERROR#");
+		// no argument, return the current volume
+		printf("##CLI.VOL %d\n",VS1053_GetVolume());
 		return;
 	}
 	char *t_end  = strstr(t, "\")")-2;
     if(t_end <= 0)
     {
-		printf("\n##CLI.CMD_ERROR#");
+
+		//printf("\n##CLI.CMD_ERROR#");
 		return;
     }
    char *vol = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -457,7 +474,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 	int i;
 	for(i=0;i<size;i++) tmp[i] = s[i];
 	tmp[size] = 0;
-	printf("size: %d, cmd=%s\n",size,tmp);
+//	printf("size: %d, cmd=%s\n",size,tmp);
 	if(strcmp(tmp, "wifi.list") == 0) wifiScan();
 	else if(strcmp(tmp, "wifi.con") == 0) wifiConnectMem();
 	else if(startsWith("wifi.con", tmp)) wifiConnect(tmp);
@@ -467,19 +484,22 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
     else if(startsWith("cli.url", tmp)) clientParseUrl(tmp);
     else if(startsWith("cli.path", tmp)) clientParsePath(tmp);
     else if(startsWith("cli.port", tmp)) clientParsePort(tmp);
-	else if(strcmp(tmp, "cli.start") == 0) {clientDisconnect("cli start");clientConnectOnce();}
+	else if(strcmp(tmp, "cli.instant") == 0) {clientDisconnect("cli instantplay");clientConnectOnce();}
+	else if(strcmp(tmp, "cli.start") == 0) clientPlay("(\"255\")"); // outside value to play the current station
     else if(strcmp(tmp, "cli.stop") == 0) clientDisconnect("cli stop");
     else if(startsWith("cli.list", tmp)) clientList(tmp);
     else if(strcmp(tmp, "cli.next") == 0) wsStationNext();
     else if(strncmp(tmp, "cli.previous",8) == 0) wsStationPrev();
     else if(startsWith("cli.play",tmp)) clientPlay(tmp);
+	else if(strcmp(tmp, "cli.vol+") == 0) setVolumePlus();
+	else if(strcmp(tmp, "cli.vol-") == 0) setVolumeMinus();
 	else if(startsWith("cli.vol",tmp)) clientVol(tmp);
+    else if(startsWith("sys.i2s",tmp)) clientI2S(tmp);
+    else if(startsWith("sys.uart",tmp)) clientUart(tmp);
     else if(strcmp(tmp, "sys.erase") == 0) eeEraseAll();
     else if(strcmp(tmp, "sys.heap") == 0) heapSize();
     else if(strcmp(tmp, "sys.boot") == 0) system_restart();
     else if(strcmp(tmp,"sys.update") == 0) update_firmware();
-    else if(startsWith("cli.i2s",tmp)) clientI2S(tmp);
-    else if(startsWith("cli.uart",tmp)) clientUart(tmp);
 	else printInfo(tmp);
 	free(tmp);
 	

@@ -305,8 +305,11 @@ ICACHE_FLASH_ATTR void playStationInt(int sid) {
 	sprintf(answer,"{\"wsstation\":\"%d\"}",sid);
 	websocketbroadcast(answer, strlen(answer));
 	device = getDeviceSettings();
-	device->currentstation = sid;
-	saveDeviceSettings(device);
+	if (device->currentstation != sid)
+	{
+		device->currentstation = sid;
+		saveDeviceSettings(device);
+	}
 	incfree(device,"playStation");
 
 }
@@ -314,8 +317,12 @@ ICACHE_FLASH_ATTR void playStationInt(int sid) {
 ICACHE_FLASH_ATTR void playStation(char* id) {
 	struct shoutcast_info* si;
 	char answer[22];
+	int uid;
 	struct device_settings *device;
-	currentStation = atoi(id) ;
+	uid = atoi(id) ;
+//	printf ("playstation: %d\n",uid);
+	if (uid < 255)
+		currentStation = atoi(id) ;
 	playStationInt(currentStation);	
 }
 
@@ -535,7 +542,24 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 //			printf("autostart: %s, num:%d\n",id,device->autostart);
 			saveDeviceSettings(device);
 			infree(device);			
-		}		
+		}
+	} else if(strcmp(name, "/rauto") == 0) {
+		char *buf = inmalloc( 75 + 13);
+		if (buf == NULL)
+		{	
+			printf("post rauto inmalloc fails\n");
+			respOk(conn);
+		}
+		else {			
+			device = getDeviceSettings();		
+			sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"rauto\":\"%c\"}",
+(device->autostart)?'1':'0' );
+			write(conn, buf, strlen(buf));
+			infree(device);	
+			infree(buf);
+			}
+		infree(device);	
+		return;		
 	} else if(strcmp(name, "/stop") == 0) {
 //	    int i;
 		if (clientIsConnected())

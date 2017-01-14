@@ -485,7 +485,7 @@ ICACHE_FLASH_ATTR void clientDisconnect(char* from)
 	//connect = 0;
 	xSemaphoreGive(sDisconnect);
 	printf("##CLI.STOPPED# from %s\n",from);
-//	vTaskDelay(10);
+	vTaskDelay(10);
 //	clearHeaders();
 }
 
@@ -505,12 +505,13 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 	char* t2;
 	bool  icyfound;
 
-//	if (cstatus != C_DATA){printf("cstatus= %d\n",cstatus);  printf("Len=%d, Byte_list = %s\n",len,pdata);}
+//	if (cstatus != C_DATA) {printf("cstatus= %d\n",cstatus);  printf("Len=%d, Byte_list = %s\n",len,pdata);}
 	if (cstatus != C_DATA)
 	{
-		t1 = strstr(pdata, "404 Not Found"); 
+		t1 = strstr(pdata, "404"); 
+		if (t1 != NULL) t1 = strstr(pdata, "Not Found"); 
 		if (t1 != NULL) { // 
-			printf("404 Not Found\n");
+			printf("404 Not Found \n");
 			clientSaveOneHeader("404 Not Found", 13,METANAME);
 			wsHeaders();
 			vTaskDelay(200);

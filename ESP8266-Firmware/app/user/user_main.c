@@ -173,6 +173,7 @@ void uartInterfaceTask(void *pvParameters) {
 	saveDeviceSettings(device);			
 //autostart	
 	printf("autostart: playing:%d, currentstation:%d\n",device->autostart,device->currentstation);
+	currentStation = device->currentstation;
 	VS1053_I2SRate(device->i2sspeed);
 	if (device->autostart ==1)
 	{	
@@ -351,7 +352,7 @@ void user_init(void)
 
 	xTaskCreate(testtask, "t0", 80, NULL, 1, &pxCreatedTask); // DEBUG/TEST 80
 	printf("t0 task: %x\n",pxCreatedTask);
-	xTaskCreate(uartInterfaceTask, "t1", 294, NULL, 6, &pxCreatedTask); // 244
+	xTaskCreate(uartInterfaceTask, "t1", 320, NULL, 6, &pxCreatedTask); // 244
 	printf("t1 task: %x\n",pxCreatedTask);
 	xTaskCreate(vsTask, "t4", 370, NULL,4, &pxCreatedTask); //370
 	printf("t4 task: %x\n",pxCreatedTask);

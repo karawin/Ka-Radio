@@ -1,7 +1,7 @@
 var content = "Content-type",
 	ctype = "application/x-www-form-urlencoded",
 	cjson = "application/json";
-var intervalid , timeid, websocket,urlmonitor , e, playing = false, curtab = "tab-content1",stchanged = false,maxStation = 255;
+var auto,intervalid , timeid, websocket,urlmonitor , e, playing = false, curtab = "tab-content1",stchanged = false,maxStation = 255;
 const karadio = "Karadio";
 
 function openwebsocket(){	
@@ -334,6 +334,7 @@ function icyResp(arr) {
 				{ document.getElementById('meta').innerHTML = karadio;setMainHeight(curtab);}			
 			if (arr["meta"]) document.getElementById('meta').innerHTML = arr["meta"].replace(/\\/g,"");
 //					else document.getElementById('meta').innerHTML = karadio;
+            if (typeof arr["auto"] != 'undefined')  // undefined for websocket
 			if (arr["auto"] == "1")
 				document.getElementById("aplay").setAttribute("checked","");
 			else
@@ -502,6 +503,7 @@ function nextStation() {
 		Select();
 	}
 }
+// autoplay checked or unchecked
 function autoplay() {
 	try{		
 		xhr.open("POST","auto",false);
@@ -509,6 +511,26 @@ function autoplay() {
 		xhr.send("id=" +document.getElementById('aplay').checked+"&");		
 	} catch(e){console.log("error"+e);}	
 }
+
+//ask for the state of autoplay
+function autostart() {
+	xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4 && xhr.status == 200) {	
+			var arr = JSON.parse(xhr.responseText);
+			if (arr["rauto"] == "1")
+				document.getElementById("aplay").setAttribute("checked","");
+			else
+				document.getElementById("aplay").removeAttribute("checked") ;			
+		}
+	}
+	try{		
+		xhr.open("POST","rauto",false); // request auto state
+		xhr.setRequestHeader(content,ctype);
+		xhr.send("&");		
+	} catch(e){console.log("error"+e);}	
+}
+
 function Select() {
 	if (document.getElementById('aplay').checked)
 		 playStation() ;
@@ -1029,6 +1051,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	checkwebsocket();
 	refresh();
 	wifi(0) ;
+	autostart();
 	checkversion();
 	setMainHeight(curtab);
 	promptworking("");
