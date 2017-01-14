@@ -2,14 +2,12 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations<BR/>
-###Release 1.1.4 Built on 2017/01/09 <br/>
+###Release 1.1.5 Built on 2017/01/14 <br/>
 New features:<br/>
-- Now 2 AP's can be set. The second one will be tested if the first is not detected. <br/>
-- The Mac address of the radio is displayed <br/>
-- An offset volume can be set for each station in Station editor. <br/>
-- Pb on Autostart not correctly checked: corrected <br/>
-- Added: a reset button for the equalizer <br/>
-- Many bugs removed thanks to users feedback's. <br/>
+- Modification of the list of uart command. See  <a href="http://karadio.karawin.fr/Interface.txt"  target="_blank"><font color="#14A692">uart and html interfaces</font></a><br/>
+- New IR and LCD software<BR/>
+- Autoplay corrected</br>
+- Many bugs removed thanks to users feedback's.<BR/>
 
 
 <BR/>
