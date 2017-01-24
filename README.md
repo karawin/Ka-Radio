@@ -26,7 +26,7 @@ See also https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053
 The binaries are on ESP8266-Firmware/bin/upgrade/
 
 #### First use
-- If the acces point of your router is not known, the webradio inits itself as an AP. Connect your wifi to the ssid "WifiWebRadio",  
+- If the acces point of your router is not known, the webradio inits itself as an AP. Connect the wifi of your computer to the ssid "WifiWebRadio",  
 - Browse to 192.168.4.1 to display the page, got to "setting" "Wifi" and configure your ssid ap, the password if any, the wanted IP or use dhcp if you know how to retrieve the dhcp given ip (terminal or scan of the network).
 - In the gateway field, enter the ip address of your router.
 - Validate. The equipment restart to the new configuration. Connect your wifi to your AP and browse to the ip given in configuration.
