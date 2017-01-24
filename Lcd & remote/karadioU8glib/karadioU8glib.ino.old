@@ -1,42 +1,12 @@
+#include "u8glibConf.h"
 /*
 
   KaradioU8glib.pde
   
 */
 
-//-------------------------------------------------------
-// UnComment the following line if you want the IR remote
-#define IR
-// Uncomment the following line to use the IRLib2 library
-#define IRLib2
-//-------------------------------------------------------
-
 #include "u8glibConf.h"
 #include <EEPROM.h>
-
-#ifdef IR
-#ifdef IRLib2
-#include <IRLibDecodeBase.h>
-#include <IRLib_P01_NEC.h>
-//#include <IRLib_P02_Sony.h>
-//#include <IRLib_P03_RC5.h>
-//#include <IRLib_P04_RC6.h>
-//#include <IRLib_P05_Panasonic_Old.h>
-//#include <IRLib_P06_JVC.h>
-#include <IRLib_P07_NECx.h>
-//#include <IRLib_P08_Samsung36.h>
-//#include <IRLib_P09_GICable.h>
-//#include <IRLib_P10_DirecTV.h>
-//#include <IRLib_P11_RCMM.h>
-//include additional protocols here
-#include <IRLibCombo.h>
-//#include <IRLibRecv.h>
-#include <IRLibRecvPCI.h>
-#else
-#include "IRremote.h"
-#endif
-#endif
-
 
 #define PIN_LED 13
 #define PIN_PLAYING 12
@@ -49,56 +19,36 @@ const int  EEaddrIp        = 10;    // EEPROM address for the IP
 
 const byte ContrastPin     = 8;     // D8 low activates the Contrast adjustment
 
-
-#ifdef IR
-char irStr[4];
-// IR define and objects
-#ifdef IRLib2
-#define PIN_IRRECV  2
-IRrecvPCI irrecv(PIN_IRRECV);//create instance of receiver using pin PIN_IRRECV
-IRdecode irDecoder;   //create decoder
-IRdecode results; //create decoder
-#else
-#define PIN_IRRECV	11
-IRrecv irrecv(PIN_IRRECV); // The IR 
-decode_results results; 
-#endif
-#endif
-bool state = false; // start stop on Ok key
-//-----------
-#ifdef IR
 // Character array pointers
-   char  msg[]      = {"Karadio IR+lcd V1.4"}; //
-#else
-	 char  msg[]      = {"Karadio lcd V1.4"}; //
-#endif
-   char  msg1[]    = {"(c) KaraWin"}; //
-   char  msg2[]    = {"https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053"};
-      
+   char  msg[]       = {"Karadio lcd V1.3"}; //
+   char  msg1[]      = {"== (c) KaraWin =="}; //
+   char  msg2[]      = {"https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053"};
+   char  msg3[]	 = {"Karadio"};
+   
 // Karadio specific data
-#define BUFLEN  180
-#define LINES	6
+#define BUFLEN  200
+#define LINES	10
 char line[BUFLEN]; // receive buffer
 char station[BUFLEN]; //received station
 char title[BUFLEN];	// received title
 char nameset[BUFLEN]; // the local name of the station
-
 char nameNum[5]; // the number of the station
 char* lline[LINES] ; // array of ptr of n lines 
-uint8_t  iline[LINES] ; //array of index for scrolling
-uint8_t  tline[LINES] ;
-
+int  iline[LINES] ; //array of index for scrolling
+char  tline[LINES] ;
+char* ici;
 unsigned index = 0;
 unsigned loopcount = 0;
 unsigned scrl = 0;
 char oip[20];
 
-uint16_t y ;		//Height of a line
-uint16_t yy;		//Height of screen
-uint16_t x ;		//Width
-uint16_t z ;		// an internal offset for y
+int y ;		//Height of a line
+int yy;		//Height of screen
+int x ;		//Width
+int z ;		// an internal offset for y
 
 byte NOKIAcontrast;                 // LCD initialization contrast values B0 thru BF
+char temp;
 
 
 ////////////////////////////////////////
@@ -134,24 +84,6 @@ void cleartitle()
      }  
 }
 
-////////////////////////////////////////
-void removeUtf8(byte *characters)
-{
-  int index = 0;
-  while (characters[index])
-  {
-    if ((characters[index] >= 0xc2)&&(characters[index] <= 0xc3)) // only 0 to FF ascii char
-    {
-      //      Serial.println((characters[index]));
-      characters[index+1] = ((characters[index]<<6)&0xFF) | (characters[index+1] & 0x3F);
-      int sind = index+1;
-      while (characters[sind]) { characters[sind-1] = characters[sind];sind++;}
-      characters[sind-1] = 0;
-
-    }
-    index++;
-  }
-}
 
 ////////////////////////////////////////
 void eepromReadStr(int addr, char* str)
@@ -204,8 +136,9 @@ void separator(char* from)
 // parse the karadio received line and do the job
 void parse(char* line)
 {
-  char* ici;
- 
+  int mul;
+  char* pn;
+//   Serial.println(line);
    removeUtf8((byte*)line);
  //////  reset of the esp
    if ((ici=strstr(line,"VS Version")) != NULL) setup2();
@@ -259,9 +192,9 @@ void parse(char* line)
    {
       int len;
       strcpy(nameset,ici+8);
-	  ici = strstr(nameset," ");
-	  strncpy(nameNum,nameset,ici-nameset+1);
-	  nameNum[ici - nameset+1] = 0;
+	  pn = strstr(nameset," ");
+	  strncpy(nameNum,nameset,pn-nameset+1);
+	  nameNum[pn-nameset+1] = 0;
 	  strcpy(nameset,nameset+strlen(nameNum));
 	  separator(nameset);
              
@@ -284,7 +217,6 @@ void parse(char* line)
 //Setup all things, check for contrast adjust and show initial page.
 void setup2()
 {
-
 	
 	clearAll();
 	lline[0] = msg;
@@ -299,7 +231,6 @@ void setup2()
 
 }
 void setup(void) {
-   char  msg3[] = {"Karadio"};
    Serial.begin(BAUD);
    while (!Serial) {
 	   ;
@@ -310,11 +241,6 @@ void setup(void) {
     pinMode(ContrastPin, INPUT);
     digitalWrite(ContrastPin, HIGH); // activate internal pullup resistor
 	digitalWrite(PIN_PLAYING, LOW);
-
-#ifdef IR
-	irrecv.enableIRIn(); // Start the IR receiver
- irStr[0] = 0;
-#endif
     
 //    Serial.println(F("Free RAM available:")) ;
 //    Serial.print(freeRam());
@@ -444,121 +370,13 @@ unsigned len;
 	draw(0);
 }
 
-#ifdef IR
-void nbStation(char nb)
-{
-  if (strlen(irStr)>=3) irStr[0] = 0;
-  uint8_t id = strlen(irStr);
-  irStr[id] = nb;
-  irStr[id+1] = 0;
-}
-void translateIR() // takes action based on IR code received
-//  KEYES Remote IR codes (NEC P01)
-//  and Ocean Digital remote (NEC P07)
-{
-#ifdef IRLib2
-  if (irrecv.getResults())
-  {
-    results.decode();    
-#else
-	if ((irrecv.decode(&results)))
-  {
-#endif  
-
-//  Uncomment the following line to see the code of your remote control and report to the case the value
-#ifdef IRLib2
-//	    Serial.print("Protocol:");Serial.print(results.protocolNum);Serial.print("  value:");Serial.println(results.value,HEX);
-#else
-//      Serial.print("Protocol:");Serial.print(results.decode_type);Serial.print("  value:");Serial.println(results.value,HEX);
-#endif
-//      Serial.print("  value:");Serial.println(results.value,HEX);
-		switch(results.value)
-		{
-			case 0xFF629D: 
-			case 0x10EF48B7:	/*(" FORWARD");*/  irStr[0] = 0;Serial.print("cli.next\r"); break;
-
-			case 0xFF22DD:
-			case 0x10EFA857:
-			case 0x10EF42BD: /*(" LEFT");*/  irStr[0] = 0;Serial.print("cli.vol-\r");  break;
-
-			case 0xFF02FD:
-			case 0x10EF7887:		/*(" -OK-");*/
-			{  
-//      state?Serial.print("cli.start\r"):Serial.print("cli.stop\r");
-        if (strlen(irStr) >0)
-        {
-          Serial.print("cli.play(\"");Serial.print(irStr);Serial.print("\")\r");
-          irStr[0] = 0;
-        }
-        else
-        { 
-          state?Serial.print("cli.start\r"):Serial.print("cli.stop\r");
-/*				  if (state)
-           Serial.print("cli.start\r");
-			  	else
-			  		Serial.print("cli.stop\r");
-           */
-        }
-				state = !state;
-        irStr[0] = 0;
-				break;
-			}
-			case 0xFFC23D:
-			case 0x10EF28D7:
-			case 0x10EF827D: /*(" RIGHT");*/ irStr[0] = 0;Serial.print("cli.vol+\r");  break; // volume +
-			case 0xFFA857:
-			case 0x10EFC837:	/*(" REVERSE");*/ irStr[0] = 0;Serial.print("cli.prev\r"); break;
-			case 0xFF6897:
-			case 0x10EF807F: /*(" 1");*/ nbStation('1');   break;
-			case 0xFF9867:
-			case 0x10EF40BF: /*(" 2");*/ nbStation('2');   break;
-			case 0xFFB04F:
-			case 0x10EFC03F: /*(" 3");*/ nbStation('3');   break;
-			case 0xFF30CF:
-			case 0x10EF20DF: /*(" 4");*/ nbStation('4');   break;
-			case 0xFF18E7:
-			case 0x10EFA05F: /*(" 5");*/ nbStation('5');   break;
-			case 0xFF7A85:
-			case 0x10EF609F: /*(" 6");*/ nbStation('6');   break;
-			case 0xFF10EF:
-			case 0x10EFE01F: /*(" 7");*/ nbStation('7');   break;
-			case 0xFF38C7:
-			case 0x10EF10EF: /*(" 8");*/ nbStation('8');   break;
-			case 0xFF5AA5:
-			case 0x10EF906F: /*(" 9");*/ nbStation('9');   break;
-			case 0xFF42BD:
-			case 0x10EFE817: /*(" *");*/   irStr[0] = 0;Serial.print("cli.stop\r"); break;
-			case 0xFF4AB5:
-			case 0x10EF00FF: /*(" 0");*/ nbStation('0');   break;
-			case 0xFF52AD:
-			case 0x10EFB847: /*(" #");*/   irStr[0] = 0;Serial.print("cli.start\r"); break;
-			case 0xFFFFFFFF: /*(" REPEAT");*/break;
-			default:;
-			/*Serial.println(" other button   ");*/
-		}// End Case
-;	
-#ifdef IRLib2
-    irrecv.enableIRIn();      //Restart receiver
-#else
-		irrecv.resume(); // receive the next value
-#endif    
-	}
-} //END translateIR
-#endif
-
 ////////////////////////////////////////
 void loop(void) {
 	serial();
-#ifdef IR
-    if (loopcount++ == ((x==84)?0x500:0x900)) // 
+    if (loopcount++ == ((x==84)?0x3000:0x7000))
     {
-		 translateIR();
-#else
-    if (loopcount++ == ((x==84)?0x2000:0x6000)) // 
-    {
-#endif
 	    loopcount = 0;
-		if (++scrl%10 == 0) digitalWrite(PIN_LED, HIGH);	
+		if (++scrl%6 == 0) digitalWrite(PIN_LED, HIGH);	
 		scroll();	
 		digitalWrite(PIN_LED, LOW);
     }

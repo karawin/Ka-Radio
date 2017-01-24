@@ -165,7 +165,8 @@ Version 1.2  added esp8266 boot detection
 Version 1.3  added Pin PLAYING low when not playing, and High when playing.
 */
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/*  ************************************************ Instruction for NOKIA 5110*********************************************
+/*  *** Instruction for NOKIA 5110*********************************************
+        ---------------------------
 NOTES:
 Confirmed vendor:
 lcd: http://www.ebay.fr/itm/262558872574?_trksid=p2057872.m2749.l2649&ssPageName=STRK%3AMEBIDX%3AIT
@@ -224,9 +225,13 @@ U8GLIB_PCD8544 u8g(PIN_SCLK, PIN_SDIN, PIN_SCE, PIN_DC, PIN_RESET); // SPI Com: 
 
 Warning:
 The webradio serial must be set at 28800 b/s
+with sys.uart("28800") command
+
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 **** Instruction for 0.96" I2C IIC SPI Serial 128X64 White OLED LCD LED Display Module for Arduino *************************
+     ----------------------------------------------------------------------------------------------
 NOTES:
 Confirmed vendor:
 lcd: http://www.ebay.fr/itm/191909116703?_trksid=p2057872.m2749.l2649&ssPageName=STRK%3AMEBIDX%3AIT
@@ -269,7 +274,8 @@ comment the current u8g
 uncomment:
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE|U8G_I2C_OPT_DEV_0);	// I2C / TWI
 
-Warning:
+--------
+WARNING:
 The webradio serial must be set at 28800 b/s
 --------
 WARNING:
@@ -278,13 +284,53 @@ The nodeMcu is a 3.3v device.
 DO NOT connect the Rx pin of the lcd to the Tx pin of the mini Pro
 
 
-Compiled with atmel studio:
-Visual Micro free version. PLEASE HELP by posting on social media or purchasing http://www.visualmicro.com
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+**** Instruction for the IR module *****************************************************************************************
+------------------------------------
+The model used here is from:
+https://www.aliexpress.com/item/Hot-Selling-1pcs-New-Infrared-IR-Wireless-Remote-Control-Module-Kits-For-Arduino-Wholesale/32334118062.html?spm=2114.13010608.0.0.XzmgYk
+or equivalent. Cost less than 1$
 
-Compiling 'karadioU8glib' for 'Arduino Pro or Pro Mini w/ ATmega328 (5V, 16 MHz)'
+- Based on NEC protocol; Built-in 1 x AG10 battery;
+- Remote control range: above 8m;
+- Wavelength: 940Nm;
+- Frequency: crystal oscillator: 455KHz; IR carrier frequency: 38KHz
 
-Program size: 13 414 bytes (used 44% of a 30 720 byte maximum) (25,38 secs)
-Minimum Memory Usage: 1482 bytes (72% of a 2048 byte maximum)
+// obsolete-----------
+See Library at: https://github.com/shirriff/Arduino-IRremote
+Install the library found at  https://github.com/z3t0/Arduino-IRremote/releases/download/2.1.0/Arduino-IRremote-dev.zip
+Uncomment the #define IR at the beginning of the karadioU8glib.ino file.
+----------------------
+// new library
+Install the library from https://github.com/cyborg5/IRLib2
+Uncomment the #define IR  and the #ifdef IRLib2 at the beginning of the karadioU8glib.ino file.
+----------------------
 
+The IR receiver pins:
+From left to right (pin at bottom)
+Gnd VCC Signal
+The signal must be connected to
+#define PIN_IRRECV	11  for the old library or
+#define PIN_IRRECV  2  or 3 for the new library IRLib2
+It is the default In karadioU8glig.ino, you can change it
+
+In karadioU8glig.ino:
+//  Uncomment the following line to see the code of your remote control and report to the case the value
+//	    Serial.print("Protocol:");Serial.print(results.decode_type);Serial.print("  value:");Serial.println(results.value,HEX);
+If you want to use another remote, you can see the code of the keys and modify the switch case for the needed function.
+See IRremote.h  to add the protocol you need for the remote.
+
+The tx of the pro mini must be connected to the rx of the esp12 but
+Warning; the esp rx pin is not 5V tolerant, so if your pro mini is a 5v version we nned to adapt the level.
+-------
+See
+http://www.instructables.com/id/Pi-Cubed-How-to-connect-a-33V-Raspberry-Pi-to-a-5V/
+
+The value of the resistors is not critical. Only th ration 1/3 2/3 must be respected 1k and 2k for example)
+
+I found that the ir is not very accurate, but it works.
+Enjoy.
+
+jpc 01/2017
 */
 

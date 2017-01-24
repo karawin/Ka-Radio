@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Atmel Studio Solution File, Format Version 11.00
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "karadioU8glib", "karadioU8glib.cppproj", "{A33715A9-C269-477B-BF93-B86BEA2BF35B}"
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "karadioU8glib", "karadioU8glib.cppproj", "{1535724F-CC0A-4340-805D-5733DE6BE788}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|AVR = Release|AVR
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A33715A9-C269-477B-BF93-B86BEA2BF35B}.Debug|AVR.ActiveCfg = Debug|AVR
-		{A33715A9-C269-477B-BF93-B86BEA2BF35B}.Debug|AVR.Build.0 = Debug|AVR
-		{A33715A9-C269-477B-BF93-B86BEA2BF35B}.Release|AVR.ActiveCfg = Release|AVR
-		{A33715A9-C269-477B-BF93-B86BEA2BF35B}.Release|AVR.Build.0 = Release|AVR
+		{1535724F-CC0A-4340-805D-5733DE6BE788}.Debug|AVR.ActiveCfg = Debug|AVR
+		{1535724F-CC0A-4340-805D-5733DE6BE788}.Debug|AVR.Build.0 = Debug|AVR
+		{1535724F-CC0A-4340-805D-5733DE6BE788}.Release|AVR.ActiveCfg = Release|AVR
+		{1535724F-CC0A-4340-805D-5733DE6BE788}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
