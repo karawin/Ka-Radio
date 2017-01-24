@@ -2,14 +2,12 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations<BR/>
-###Release 1.1.4 Built on 2017/01/09 <br/>
+###Release 1.1.5 Built on 2017/01/14 <br/>
 New features:<br/>
-- Now 2 AP's can be set. The second one will be tested if the first is not detected. <br/>
-- The Mac address of the radio is displayed <br/>
-- An offset volume can be set for each station in Station editor. <br/>
-- Pb on Autostart not correctly checked: corrected <br/>
-- Added: a reset button for the equalizer <br/>
-- Many bugs removed thanks to users feedback's. <br/>
+- Modification of the list of uart command. See  <a href="http://karadio.karawin.fr/Interface.txt"  target="_blank"><font color="#14A692">uart and html interfaces</font></a><br/>
+- New IR and LCD software<BR/>
+- Autoplay corrected</br>
+- Many bugs removed thanks to users feedback's.<BR/>
 
 
 <BR/>
@@ -28,8 +26,8 @@ See also https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053
 The binaries are on ESP8266-Firmware/bin/upgrade/
 
 #### First use
-- If the acces point of your router is not known, the webradio inits itself as an AP. Connect your wifi to the ssid "WifiWebRadio",  
-- Browse to 192.164.4.1 to display the page, got to "setting" "Wifi" and configure your ssid ap, the password if any, the wanted IP or use dhcp if you know how to retrieve the dhcp given ip (terminal or scan of the network).
+- If the acces point of your router is not known, the webradio inits itself as an AP. Connect the wifi of your computer to the ssid "WifiWebRadio",  
+- Browse to 192.168.4.1 to display the page, got to "setting" "Wifi" and configure your ssid ap, the password if any, the wanted IP or use dhcp if you know how to retrieve the dhcp given ip (terminal or scan of the network).
 - In the gateway field, enter the ip address of your router.
 - Validate. The equipment restart to the new configuration. Connect your wifi to your AP and browse to the ip given in configuration.
 - Congratulation, you can edit your own station list. Dont forget to save your stations list in case of problem or for new equipments.
