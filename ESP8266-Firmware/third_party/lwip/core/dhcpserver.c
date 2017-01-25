@@ -14,7 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////////
 //static const uint8_t xid[4] = {0xad, 0xde, 0x12, 0x23};
 //static u8_t old_xid[4] = {0};
-static const u32_t magic_cookie ICACHE_RODATA_ATTR STORE_ATTR = 0x63538263;
+static const u32_t magic_cookie  STORE_ATTR = 0x63538263;
 static struct udp_pcb *pcb_dhcps = NULL;
 static struct ip_addr broadcast_dhcps;
 static struct ip_addr server_address;

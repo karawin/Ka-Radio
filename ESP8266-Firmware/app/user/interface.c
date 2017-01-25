@@ -17,41 +17,26 @@ uint16_t currentStation = 0;
 extern void wsVol(char* vol);
 extern void playStation(char* id);
 extern void setVolume(char* vol);
+extern void setRelVolume(int8_t vol);
+extern uint16_t getVolume(void);
+
 #define MAX_WIFI_STATIONS 50
+
 	bool inside = false;
 
+void setVolumePlus()
+{
+	setRelVolume(10);
+}
+void setVolumeMinus()
+{
+	setRelVolume(-10);
+}		
 void setVolumew(char* vol)
 {
 	setVolume(vol);	
 	wsVol(vol);
 }	
-
-void setVolumePlus()
-{
-	uint8_t vol;
-	char Vol[22];
-	vol = VS1053_GetVolume();
-	if (vol <244) 
-	{	
-		vol+=10;	
-//		printf("vol %d   vol1 %d\n",vol,vol1);					
-		sprintf(Vol,"%d",vol);
-		setVolumew(Vol);
-	}
-}
-void setVolumeMinus()
-{
-	uint8_t vol;
-	char Vol[22];
-	vol = VS1053_GetVolume();
-	if (vol >10) 
-	{	
-		vol-=10;
-//		printf("vol %d   vol1 %d\n",vol,vol1);					
-		sprintf(Vol,"%d",vol);
-		setVolumew(Vol);
-	}
-}
 
 unsigned short adcdiv;	
 // Read the command panel
@@ -440,7 +425,7 @@ ICACHE_FLASH_ATTR void clientVol(char *s)
 	{
 //		printf("\n##CLI.CMD_ERROR#");
 		// no argument, return the current volume
-		printf("##CLI.VOL %d\n",VS1053_GetVolume());
+		printf("##CLI.VOL#: %d\n",getVolume());
 		return;
 	}
 	char *t_end  = strstr(t, "\")")-2;
@@ -461,6 +446,29 @@ ICACHE_FLASH_ATTR void clientVol(char *s)
 			setVolumew(vol);	}	
 			free(vol);
     }	
+}
+
+ICACHE_FLASH_ATTR void syspatch(char* s)
+{
+    char *t = strstr(s, "(\"");
+	if(t == NULL)
+	{
+		printf("\n##SYS.CMD_ERROR#");
+		return;
+	}
+	char *t_end  = strstr(t, "\")");
+    if(t_end == NULL)
+    {
+		printf("\n##SYS.CMD_ERROR#");
+		return;
+    }	
+	uint8_t value = atoi(t+2);
+	struct device_settings *device;
+	device = getDeviceSettings();
+	if (value ==0) device->options |= T_PATCH; else device->options &= NT_PATCH; // 0 = load patch
+	saveDeviceSettings(device);	
+	free(device);
+	
 }
 
 ICACHE_FLASH_ATTR void heapSize()
@@ -500,6 +508,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
     else if(strcmp(tmp, "sys.heap") == 0) heapSize();
     else if(strcmp(tmp, "sys.boot") == 0) system_restart();
     else if(strcmp(tmp,"sys.update") == 0) update_firmware();
+	else if(startsWith("sys.patch",tmp)) syspatch(tmp);
 	else printInfo(tmp);
 	free(tmp);
 	

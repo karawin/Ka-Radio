@@ -13,7 +13,6 @@
   * @{
   */
 
-//#include "vs1053b-patches-flac.h"
 #include "vs1053.h"
 #include "eeprom.h"
 #include "stdio.h"
@@ -49,9 +48,9 @@ ICACHE_FLASH_ATTR void VS1053_HW_init(){
 
 ICACHE_FLASH_ATTR void VS1053_SPI_SpeedUp()
 {
-	spi_clock(HSPI, 4, 2); //10MHz
+//	spi_clock(HSPI, 4, 2); //10MHz
 //	spi_clock(HSPI, 4, 3); //6.66MHz
-//	spi_clock(HSPI, 3, 3); //8.88MHz
+	spi_clock(HSPI, 3, 3); //8.88MHz
 }
 
 ICACHE_FLASH_ATTR void VS1053_SPI_SpeedDown() {
@@ -222,29 +221,37 @@ ICACHE_FLASH_ATTR void VS1053_I2SRate(uint8_t speed){ // 0 = 48kHz, 1 = 96kHz, 2
 	printf("I2S Speed: %d\n",speed);
 }
 
+ICACHE_FLASH_ATTR void VS1053_DisableAnalog(){
+	// disable analog output
+	VS1053_WriteRegister(SPI_VOL,0xFF,0xFF);
+}
+
 ICACHE_FLASH_ATTR void VS1053_Start(){
 	struct device_settings *device;
 	VS1053_ResetChip();
 	Delay(100);
+	// disable analog output
+	VS1053_DisableAnalog();
+	
 // these 4 lines makes board to run on mp3 mode, no soldering required anymore
 	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x17); //address of GPIO_DDR is 0xC017
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0x03); //GPIO_DDR=3
 	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x19); //address of GPIO_ODATA is 0xC019
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0x00); //GPIO_ODATA=0
 	Delay(100);
-
 	while(VS1053_checkDREQ() == 0);
-
+	
 	int MP3Status = VS1053_ReadRegister(SPI_STATUS);
 	vsVersion = (MP3Status >> 4) & 0x000F; //Mask out only the four version bits
-	
+//0 for VS1001, 1 for VS1011, 2 for VS1002, 3 for VS1003, 4 for VS1053 and VS8053,
+//5 for VS1033, 7 for VS1103, and 6 for VS1063	
    if (vsVersion == 4) // only 1053  	
 //		VS1053_WriteRegister(SPI_CLOCKF,0x78,0x00); // SC_MULT = x3, SC_ADD= x2
-		VS1053_WriteRegister(SPI_CLOCKF,0x90,0x00); // SC_MULT = x3.5, SC_ADD= x1.5
+		VS1053_WriteRegister(SPI_CLOCKF,0xB8,0x00); // SC_MULT = x1, SC_ADD= x1
+//		VS1053_WriteRegister(SPI_CLOCKF,0x90,0x00); // SC_MULT = x3.5, SC_ADD= x1.5
 	else	
 		VS1053_WriteRegister(SPI_CLOCKF,0xb0,0x00);
 	
-//	VS1053_WriteRegister(SPI_MODE, (SM_LINE1 | SM_SDINEW)>>8 , SM_RESET); // soft reset
 	VS1053_SoftwareReset();
 	VS1053_WriteRegister(SPI_MODE, (SM_SDINEW|SM_LINE1)>>8, SM_LAYER12); //mode 
 	while(VS1053_checkDREQ() == 0);
@@ -258,10 +265,10 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 		VS1053_I2SRate(0);	
    }
 	
-// plugin patch
-//	if (vsVersion == 4) LoadUserCode() ;	// vs1053b patch
-	
 	device = getDeviceSettings();
+// plugin patch
+	if ((vsVersion == 4) && ((device->options&T_PATCH)==0))LoadUserCode() ;	// vs1053b patch
+	
 	Delay(300);
 	VS1053_SetVolume( device->vol);	
 	VS1053_SetTreble(device->treble);
@@ -278,7 +285,7 @@ ICACHE_FLASH_ATTR int VS1053_SendMusicBytes(uint8_t* music, uint16_t quantity){
 	if(quantity ==0) return 0;
 	spi_take_semaphore();
 	int o = 0;
-	while(VS1053_checkDREQ() == 0) vTaskDelay(1);
+	while(VS1053_checkDREQ() == 0) {vTaskDelay(1);}
 	VS1053_SPI_SpeedUp();
 	SDI_ChipSelect(SET);
 	while(quantity)
@@ -332,7 +339,6 @@ uint8_t value = (log10(255/((float)xMinusHalfdB+1)) * 105.54571334);
 if (value == 255) value = 254;
 //printf("xMinusHalfdB=%d  value=%d\n",xMinusHalfdB,value);
 	VS1053_WriteRegister(SPI_VOL,value,value);
-	if (xMinusHalfdB != 0) printf("##CLI.VOL %d\n",xMinusHalfdB);
 }
 
 /**

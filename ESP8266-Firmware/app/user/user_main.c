@@ -65,16 +65,16 @@ void uartInterfaceTask(void *pvParameters) {
 	struct ip_info *info;
 	struct device_settings *device;
 	struct station_config* config;
-	wifi_station_set_auto_connect(false);
+//	wifi_station_set_auto_connect(false);
 //	wifi_station_set_reconnect_policy(false);
 	wifi_station_set_hostname("WifiWebRadio");
-	wifi_station_ap_number_set(2); // only 	
+//	wifi_station_ap_number_set(2); // only 	
 	
 	device = getDeviceSettings();
 	config = malloc(sizeof(struct station_config));
 	info = malloc(sizeof(struct ip_info));
-	wifi_get_ip_info(STATION_IF, info);
-//	wifi_station_get_config_default(config);
+	wifi_get_ip_info(STATION_IF, info); // ip netmask dw
+	wifi_station_get_config_default(config); //ssid passwd
 	if ((device->ssid[0] == 0xFF)&& (device->ssid2[0] == 0xFF) )  {eeEraseAll(); device = getDeviceSettings();} // force init of eeprom
 	if (device->ssid2[0] == 0xFF) {device->ssid2[0] = 0; device->pass2[0] = 0; }
 	printf("AP1: %s, AP2: %s\n",device->ssid,device->ssid2);
@@ -82,17 +82,17 @@ void uartInterfaceTask(void *pvParameters) {
 	if ((strlen(device->ssid)==0)||(device->ssid[0]==0xff)/*||(device->ipAddr[0] ==0)*/) // first use
 	{
 		printf("first use\n");
-		IP4_ADDR(&(info->ip), 192, 168, 1, 254);
-		IP4_ADDR(&(info->netmask), 0xFF, 0xFF,0xFF, 0);
-		IP4_ADDR(&(info->gw), 192, 168, 1, 254);
-		IPADDR2_COPY(&device->ipAddr, &info->ip);
-		IPADDR2_COPY(&device->mask, &info->netmask);
-		IPADDR2_COPY(&device->gate, &info->gw);
+//		IP4_ADDR(&(info->ip), 192, 168, 1, 254);
+//		IP4_ADDR(&(info->netmask), 0xFF, 0xFF,0xFF, 0);
+//		IP4_ADDR(&(info->gw), 192, 168, 1, 254);
+//		IPADDR2_COPY(&device->ipAddr, &info->ip);
+//		IPADDR2_COPY(&device->mask, &info->netmask);
+//		IPADDR2_COPY(&device->gate, &info->gw);
 //		strcpy(device->ssid,config->ssid);
 //		strcpy(device->pass,config->password);
-		device->dhcpEn = true;
-		wifi_set_ip_info(STATION_IF, info);
-		saveDeviceSettings(device);	
+//		device->dhcpEn = true;
+//		wifi_set_ip_info(STATION_IF, info);
+//		saveDeviceSettings(device);	
 	}
 	
 		IP4_ADDR(&(info->ip), device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3]);
@@ -142,6 +142,7 @@ void uartInterfaceTask(void *pvParameters) {
 		{
 					printf("\n");
 //					smartconfig_stop();
+wifi_station_disconnect();
 					FlashOn = 10;FlashOff = 200;
 					vTaskDelay(200);
 					printf("Config not found\n\n");
@@ -161,7 +162,7 @@ void uartInterfaceTask(void *pvParameters) {
 		}//
 
 	}
-	wifi_station_set_reconnect_policy(true);
+//	wifi_station_set_reconnect_policy(true);
 	// update device info
 	wifi_get_ip_info(STATION_IF, info);
 //	wifi_station_get_config(config);
@@ -170,7 +171,8 @@ void uartInterfaceTask(void *pvParameters) {
 	IPADDR2_COPY(&device->gate, &info->gw);
 //	strcpy(device->ssid,config->ssid);
 //	strcpy(device->pass,config->password);
-	saveDeviceSettings(device);			
+	saveDeviceSettings(device);	
+
 //autostart	
 	printf("autostart: playing:%d, currentstation:%d\n",device->autostart,device->currentstation);
 	currentStation = device->currentstation;
@@ -342,7 +344,7 @@ void user_init(void)
 	test_upgrade();
 	extramInit();
 	initBuffer();
-	wifi_set_opmode(STATION_MODE);
+	wifi_set_opmode_current(STATION_MODE);
 	Delay(100);	
 	system_print_meminfo();
 	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
@@ -362,4 +364,3 @@ void user_init(void)
 	printf("t2 task: %x\n",pxCreatedTask);
 
 }
-

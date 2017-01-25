@@ -97,12 +97,24 @@ ICACHE_FLASH_ATTR struct icyHeader* clientGetHeader()
 	
 ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 {
-  char* str; 
+  char* str;
+  char* ns; 
   char path[116] = "/";
   char url[73]; 
   char port[5] = "80";
   int remove = 0;
   int i = 0; int j = 0;
+  
+// for extm3u skip line with #EXTINF  
+  str = strstr(s,"#EXTINF");
+  if (str != NULL) //skip to next line
+  {
+	ns = str;
+//	printf("in EXTM3U: %s\n",ns);
+    while ((strlen(ns) > 1) && (ns[0]!=0x0A)) ns++;
+//	printf("EXTM3U: %s\n",ns);
+	s= ns;
+  }
   str = strstr(s,"<location>http://");  //for xspf
   if (str != NULL) remove = 17;
   if (str ==NULL) 
@@ -803,7 +815,7 @@ IRAM_ATTR void vsTask(void *pvParams) {
 			vTaskDelay(1);			
 		} else 
 		{
-			vTaskDelay(20);		
+			vTaskDelay(30);		
 //	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 //	printf("watermark vstask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);			
 		}	

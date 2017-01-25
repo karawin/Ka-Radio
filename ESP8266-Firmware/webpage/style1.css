@@ -12,6 +12,7 @@ html,body {
 	overflow:hidden;
 	margin:0
 }
+
 #HEAD {
 	width:100%;
 	min-height:55px;
@@ -70,7 +71,7 @@ div.LEFT {
 
 #CONTENT {
 	width:90%;
-	overflow:auto;
+	overflow:auto;	
 	min-height:calc(100% - 70px);
 	margin-left:auto;
 	margin-right:auto;

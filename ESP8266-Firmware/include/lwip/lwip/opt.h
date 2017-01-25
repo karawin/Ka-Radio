@@ -954,6 +954,7 @@
  */
 #ifndef TCP_MSS
 #define TCP_MSS                         536
+//#define TCP_MSS                         720
 #endif
 
 /**
@@ -974,7 +975,7 @@
  * To achieve good performance, this should be at least 2 * TCP_MSS.
  */
 #ifndef TCP_SND_BUF
-#define TCP_SND_BUF                     (2 * TCP_MSS)
+#define TCP_SND_BUF                     (4 * TCP_MSS)
 #endif
 
 /**

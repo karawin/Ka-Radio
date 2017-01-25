@@ -81,6 +81,7 @@ uint16_t	VS1053_GetDecodeTime();
 void	VS1053_flush_cancel(uint8_t mode);// 0 only fillbyte  1 before play    2 close play
 
 //Volume control
+void VS1053_DisableAnalog(void);
 uint8_t 	VS1053_GetVolume();
 uint8_t 	VS1053_GetVolumeLinear();
 void	VS1053_SetVolume(uint8_t xMinusHalfdB);

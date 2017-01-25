@@ -10,6 +10,14 @@ struct device_settings_ext {
 	uint8_t pass2[64];
 	uint8_t  futur[115];
 };
+
+//define for bit array in theme
+#define T_THEME 	1
+#define NT_THEME	0xFE
+#define T_PATCH 	2
+#define NT_PATCH	0xFD
+#define T_LED		4
+#define NT_LED		0xFB
 struct device_settings {
 	uint8_t dhcpEn;
 	uint8_t ipAddr[4];
@@ -28,7 +36,7 @@ struct device_settings {
 	uint8_t autostart; // 0: stopped, 1: playing
 	uint8_t i2sspeed; // 0 = 48kHz, 1 = 96kHz, 2 = 128kHz
 	uint32_t uartspeed; // serial baud
-	uint8_t theme;  // 0 ligth blue, 1 Dark brown
+	uint8_t options;  // bit0:0 theme ligth blue, 1 Dark brown, bit1: 0 patch load  1 no patch, bit2: O blink led  1 led on On play
 	char ua[40]; // user agent
 	uint8_t pass2[60];
 };

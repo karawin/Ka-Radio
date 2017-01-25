@@ -1023,6 +1023,34 @@ function setMainHeight(name) {
 //	checkwebsocket();
 }
 
+function printList()
+{
+   var html="<html>";
+   id = 0;
+//   html+= document.getElementById(id).innerHTML;
+   html+="</html>";
+   html+="<h1>KaraDio Stations list</h1><br/><hr><br/>";
+   for(id; id < maxStation; id++) {
+     idstr = id.toString();
+	 if (localStorage.getItem(idstr) != null)
+	 {	
+		try {
+				arr = JSON.parse(localStorage.getItem(idstr));
+		} catch(e){console.log("error"+e);}
+		if(arr["Name"].length > 0) 
+		{
+			html+=idstr+"&nbsp;&nbsp;"+arr["Name"]+"<br/>";
+		}
+	 }		
+   }
+   var printWin = window.open('','','left=0,top=0,width=1,height=1,toolbar=0,scrollbars=0,status  =0');
+   printWin.document.write(html);
+   printWin.document.close();
+   printWin.focus();
+   printWin.print();
+   printWin.close();
+}
+
 document.addEventListener("DOMContentLoaded", function() {
 	document.getElementById("tab1").addEventListener("click", function() {
 			if (stchanged) stChanged();

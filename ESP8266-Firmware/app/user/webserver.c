@@ -54,8 +54,8 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 		struct device_settings *device;
 		device = getDeviceSettings();
 		if (device != NULL)	 {
-			if (device->theme) strcpy(name , "/style1.css");
-//			printf("name: %s, theme:%d\n",name,device->theme);
+			if (device->options & T_THEME) strcpy(name , "/style1.css");
+//			printf("name: %s, theme:%d\n",name,device->options&T_THEME);
 			infree(device);
 		}
 	}
@@ -150,10 +150,12 @@ ICACHE_FLASH_ATTR void clientSetOvol(int8_t ovol)
 	printf("##CLI.OVOLSET#: %d\n",ovol);
 }
 
+// set the current volume with its offset
 ICACHE_FLASH_ATTR void setOffsetVolume(void) {
 		struct device_settings *device;
 		device = getDeviceSettings();
 		int16_t uvol;
+		printf("##CLI.VOL#: %d\n",device->vol);
 		uvol = device->vol+clientOvol;
 		if (uvol > 254) uvol = 254;
 		if (uvol <=0) uvol = 1;
@@ -162,21 +164,43 @@ ICACHE_FLASH_ATTR void setOffsetVolume(void) {
 		infree(device);			
 }
 
+// set the volume with vol, save it to device and add offset
 ICACHE_FLASH_ATTR void setVolume(char* vol) {
 		struct device_settings *device;
-		uint8_t ivol = atoi(vol);
+		uint16_t ivol = atoi(vol);
 		int16_t uvol = atoi(vol);
 		uvol += clientOvol;
 		if (uvol > 254) uvol = 254;
-		if (uvol <=0) uvol = 1;
-		device = getDeviceSettings();
+		if (uvol <0) uvol = 0;
 		if(vol) {
-//			printf("setVol: \"%s + %d\"\n",vol,clientOvol);
+//			printf("setVol: \"%s + %d, uvol: %d, ivol:%d\"\n",vol,clientOvol,uvol,ivol);
+			device = getDeviceSettings();
 			VS1053_SetVolume(uvol);
+			printf("##CLI.VOL#: %d\n",ivol);
+
 			if (device != NULL)
 				if (device->vol != (ivol)){ device->vol = ivol;saveDeviceSettings(device);}
 		}
-		if (device != NULL) infree(device);			
+		infree(device);			
+}
+
+ICACHE_FLASH_ATTR uint16_t getVolume() {
+	return (VS1053_GetVolume()-clientOvol);
+}
+
+// Set the volume with increment vol
+ICACHE_FLASH_ATTR void setRelVolume(int8_t vol) {
+	struct device_settings *device;
+	char Vol[5];
+	int16_t rvol;
+	device = getDeviceSettings();
+	rvol = device->vol+vol;
+	if (rvol <0) rvol = 0;
+	if (rvol > 254) rvol = 254;
+	sprintf(Vol,"%d",rvol);
+	infree(device);		
+	setVolume(Vol);
+	wsVol(Vol);
 }
 
 // flip flop the theme indicator
@@ -184,10 +208,9 @@ ICACHE_FLASH_ATTR void theme() {
 		struct device_settings *device;
 		device = getDeviceSettings();
 		if (device != NULL)	 {
-//			if (device->theme) device->theme=false; else device->theme = true;
-			device->theme = !device->theme;
+			if ((device->options&T_THEME)!=0) device->options&=NT_THEME; else device->options |= T_THEME;
 			saveDeviceSettings(device);
-//			printf("theme:%d\n",device->theme);
+//			printf("theme:%d\n",device->options&T_THEME);
 			infree(device);	
 		}
 }
