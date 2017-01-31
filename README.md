@@ -76,7 +76,15 @@ GPIO04 to VS1053 DREQ<br />
 GPIO00 to VS1053 XRST<br />
 GPIO02<br />
 GPIO15 to VS1053 XCS<br />
-<br />
+<br/>
+Optional external ram (23LCV1024) support (1:CS/=GPIO16 2:MISO=GPIO12 3:NC 4:GND 5:MOSI=GPIO13 6:SCK=GPIO14 7:GND 8:3.3v)<br/>
+If your chip has a /Vhold in place of /VBAT, the pin 7 must be wired to VCC (pin8)<br/>
+Attention:<br>
+	The optional led is now on GPIO2. The blue led on the ESP8266 is blinking at the same rate.<br/>
+	GPIO16 is now the Chip select for the external ram if any.<br/>
+	The external ram is detected at boot time if present.<br/>
+
+
 ##Used hardware
 WiFi : ESP8266 (ESP-12 with 32Mbits flash)<br />
 Additional MCU (as a bridge UART<=>UI): AVR<br />
