@@ -62,7 +62,7 @@ The second step will add some hardware buttons (vol + -, station + -, play ...)<
 - Wiring: <br />
 From ESP8266_ESP12( 3.3 v) to VS1053 (5 v)<br />
 REST<br />
-ADC   if control panel nut used, this input must be grounded.<br />
+ADC   if control panel is not used, this input must be grounded.<br />
 CH_PD to 3.3v<br />
 GPIO16 (a 1Hz output)<br />
 GPIO14 to VS1053 SCK<br />
