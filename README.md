@@ -2,12 +2,15 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations<BR/>
-###Release 1.1.5 Built on 2017/01/14 <br/>
+###Release 1.1.6 Built on 2017/02/02 <br/>
 New features:<br/>
 - Modification of the list of uart command. See  <a href="http://karadio.karawin.fr/Interface.txt"  target="_blank"><font color="#14A692">uart and html interfaces</font></a><br/>
-- New IR and LCD software<BR/>
-- Autoplay corrected</br>
-- Many bugs removed thanks to users feedback's.<BR/>
+- New sys.patch command. Inhibit or permit (default) the load of a vs1053 patch for AAC stations.<BR/>
+- New sys.led command. Default is blinking mode, or Play mode: the led is on when a station is playing.</br>
+- Modification of the wifi.con command. Now the AP can be set in the AP mode (192.168.4.1) without the need of the web interface.</br>
+- New print button on the Stations panel: Print the list of stations, number and name.<br/>
+- New logo ;-)<br/>
+- Many bugs removed thanks to users feedback's.<BR/><BR/>
 
 
 <BR/>
