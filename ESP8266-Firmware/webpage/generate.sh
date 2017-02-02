@@ -45,3 +45,9 @@ sed -i 's/\[\]/\[\] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR /g' index
 #rm index.html
 #mv index.html index.min.html
 mv index.htm index.html
+
+xxd -i logo.png > logo
+sed -i 's/\[\]/\[\] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR /g' logo
+
+xxd -i favicon.png > favicon
+sed -i 's/\[\]/\[\] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR /g' favicon

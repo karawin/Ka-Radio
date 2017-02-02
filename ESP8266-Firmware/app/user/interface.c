@@ -19,10 +19,11 @@ extern void playStation(char* id);
 extern void setVolume(char* vol);
 extern void setRelVolume(int8_t vol);
 extern uint16_t getVolume(void);
+extern uint8_t playing;
 
 #define MAX_WIFI_STATIONS 50
-
-	bool inside = false;
+char errmsg[]={"##CMD_ERROR#\n"};
+bool inside = false;
 
 void setVolumePlus()
 {
@@ -129,6 +130,40 @@ ICACHE_FLASH_ATTR void wifiScan()
 ICACHE_FLASH_ATTR void wifiConnect(char* cmd)
 {
 	int i;
+	struct device_settings* devset = getDeviceSettings();
+	for(i = 0; i < 32; i++) devset->ssid[i] = 0;
+	for(i = 0; i < 64; i++) devset->pass[i] = 0;	
+	char *t = strstr(cmd, "(\"");
+	if(t == 0)
+	{
+		printf("\n##WIFI.CMD_ERROR#");
+		return;
+	}
+	char *t_end  = strstr(t, "\",\"");
+	if(t_end == 0)
+	{
+		printf("\n##WIFI.CMD_ERROR#");
+		return;
+	}
+	
+	strncpy( devset->ssid, (t+2), (t_end-t-2) );
+	
+	t = t_end+3;
+	t_end = strstr(t, "\")");
+	if(t_end == 0)
+	{
+		printf(errmsg);
+		return;
+	}
+	
+	strncpy( devset->pass, t, (t_end-t)) ;
+	devset->dhcpEn = 1;
+	saveDeviceSettings(devset);
+	printf("\n##AP1: %s with dhcp on next reset#\n",devset->ssid);
+	free(devset);
+
+	
+/*	int i;
 	struct station_config* cfg = malloc(sizeof(struct station_config));
 	
 	for(i = 0; i < 32; i++) cfg->ssid[i] = 0;
@@ -177,11 +212,18 @@ ICACHE_FLASH_ATTR void wifiConnect(char* cmd)
 	else printf("\n##WIFI.NOT_CONNECTED#");
 	
 	free(cfg);
+*/	
 }
 
 ICACHE_FLASH_ATTR void wifiConnectMem()
 {
-	int i;
+	
+	struct device_settings* devset = getDeviceSettings();
+	printf("\n##AP1: %s#",devset->ssid);
+	printf("\n##AP2: %s#\n",devset->ssid2);
+	free(devset);
+	 
+/*	int i;
 	struct station_config* cfg = malloc(sizeof(struct station_config));
 	
 	for(i = 0; i < 32; i++) cfg->ssid[i] = 0;
@@ -201,6 +243,7 @@ ICACHE_FLASH_ATTR void wifiConnectMem()
 	else printf("\n##WIFI.NOT_CONNECTED#");
 	
 	free(cfg);
+	*/
 }
 
 ICACHE_FLASH_ATTR void wifiDisconnect()
@@ -232,13 +275,13 @@ ICACHE_FLASH_ATTR void clientParseUrl(char* s)
     char *t = strstr(s, "(\"");
 	if(t == 0)
 	{
-		printf("\n##CLI.CMD_ERROR#");
+		printf(errmsg);
 		return;
 	}
 	char *t_end  = strstr(t, "\")")-2;
     if(t_end <= 0)
     {
-		printf("\n##CLI.CMD_ERROR#");
+		printf(errmsg);
 		return;
     }
     char *url = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -258,13 +301,13 @@ ICACHE_FLASH_ATTR void clientParsePath(char* s)
 	printf("cli.path: %s\n",t);
 	if(t == 0)
 	{
-		printf("\n##CLI.CMD_ERROR#");
+		printf(errmsg);
 		return;
 	}
 	char *t_end  = strstr(t, "\")")-2;
     if(t_end <= 0)
     {
-		printf("\n##CLI.CMD_ERROR#");
+		printf(errmsg);
 		return;
     }
     char *path = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -284,13 +327,13 @@ ICACHE_FLASH_ATTR void clientParsePort(char *s)
     char *t = strstr(s, "(\"");
 	if(t == 0)
 	{
-		printf("\n##CLI.CMD_ERROR#");
+		printf(errmsg);
 		return;
 	}
 	char *t_end  = strstr(t, "\")")-2;
     if(t_end <= 0)
     {
-		printf("\n##CLI.CMD_ERROR#");
+		printf(errmsg);
 		return;
     }
     char *port = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -311,13 +354,13 @@ ICACHE_FLASH_ATTR void clientPlay(char *s)
     char *t = strstr(s, "(\"");
 	if(t == 0)
 	{
-		printf("\n##CLI.CMD_ERROR#");
+		printf(errmsg);
 		return;
 	}
 	char *t_end  = strstr(t, "\")")-2;
     if(t_end <= 0)
     {
-		printf("\n##CLI.CMD_ERROR#");
+		printf(errmsg);
 		return;
     }
    char *id = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -342,7 +385,7 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 		char *t_end  = strstr(t, "\")")-2;
 		if(t_end <= 0)
 		{
-			printf("\n##CLI.CMD_ERROR#");
+			printf(errmsg);
 			return;
 		}	
 		i = atoi(t+2);
@@ -367,23 +410,27 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 ICACHE_FLASH_ATTR void clientI2S(char* s)
 {
     char *t = strstr(s, "(\"");
+	char message[] ={"\n##I2S speed: %d, 0=48kHz, 1=96kHz, 2=192kHz#\n"};
+	struct device_settings *device;
+	device = getDeviceSettings();
 	if(t == NULL)
 	{
-		printf("\n##CLI.CMD_ERROR#");
+		printf(message,device->i2sspeed);
+		free(device);
 		return;
 	}
 	char *t_end  = strstr(t, "\")");
     if(t_end == NULL)
     {
-		printf("\n##CLI.CMD_ERROR#");
+		printf(errmsg);
 		return;
     }	
 	uint8_t speed = atoi(t+2);
 	VS1053_I2SRate(speed);
-	struct device_settings *device;
-	device = getDeviceSettings();
+
 	device->i2sspeed = speed;
 	saveDeviceSettings(device);	
+	printf(message,speed);
 	free(device);
 }
 ICACHE_FLASH_ATTR void clientUart(char* s)
@@ -432,7 +479,7 @@ ICACHE_FLASH_ATTR void clientVol(char *s)
     if(t_end <= 0)
     {
 
-		//printf("\n##CLI.CMD_ERROR#");
+		printf("\n##CLI.CMD_ERROR#");
 		return;
     }
    char *vol = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -451,22 +498,57 @@ ICACHE_FLASH_ATTR void clientVol(char *s)
 ICACHE_FLASH_ATTR void syspatch(char* s)
 {
     char *t = strstr(s, "(\"");
+	struct device_settings *device;
+	device = getDeviceSettings();
 	if(t == NULL)
 	{
-		printf("\n##SYS.CMD_ERROR#");
+		printf("\n##VS1053 Patch is %s#\n",((device->options & T_PATCH)!= 0)?"Not loaded":"Loaded");
+		free(device);
 		return;
 	}
 	char *t_end  = strstr(t, "\")");
     if(t_end == NULL)
     {
-		printf("\n##SYS.CMD_ERROR#");
+		printf(errmsg);
 		return;
     }	
 	uint8_t value = atoi(t+2);
+	if (value ==0) 
+		device->options |= T_PATCH; 
+	else 
+		device->options &= NT_PATCH; // 0 = load patch
+	
+	saveDeviceSettings(device);	
+	printf("\n##VS1053 Patch will be %s after power Off and On#\n",((device->options & T_PATCH)!= 0)?"unloaded":"Loaded");
+	free(device);	
+}
+
+ICACHE_FLASH_ATTR void sysled(char* s)
+{
+    char *t = strstr(s, "(\"");
 	struct device_settings *device;
 	device = getDeviceSettings();
-	if (value ==0) device->options |= T_PATCH; else device->options &= NT_PATCH; // 0 = load patch
+	extern bool ledStatus;
+	if(t == NULL)
+	{
+		printf("\n##Led is in %s#\n",((device->options & T_LED)== 0)?"Blink mode":"Play mode");
+		free(device);
+		return;
+	}
+	char *t_end  = strstr(t, "\")");
+    if(t_end == NULL)
+    {
+		printf(errmsg);
+		return;
+    }	
+	uint8_t value = atoi(t+2);
+	if (value ==0) 
+	{device->options |= T_LED; ledStatus = false; if (playing) gpio2_output_set(0);}
+	else 
+	{device->options &= NT_LED; ledStatus =true;} // options:0 = ledStatus true = Blink mode
+	
 	saveDeviceSettings(device);	
+	printf("\n##LED is in %s#\n",((device->options & T_LED)== 0)?"Blink mode":"Play mode");
 	free(device);
 	
 }
@@ -509,6 +591,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
     else if(strcmp(tmp, "sys.boot") == 0) system_restart();
     else if(strcmp(tmp,"sys.update") == 0) update_firmware();
 	else if(startsWith("sys.patch",tmp)) syspatch(tmp);
+	else if(startsWith("sys.led",tmp)) sysled(tmp);
 	else printInfo(tmp);
 	free(tmp);
 	

@@ -21,11 +21,13 @@ static enum clientStatus cstatus;
 //static uint32_t metacount = 0;
 //static uint16_t metasize = 0;
 
+extern bool ledStatus;
 
 xSemaphoreHandle sConnect, sConnected, sDisconnect, sHeader;
 
-static uint8_t connect = 0, playing = 0, once = 0;
+static uint8_t connect = 0,once = 0;
 static uint8_t volume = 0;
+uint8_t playing = 0;
 
 
 
@@ -376,6 +378,7 @@ ICACHE_FLASH_ATTR bool clientSaveOneHeader(char* t, uint16_t len, uint8_t header
 	for(i = 0; i<len+1; i++) header.members.mArr[header_num][i] = 0;
 	strncpy(header.members.mArr[header_num], t, len);
 	header.members.mArr[header_num] = stringify(header.members.mArr[header_num],len);
+	vTaskDelay(10);
 	printf("##CLI.ICY%d#: %s\n",header_num,header.members.mArr[header_num]);
 //	printf("header after num:%d addr:0x%x  cont:\"%s\"\n",header_num,header.members.mArr[header_num],header.members.mArr[header_num]);
 	return true;
@@ -497,6 +500,7 @@ ICACHE_FLASH_ATTR void clientDisconnect(char* from)
 	//connect = 0;
 	xSemaphoreGive(sDisconnect);
 	printf("##CLI.STOPPED# from %s\n",from);
+	if (!ledStatus) gpio2_output_set(1);
 	vTaskDelay(10);
 //	clearHeaders();
 }
@@ -781,6 +785,7 @@ int jj = 0;
 			if (once == 0)vTaskDelay(30);
 			VS1053_SetVolume(volume);
 			printf("##CLI.PLAYING#\n");
+			if (!ledStatus) gpio2_output_set(0);
 		}	
     }
 }

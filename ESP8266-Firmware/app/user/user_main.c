@@ -33,7 +33,8 @@
 void uart_div_modify(int no, unsigned int freq);
 
 //	struct station_config config;
-int FlashOn = 5,FlashOff = 5;
+unsigned FlashOn = 5,FlashOff = 5;
+bool ledStatus = true; // true: normal blink, false: led on when playing
 sc_status status = 0;
 	
 void cb(sc_status stat, void *pdata)
@@ -82,17 +83,17 @@ void uartInterfaceTask(void *pvParameters) {
 	if ((strlen(device->ssid)==0)||(device->ssid[0]==0xff)/*||(device->ipAddr[0] ==0)*/) // first use
 	{
 		printf("first use\n");
-//		IP4_ADDR(&(info->ip), 192, 168, 1, 254);
-//		IP4_ADDR(&(info->netmask), 0xFF, 0xFF,0xFF, 0);
-//		IP4_ADDR(&(info->gw), 192, 168, 1, 254);
-//		IPADDR2_COPY(&device->ipAddr, &info->ip);
-//		IPADDR2_COPY(&device->mask, &info->netmask);
-//		IPADDR2_COPY(&device->gate, &info->gw);
-//		strcpy(device->ssid,config->ssid);
-//		strcpy(device->pass,config->password);
-//		device->dhcpEn = true;
-//		wifi_set_ip_info(STATION_IF, info);
-//		saveDeviceSettings(device);	
+		IP4_ADDR(&(info->ip), 192, 168, 1, 254);
+		IP4_ADDR(&(info->netmask), 0xFF, 0xFF,0xFF, 0);
+		IP4_ADDR(&(info->gw), 192, 168, 1, 254);
+		IPADDR2_COPY(&device->ipAddr, &info->ip);
+		IPADDR2_COPY(&device->mask, &info->netmask);
+		IPADDR2_COPY(&device->gate, &info->gw);
+		strcpy(device->ssid,config->ssid);
+		strcpy(device->pass,config->password);
+		device->dhcpEn = true;
+		wifi_set_ip_info(STATION_IF, info);
+		saveDeviceSettings(device);	
 	}
 	
 		IP4_ADDR(&(info->ip), device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3]);
@@ -183,6 +184,8 @@ wifi_station_disconnect();
 		playStationInt(device->currentstation);
 	}
 //
+	ledStatus = ((device->options & T_LED)== 0);
+//
 	free(info);
 	free (device);
 	free (config);
@@ -225,10 +228,10 @@ void testtask(void* p) {
 	vTaskDelay(50);
 	while(1) {
 //		gpio16_output_set(0);
-		gpio2_output_set(0);
+		if (ledStatus) gpio2_output_set(0);
 		vTaskDelay(FlashOff);
 //		gpio16_output_set(1);
-		gpio2_output_set(1);
+		if (ledStatus) gpio2_output_set(1);
 		vTaskDelay(FlashOn);
 	};
 }
@@ -356,7 +359,7 @@ void user_init(void)
 	printf("t0 task: %x\n",pxCreatedTask);
 	xTaskCreate(uartInterfaceTask, "t1", 320, NULL, 6, &pxCreatedTask); // 244
 	printf("t1 task: %x\n",pxCreatedTask);
-	xTaskCreate(vsTask, "t4", 370, NULL,4, &pxCreatedTask); //370
+	xTaskCreate(vsTask, "t4", 380, NULL,4, &pxCreatedTask); //370
 	printf("t4 task: %x\n",pxCreatedTask);
 	xTaskCreate(clientTask, "t3", 830, NULL, 5, &pxCreatedTask); // 830
 	printf("t3 task: %x\n",pxCreatedTask);

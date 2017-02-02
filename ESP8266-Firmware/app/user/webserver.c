@@ -148,6 +148,7 @@ ICACHE_FLASH_ATTR void clientSetOvol(int8_t ovol)
 {
 	clientOvol = ovol;
 	printf("##CLI.OVOLSET#: %d\n",ovol);
+	vTaskDelay(20);
 }
 
 // set the current volume with its offset
@@ -177,7 +178,6 @@ ICACHE_FLASH_ATTR void setVolume(char* vol) {
 			device = getDeviceSettings();
 			VS1053_SetVolume(uvol);
 			printf("##CLI.VOL#: %d\n",ivol);
-
 			if (device != NULL)
 				if (device->vol != (ivol)){ device->vol = ivol;saveDeviceSettings(device);}
 		}
