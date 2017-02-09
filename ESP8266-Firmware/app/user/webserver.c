@@ -126,7 +126,7 @@ ICACHE_FLASH_ATTR char* getParameter(char* sep,char* param, char* data, uint16_t
 			int i;
 			for(i=0; i<(p_end-p + 1); i++) t[i] = 0;
 			strncpy(t, p, p_end-p);
-//			printf("getParam: in: \"%s\"   \"%s\"\n",data,t);
+//printf("getParam: in: \"%s\"   \"%s\"\n",data,t);
 			return t;
 		} else return NULL;
 	} else return NULL;
@@ -353,17 +353,19 @@ ICACHE_FLASH_ATTR void playStation(char* id) {
 ICACHE_FLASH_ATTR void pathParse(char* str)
 {
 	int i = 0;
-	char* pend;
+	char *pend;
+	char  num[3]= {0,0,0};
 	uint8_t cc;
 	if (str == NULL) return;
 	for (i; i< strlen(str);i++)
 	{
 		if (str[i] == '%')
 		{
-			cc = strtol(&str[i+1], &pend,16);
+			num[0] = str[i+1]; num[1] = str[i+2];
+			cc = strtol(num, &pend,16);
 			str[i] = cc;			
 			str[i+1]=0;
-			strcat(str, pend);
+			if (str[i+3] !=0)strcat(str, str+i+3);
 		}
 	}
 }
@@ -520,7 +522,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				name = getParameterFromResponse("name=", data, data_size);
 				port = getParameterFromResponse("port=", data, data_size);
 				ovol = getParameterFromResponse("ovol=", data, data_size);
-//				printf("nb:%d,si:%x,nsi:%x,id:%s,url:%s,file:%s\n",i,si,nsi,id,url,file);
+//printf("nb:%d,si:%x,nsi:%x,id:%s,url:%s,file:%s\n",i,si,nsi,id,url,file);
 				if(id ) {
 					if (i == 0) uid = atoi(id);
 					if ((atoi(id) >=0) && (atoi(id) < 255))
@@ -546,7 +548,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				data = strstr(data,"&&")+2;
 //				printf("si:%x, nsi:%x, addr:%x\n",si,nsi,data);
 			}
-//			printf("save station: %d, unb:%d, addr:%x\n",uid,unb,nsi);
+//printf("save station: %d, unb:%d, addr:%x\n",uid,unb,si);
 			saveMultiStation(si, uid,unb);
 			infree (si);
 		}
@@ -597,6 +599,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 	} else if(strcmp(name, "/icy") == 0)	
 	{	
 //		printf("icy vol \n");
+		char currentSt[5]; sprintf(currentSt,"%d",currentStation);
 		char vol[5]; sprintf(vol,"%d",(VS1053_GetVolume()));
 		char treble[5]; sprintf(treble,"%d",VS1053_GetTreble());
 		char bass[5]; sprintf(bass,"%d",VS1053_GetBass());
@@ -612,7 +615,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		if (not2 ==NULL) not2=header->members.single.audioinfo;
 		if ((header->members.single.notice2 != NULL)&(strlen(header->members.single.notice2)==0)) not2=header->members.single.audioinfo;
 		int json_length ;
-		json_length =155+ //144
+		json_length =166+ //144 155
 		((header->members.single.description ==NULL)?0:strlen(header->members.single.description)) +
 		((header->members.single.name ==NULL)?0:strlen(header->members.single.name)) +
 		((header->members.single.bitrate ==NULL)?0:strlen(header->members.single.bitrate)) +
@@ -621,7 +624,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		((not2 ==NULL)?0:strlen(not2))+
 		((header->members.single.genre ==NULL)?0:strlen(header->members.single.genre))+
 		((header->members.single.metadata ==NULL)?0:strlen(header->members.single.metadata))
-		+	strlen(vol) +strlen(treble)+strlen(bass)+strlen(tfreq)+strlen(bfreq)+strlen(spac)
+		+ strlen(currentSt)+	strlen(vol) +strlen(treble)+strlen(bass)+strlen(tfreq)+strlen(bfreq)+strlen(spac)
 		;
 //		printf("icy start header %x  len:%d vollen:%d vol:%s\n",header,json_length,strlen(vol),vol);
 		
@@ -632,8 +635,9 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			respOk(conn);
 		}
 		else {				
-			sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"descr\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\",\"meta\":\"%s\",\"vol\":\"%s\",\"treb\":\"%s\",\"bass\":\"%s\",\"tfreq\":\"%s\",\"bfreq\":\"%s\",\"spac\":\"%s\",\"auto\":\"%c\"}",
+			sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"curst\":\"%s\",\"descr\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\",\"meta\":\"%s\",\"vol\":\"%s\",\"treb\":\"%s\",\"bass\":\"%s\",\"tfreq\":\"%s\",\"bfreq\":\"%s\",\"spac\":\"%s\",\"auto\":\"%c\"}",
 			json_length,
+			currentSt,
 			(header->members.single.description ==NULL)?"":header->members.single.description,
 			(header->members.single.name ==NULL)?"":header->members.single.name,
 			(header->members.single.bitrate ==NULL)?"":header->members.single.bitrate,
@@ -662,15 +666,20 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* valid = getParameterFromResponse("valid=", data, data_size);
 			if(valid != NULL) if (strcmp(valid,"1")==0) val = true;
 			char* ssid = getParameterFromResponse("ssid=", data, data_size);
+			pathParse(ssid);
 			char* pasw = getParameterFromResponse("pasw=", data, data_size);
+			pathParse(pasw);
 			char* ssid2 = getParameterFromResponse("ssid2=", data, data_size);
+			pathParse(ssid2);
 			char* pasw2 = getParameterFromResponse("pasw2=", data, data_size);
+			pathParse(pasw2);
 			char* aip = getParameterFromResponse("ip=", data, data_size);
 			char* amsk = getParameterFromResponse("msk=", data, data_size);
 			char* agw = getParameterFromResponse("gw=", data, data_size);
 			char* aua = getParameterFromResponse("ua=", data, data_size);
+			pathParse(aua);
 			char* adhcp = getParameterFromResponse("dhcp=", data, data_size);
-//			printf("rec:%s\nwifi received  valid:%s,val:%d, ssid:%s, pasw:%s, aip:%s, amsk:%s, agw:%s, adhcp:%s \n",data,valid,val,ssid,pasw,aip,amsk,agw,adhcp);
+// printf("rec:%s\nwifi received  valid:%s,val:%d, ssid:%s, pasw:%s, aip:%s, amsk:%s, agw:%s, adhcp:%s, aua:%s \n",data,valid,val,ssid,pasw,aip,amsk,agw,adhcp,aua);
 			if (val) {
 				ip_addr_t valu;
 				ipaddr_aton(aip, &valu);
@@ -685,7 +694,11 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				strcpy(device->ssid2,(ssid2==NULL)?"":ssid2);
 				strcpy(device->pass2,(pasw2==NULL)?"":pasw2);				
 			}
-			strcpy(device->ua,(aua==NULL)?"":aua);
+			if (strlen(device->ua)==0)
+			{
+				if (aua==NULL) {aua=malloc(strlen("Karadio/1.1")+1); strcpy(aua,"Karadio/1.1");}
+			}	
+			if (aua!=NULL) strcpy(device->ua,aua);
 			saveDeviceSettings(device);		
 			uint8_t *macaddr = malloc(10*sizeof(uint8_t));
 			char* macstr = malloc(20*sizeof(char));
@@ -951,7 +964,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 			}	
 		}
 		infree(buf);
-	} else printf("Client entry buf malloc fails socket:%x \n",client_sock);
+	} else printf("Client buf malloc fails socket:%x \n",client_sock);
 	if (result)
 	{
 		int err;
@@ -1026,12 +1039,12 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
 					{	
 						if (xPortGetFreeHeapSize( ) < 4000)
 						{
-							printf ("Low memory %d\n",xPortGetFreeHeapSize( ));
+//							printf ("Low memory %d\n",xPortGetFreeHeapSize( ));
 							vTaskDelay(300);	
 							printf ("Heap size low mem: %d\n",xPortGetFreeHeapSize( ));
 							if (xPortGetFreeHeapSize( ) < 4000)
 							{
-								printf ("Low memory2 %d\n",xPortGetFreeHeapSize( ));					
+								printf ("Low memory %d\n",xPortGetFreeHeapSize( ));					
 								write(client_sock, lowmemory, strlen(lowmemory));
 								close (client_sock);
 								break;							
@@ -1048,7 +1061,7 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
 							4, 
 							NULL ) != pdPASS) 
 							{
-								printf("xTaskCreate 1 failed for stack %d. Retrying...\n",stack);
+								printf("xTaskCreate t10 failed for stack %d. Retrying...\n",stack);
 //								stack -=10;
 								vTaskDelay(150);	
 							}							

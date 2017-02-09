@@ -29,7 +29,8 @@ static uint8_t connect = 0,once = 0;
 static uint8_t volume = 0;
 uint8_t playing = 0;
 
-
+char notfound[]={"Not Found"};
+char strplaying[]={"##CLI.PLAYING#\n"};
 
 /* TODO:
 	- METADATA HANDLING
@@ -112,7 +113,6 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
   if (str != NULL) //skip to next line
   {
 	ns = str;
-//	printf("in EXTM3U: %s\n",ns);
     while ((strlen(ns) > 1) && (ns[0]!=0x0A)) ns++;
 //	printf("EXTM3U: %s\n",ns);
 	s= ns;
@@ -318,13 +318,15 @@ ICACHE_FLASH_ATTR void wsMonitor()
 ICACHE_FLASH_ATTR void wsHeaders()
 {
 	uint8_t header_num;
+	char currentSt[5]; sprintf(currentSt,"%d",currentStation);
 	char* not2;
 	not2 = header.members.single.notice2;
 	if (not2 ==NULL) not2=header.members.single.audioinfo;
 	if ((header.members.single.notice2 != NULL)&(strlen(header.members.single.notice2)==0)) not2=header.members.single.audioinfo;
 
 	int json_length ;
-	json_length =93+
+	json_length =104+ //93
+		strlen(currentSt)+
 		((header.members.single.description ==NULL)?0:strlen(header.members.single.description)) +
 		((header.members.single.name ==NULL)?0:strlen(header.members.single.name)) +
 		((header.members.single.bitrate ==NULL)?0:strlen(header.members.single.bitrate)) +
@@ -337,7 +339,8 @@ ICACHE_FLASH_ATTR void wsHeaders()
 	char* wsh = incmalloc(json_length+1);
 	if (wsh == NULL) {printf("wsHeader malloc fails\n");return;}
 
-	sprintf(wsh,"{\"wsicy\":{\"descr\":\"%s\",\"meta\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\"}}",
+	sprintf(wsh,"{\"wsicy\":{\"curst\":\"%s\",\"descr\":\"%s\",\"meta\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\"}}",
+			currentSt,
 			(header.members.single.description ==NULL)?"":header.members.single.description,
 			(header.members.single.metadata ==NULL)?"":header.members.single.metadata,	
 			(header.members.single.name ==NULL)?"":header.members.single.name,
@@ -525,10 +528,11 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 	if (cstatus != C_DATA)
 	{
 		t1 = strstr(pdata, "404"); 
-		if (t1 != NULL) t1 = strstr(pdata, "Not Found"); 
+		if (t1 != NULL) t1 = strstr(pdata, notfound); 
 		if (t1 != NULL) { // 
-			printf("404 Not Found \n");
-			clientSaveOneHeader("404 Not Found", 13,METANAME);
+			printf(notfound);
+			printf("\n");
+			clientSaveOneHeader(notfound, 13,METANAME);
 			wsHeaders();
 			vTaskDelay(200);
 			clientDisconnect("C_DATA");
@@ -660,8 +664,8 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 						if ((inpchr != NULL) &&(inpchr- (inpdata+cchunk) <16))
 							*inpchr = 0; // replace lf by a end of string
 						else {
-							printf("0D not found\n");
-							printf("len:%d, inpdata:%x, pdata:%x,chunked:%d  cchunk:%d, lc:%d, str:%s\n",len,inpdata,pdata,chunked,cchunk, lc,inpdata+cchunk );
+/*							printf("0D not found\n");
+							printf("len:%d, inpdata:%x, pdata:%x,chunked:%d  cchunk:%d, lc:%d, str:%s\n",len,inpdata,pdata,chunked,cchunk, lc,inpdata+cchunk );*/
 							clientDisconnect("chunk"); clientConnect();
 							lc = 0; 
 							break;
@@ -784,7 +788,7 @@ int jj = 0;
 			playing=1;
 			if (once == 0)vTaskDelay(30);
 			VS1053_SetVolume(volume);
-			printf("##CLI.PLAYING#\n");
+			printf(strplaying);
 			if (!ledStatus) gpio2_output_set(0);
 		}	
     }
@@ -901,15 +905,6 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
 					printf("setsockopt failed\n");
 //////				
-/*				int ipt = IPTOS_THROUGHPUT;
-				int ndl = 1;
-				if (setsockopt (sockfd, IPPROTO_IP,IP_TOS, &ipt,sizeof(int)) < 0)
-					printf("setsockopt1 failed\n");
-				if (setsockopt (sockfd, IPPROTO_TCP,TCP_NODELAY,&ndl,sizeof(int)) < 0)
-					printf("setsockopt2 failed\n"); 
-				if (setsockopt (sockfd, IPPROTO_TCP,TCP_NODELAY,&ndl,sizeof(int)) < 0)
-					printf("setsockopt2 failed\n"); 
-*/
 				do
 				{
 					bytes_read = recvfrom(sockfd, bufrec,RECEIVE, 0, NULL, NULL);						
@@ -936,27 +931,28 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 					{
 						clientDisconnect("try restart"); 
 						clientConnect();
-						printf("##CLI.PLAYING#\n");
+						playing=1; // force
+//						printf(strplaying);
 					}	
-					else if (!playing){ // nothing played
+					else if ((!playing)&&(once == 1)){ // nothing played. Force the read of the buffer
 						// some data not played						
 						if ((!playing )&& (getBufferFree() < (BUFFER_SIZE))) {						
 							playing=1;
 							vTaskDelay(1);
 							if (VS1053_GetVolume()==0) VS1053_SetVolume(volume);
-							printf("##CLI.PLAYING#\n");
+							printf(strplaying);
 							while (getBufferFree() < (BUFFER_SIZE)) vTaskDelay(200);							
 							vTaskDelay(200);
 							playing=0;
 							clientDisconnect("data not played"); 
-						}	
-						//						
-						else{  // nothing received
-							clientSaveOneHeader("Not Found", 9,METANAME);
-							wsHeaders();
 						}
+					}						
+						//						
+					else if ((!playing)&&(once == 0)) {  // nothing received
+							clientSaveOneHeader(notfound, 9,METANAME);
+							wsHeaders();
 					}	
-					else{  //playing once and no more received stream
+					else{  //playing & once=1 and no more received stream
 						while (getBufferFree() < (BUFFER_SIZE)) vTaskDelay(200);
 						vTaskDelay(200);
 						clientDisconnect("once"); 						

@@ -296,6 +296,7 @@ function full(){
 }
 	
 function icyResp(arr) {			
+			document.getElementById('curst').innerHTML = arr["curst"].replace(/\\/g,"");			
 			if ((arr["descr"] =="")||(!document.getElementById('Full').checked))
 				document.getElementById('ldescr').style.display = "none";
 			else 	document.getElementById('ldescr').style.display = "inline-block";
@@ -470,7 +471,7 @@ function wifi(valid) {
 	}
 	xhr.open("POST","wifi",false);
 	xhr.setRequestHeader(content,ctype);
-	xhr.send("valid=" + valid +"&ssid=" + document.getElementById('ssid').value + "&pasw=" + document.getElementById('passwd').value +"&ssid2=" + document.getElementById('ssid2').value + "&pasw2=" + document.getElementById('passwd2').value + "&ip=" + document.getElementById('ip').value+"&msk=" + document.getElementById('mask').value+"&gw=" + document.getElementById('gw').value+"&ua=" + document.getElementById('ua').value+"&dhcp=" + document.getElementById('dhcp').checked+"&");
+	xhr.send("valid=" + valid +"&ssid=" + encodeURIComponent(document.getElementById('ssid').value )+ "&pasw=" + encodeURIComponent(document.getElementById('passwd').value) +"&ssid2=" + encodeURIComponent(document.getElementById('ssid2').value) + "&pasw2=" + encodeURIComponent(document.getElementById('passwd2').value) + "&ip=" + document.getElementById('ip').value+"&msk=" + document.getElementById('mask').value+"&gw=" + document.getElementById('gw').value+"&ua=" + encodeURIComponent(document.getElementById('ua').value) +"&dhcp=" + document.getElementById('dhcp').checked+"&");
 }
 function instantPlay() {
 	var curl;
@@ -754,7 +755,7 @@ function downloadStations()
 				xhr.send(tosend);
 				} catch (e){console.log("error "+e);}
 //			}
-			indmax = 8;
+			indmax = 4;
 			for(line = 7; line < lines.length; line+=indmax){				
 //				console.log(lines[line]);
 				try {

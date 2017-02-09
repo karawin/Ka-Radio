@@ -10,12 +10,12 @@
 
 #define __AVR_ATmega328p__
 #define __AVR_ATmega328P__
-#define ARDUINO 106010
+#define ARDUINO 106013
 #define ARDUINO_MAIN
 #define F_CPU 16000000L
 #define __AVR__
 #define F_CPU 16000000L
-#define ARDUINO 106010
+#define ARDUINO 106013
 #define ARDUINO_AVR_PRO
 #define ARDUINO_ARCH_AVR
 
@@ -31,6 +31,8 @@ void setup(void);
 void serial();
 void draw(int xx);
 void scroll();
+void translateIR();
+void loop(void);
 void loop(void);
 int freeRam ();
 void removeUtf8(byte *characters);

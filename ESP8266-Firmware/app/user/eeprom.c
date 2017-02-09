@@ -121,14 +121,16 @@ int i = 0;
 		uint16_t startaddr = address & 0xFFF;
 		uint16_t maxsize = 4096 - startaddr;
 		uint16_t i;
-		
+//printf("set1 startaddr: %x, size:%x, maxsize: %x, sector: %x, eebuf: %x\n",startaddr,size,maxsize,sector,eebuf);
 		for(i=0; (i<size && i<maxsize); i++) eebuf8[i+startaddr] = inbuf[i];
 		result = spi_flash_write(sector, (uint32 *)eebuf, 4096);
+//printf("set3 startaddr: %x, size:%x, maxsize: %x, result:%x, sector: %x, eebuf: %x\n",startaddr,size,maxsize,result,sector,eebuf);
 		if(maxsize >= size) break;
 		
 		address += i;
 		inbuf += i;
 		size -= i;
+//printf("set2 startaddr: %x, size:%x, maxsize: %x, sector: %x, eebuf: %x\n",startaddr,size,maxsize,sector,eebuf);
 	}
 	free (eebuf);
 	} else printf("eebuf malloc fails\n");
