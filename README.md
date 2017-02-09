@@ -2,23 +2,19 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations<BR/>
-###Release 1.1.6 Built on 2017/02/02 <br/>
+###Release 1.1.7 Built on 2017/02/09 <br/>
 New features:<br/>
-- Modification of the list of uart command. See  <a href="http://karadio.karawin.fr/Interface.txt"  target="_blank"><font color="#14A692">uart and html interfaces</font></a><br/>
-- New sys.patch command. Inhibit or permit (default) the load of a vs1053 patch for AAC stations.<BR/>
-- New sys.led command. Default is blinking mode, or Play mode: the led is on when a station is playing.</br>
-- Modification of the wifi.con command. Now the AP can be set in the AP mode (192.168.4.1) without the need of the web interface.</br>
-- New print button on the Stations panel: Print the list of stations, number and name.<br/>
-- New logo ;-)<br/>
+- Now Both AP SSID and AP Password are encoded to permit special characters like & : etc<BR/>
+- "Restore stations" corrected for some heavy lists<BR/>
+- Station information now give the number of the current station<BR/>
+- retry client connection modified to avoid blocking situation.<BR/>
 - Many bugs removed thanks to users feedback's.<BR/><BR/>
-
-
 <BR/>
 Attention:<br/>
 The optional led is now on GPIO2. The blue led on the ESP8266 is blinking at the same rate.<BR/>
 GPIO16 is now the Chip select for the external ram if any.<BR/>
 The external ram is detected at boot time if present.<BR/><BR/>
-To upgrade to this release, please flash user1.4096.new.4.bin at 0x1000 ,<BR/>
+To load this release, please flash user1.4096.new.4.bin at 0x1000 ,<BR/>
  user2.4096.new.4.bin at 0X81000 and blank.bin at	0x7e000 & 0x3fe000 <BR/>
 After that, all next updates are done with the On The Air (OTA) feature.<BR/>
 New binaries are hosted at http://karadio.karawin.fr .<BR/><BR/>
