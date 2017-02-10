@@ -102,8 +102,8 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 {
   char* str;
   char* ns; 
-  char path[116] = "/";
-  char url[73]; 
+  char path[255] = "/";
+  char url[78]; 
   char port[5] = "80";
   int remove = 0;
   int i = 0; int j = 0;
@@ -133,8 +133,12 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
   
   {
 	str += remove; //skip http://
+	
+//	printf("parse str %s\n",str);
+	
 	while ((str[i] != '/')&&(str[i] != ':')&&(str[i] != 0x0a)&&(str[i] != 0x0d)&&(j<78)) {url[j] = str[i]; i++ ;j++;}
 	url[j] = 0;
+//	printf("parse str url %s\n",url);
 	j = 0;
 	if (str[i] == ':')  //port
 	{
@@ -144,14 +148,16 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 	j = 0;
 	if ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<'))
 	{	
-	  while ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<')&&(j<116)) {path[j] = str[i]; i++; j++;}
+	  while ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<')&&(j<255)) {path[j] = str[i]; i++; j++;}
 	  path[j] = 0;
 	}
+	
+	
 	
 	if (strncmp(url,"localhost",9)!=0) clientSetURL(url);
 	clientSetPath(path);
 	clientSetPort(atoi(port));
-//	printf("##CLI.URL#: %s, path: %s, port: %s\n",url,path,port);
+//printf("##CLI.URL#: %s, path: %s, port: %s\n",url,path,port);
 	return true;
   }
   else 

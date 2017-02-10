@@ -732,7 +732,7 @@ function downloadStations()
 		reader.onload = function(e){
 			function fillInfo(ind,arri){
 				if (!arri["ovol"]) arri["ovol"]= "0";
-				tosend = tosend+"&id="+ind + "&url="+arri["URL"] +"&name="+ arri["Name"]+ "&file="+arri["File"] + "&port=" + arri["Port"]+"&";
+				tosend = tosend+"&id="+ind + "&url="+arri["URL"] +"&name="+ arri["Name"]+ "&file="+arri["File"] + "&port=" + arri["Port"]+"&ovol=" + arri["ovol"]+"&";
 				localStorage.setItem(ind,"{\"Name\":\""+arri["Name"]+"\",\"URL\":\""+arri["URL"] +"\",\"File\":\""+arri["File"]+"\",\"Port\":\""+arri["Port"] +"\",\"ovol\":\""+arri["ovol"]  +"\"}");
 			}	
 			// Entire file
@@ -740,7 +740,7 @@ function downloadStations()
 			// By lines
 			lines = this.result.split('\n');
 			localStorage.clear();
-			indmax = 7;
+			indmax = 3;
 			line = 0;
 			try {
 				tosend =  "nb=" + indmax;
@@ -755,8 +755,8 @@ function downloadStations()
 				xhr.send(tosend);
 				} catch (e){console.log("error "+e);}
 //			}
-			indmax = 4;
-			for(line = 7; line < lines.length; line+=indmax){				
+			indmax = 2;
+			for(line = 3; line < lines.length; line+=indmax){				
 //				console.log(lines[line]);
 				try {
 				tosend =  "nb=" + indmax;

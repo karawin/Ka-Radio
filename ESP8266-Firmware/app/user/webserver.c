@@ -920,8 +920,9 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 						vTaskDelay(3);
 						if ((bend - buf +cl)> recbytes)
 						{	
-//							printf ("Server: try receive more:%d bytes. reclen = %d\n", recbytes,reclen);
+//							printf ("Server: try receive more:%d bytes. reclen = %d, must be %d\n", recbytes,reclen,bend - buf +cl);
 							while(((recb = read(client_sock , buf+recbytes, cl))==0));
+							buf[recbytes+recb] = 0;
 //							printf ("Server: received more now: %d bytes, rec:%s\n", recbytes+recb,buf);
 							if (recb < 0) {
 								if (errno != EAGAIN )
