@@ -1,0 +1,1 @@
+python2.7 esptool.py --port /dev/ttyUSB0 write_flash -ff 40m -fm qio -fs 32m 0x00000 boot_v1.5.bin 0x01000 user1.4096.new.4.bin 0x81000 user2.4096.new.4.bin 0x7E000 blank.bin 0x3FE000 blank.bin 0xFC000 esp_init_data_default.bin 0x3FC000 esp_init_data_default.bin 

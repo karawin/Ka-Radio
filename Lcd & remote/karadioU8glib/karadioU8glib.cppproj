@@ -1,0 +1,237 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
+  <PropertyGroup>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>7.0</ProjectVersion>
+    <ToolchainName>com.Atmel.AVRGCC8.CPP</ToolchainName>
+    <ProjectGuid>{1535724f-cc0a-4340-805d-5733de6be788}</ProjectGuid>
+    <avrdevice>atmega328p</avrdevice>
+    <avrdeviceseries>none</avrdeviceseries>
+    <OutputType>Executable</OutputType>
+    <Language>CPP</Language>
+    <OutputFileName>$(MSBuildProjectName)</OutputFileName>
+    <OutputFileExtension>.elf</OutputFileExtension>
+    <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
+    <AssemblyName>karadioU8glib</AssemblyName>
+    <Name>karadioU8glib</Name>
+    <RootNamespace>karadioU8glib</RootNamespace>
+    <ToolchainFlavour>Native</ToolchainFlavour>
+    <KeepTimersRunning>true</KeepTimersRunning>
+    <OverrideVtor>false</OverrideVtor>
+    <OverrideVtorValue>
+    </OverrideVtorValue>
+    <eraseonlaunchrule>0</eraseonlaunchrule>
+    <ProgFlashFromRam>true</ProgFlashFromRam>
+    <RamSnippetAddress>0x20000000</RamSnippetAddress>
+    <CacheFlash>true</CacheFlash>
+    <UncachedRange />
+    <BootSegment>0</BootSegment>
+    <AsfFrameworkConfig>
+      <framework-data>
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.28.1" />
+        </dependencies>
+      </framework-data>
+    </AsfFrameworkConfig>
+    <preserveEEPROM>true</preserveEEPROM>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <ToolchainSettings>
+      <AvrGccCpp>
+  <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
+  <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
+  <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
+  <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
+  <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
+  <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <avrgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>__AVR_ATmega328p__</Value>
+      <Value>__AVR_ATmega328P__</Value>
+      <Value>ARDUINO=106013</Value>
+      <Value>ARDUINO_MAIN</Value>
+      <Value>F_CPU=16000000L</Value>
+      <Value>__AVR__</Value>
+      <Value>ARDUINO_AVR_PRO</Value>
+      <Value>ARDUINO_ARCH_AVR</Value>
+    </ListValues>
+  </avrgcc.compiler.symbols.DefSymbols>
+  <avrgcc.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/U8glib</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master/utility</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src/utility</Value>
+      <Value>C:/Program Files (x86)/Arduino/libraries</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/cores/arduino</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/variants/eightanaloginputs</Value>
+      <Value>../../../karadioU8glib</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/avr/include/</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2//avr/include/avr/</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/lib/gcc/avr/4.8.1/include</Value>
+    </ListValues>
+  </avrgcc.compiler.directories.IncludePaths>
+  <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
+  <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+  <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+  <avrgcc.compiler.optimization.DebugLevel>Default (-g2)</avrgcc.compiler.optimization.DebugLevel>
+  <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+  <avrgcccpp.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcccpp.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <avrgcccpp.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>__AVR_ATmega328p__</Value>
+      <Value>__AVR_ATmega328P__</Value>
+      <Value>ARDUINO=106013</Value>
+      <Value>ARDUINO_MAIN</Value>
+      <Value>F_CPU=16000000L</Value>
+      <Value>__AVR__</Value>
+      <Value>ARDUINO_AVR_PRO</Value>
+      <Value>ARDUINO_ARCH_AVR</Value>
+    </ListValues>
+  </avrgcccpp.compiler.symbols.DefSymbols>
+  <avrgcccpp.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/U8glib</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master/utility</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src/utility</Value>
+      <Value>C:/Program Files (x86)/Arduino/libraries</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/cores/arduino</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/variants/eightanaloginputs</Value>
+      <Value>../../../karadioU8glib</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/avr/include/</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2//avr/include/avr/</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/lib/gcc/avr/4.8.1/include</Value>
+    </ListValues>
+  </avrgcccpp.compiler.directories.IncludePaths>
+  <avrgcccpp.compiler.optimization.level>Optimize (-O1)</avrgcccpp.compiler.optimization.level>
+  <avrgcccpp.compiler.optimization.PackStructureMembers>True</avrgcccpp.compiler.optimization.PackStructureMembers>
+  <avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>
+  <avrgcccpp.compiler.optimization.DebugLevel>Default (-g2)</avrgcccpp.compiler.optimization.DebugLevel>
+  <avrgcccpp.compiler.warnings.AllWarnings>True</avrgcccpp.compiler.warnings.AllWarnings>
+  <avrgcccpp.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcccpp.assembler.debugging.DebugLevel>
+</AvrGccCpp>
+    </ToolchainSettings>
+    <VMSETTING_IncludePaths>C:/Users/jp/Documents/Arduino/libraries/U8glib;C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/src;C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master;C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src;C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src/utility;C:/Program Files (x86)/Arduino/libraries;C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries;C:/Users/jp/Documents/Arduino/libraries;C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/cores/arduino;C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/variants/eightanaloginputs;../../../karadioU8glib;C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/avr/include/;C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2//avr/include/avr/;C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/lib/gcc/avr/4.8.1/include;C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master/utility;</VMSETTING_IncludePaths>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <ToolchainSettings>
+      <AvrGccCpp>
+  <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
+  <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
+  <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
+  <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
+  <avrgcc.common.outputfiles.usersignatures>False</avrgcc.common.outputfiles.usersignatures>
+  <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <avrgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>__AVR_ATmega328p__</Value>
+      <Value>__AVR_ATmega328P__</Value>
+      <Value>ARDUINO=106013</Value>
+      <Value>ARDUINO_MAIN</Value>
+      <Value>F_CPU=16000000L</Value>
+      <Value>__AVR__</Value>
+      <Value>ARDUINO_AVR_PRO</Value>
+      <Value>ARDUINO_ARCH_AVR</Value>
+    </ListValues>
+  </avrgcc.compiler.symbols.DefSymbols>
+  <avrgcc.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/U8glib</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master/utility</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src/utility</Value>
+      <Value>C:/Program Files (x86)/Arduino/libraries</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/cores/arduino</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/variants/eightanaloginputs</Value>
+      <Value>../../../karadioU8glib</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/avr/include/</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2//avr/include/avr/</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/lib/gcc/avr/4.8.1/include</Value>
+    </ListValues>
+  </avrgcc.compiler.directories.IncludePaths>
+  <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
+  <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+  <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+  <avrgcc.compiler.optimization.DebugLevel>Default (-g2)</avrgcc.compiler.optimization.DebugLevel>
+  <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+  <avrgcccpp.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcccpp.compiler.general.ChangeDefaultCharTypeUnsigned>
+  <avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcccpp.compiler.general.ChangeDefaultBitFieldUnsigned>
+  <avrgcccpp.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>__AVR_ATmega328p__</Value>
+      <Value>__AVR_ATmega328P__</Value>
+      <Value>ARDUINO=106013</Value>
+      <Value>ARDUINO_MAIN</Value>
+      <Value>F_CPU=16000000L</Value>
+      <Value>__AVR__</Value>
+      <Value>ARDUINO_AVR_PRO</Value>
+      <Value>ARDUINO_ARCH_AVR</Value>
+    </ListValues>
+  </avrgcccpp.compiler.symbols.DefSymbols>
+  <avrgcccpp.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/U8glib</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master/utility</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src/utility</Value>
+      <Value>C:/Program Files (x86)/Arduino/libraries</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries</Value>
+      <Value>C:/Users/jp/Documents/Arduino/libraries</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/cores/arduino</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/variants/eightanaloginputs</Value>
+      <Value>../../../karadioU8glib</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/avr/include/</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2//avr/include/avr/</Value>
+      <Value>C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/lib/gcc/avr/4.8.1/include</Value>
+    </ListValues>
+  </avrgcccpp.compiler.directories.IncludePaths>
+  <avrgcccpp.compiler.optimization.level>Optimize (-O1)</avrgcccpp.compiler.optimization.level>
+  <avrgcccpp.compiler.optimization.PackStructureMembers>True</avrgcccpp.compiler.optimization.PackStructureMembers>
+  <avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcccpp.compiler.optimization.AllocateBytesNeededForEnum>
+  <avrgcccpp.compiler.optimization.DebugLevel>Default (-g2)</avrgcccpp.compiler.optimization.DebugLevel>
+  <avrgcccpp.compiler.warnings.AllWarnings>True</avrgcccpp.compiler.warnings.AllWarnings>
+  <avrgcccpp.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcccpp.assembler.debugging.DebugLevel>
+</AvrGccCpp>
+    </ToolchainSettings>
+    <VMSETTING_IncludePaths>C:/Users/jp/Documents/Arduino/libraries/U8glib;C:/Program Files (x86)/Arduino/hardware/arduino/avr/libraries/EEPROM/src;C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master;C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src;C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries/EEPROM/src/utility;C:/Program Files (x86)/Arduino/libraries;C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/libraries;C:/Users/jp/Documents/Arduino/libraries;C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/cores/arduino;C:/Users/jp/AppData/Local/arduino15/packages/arduino/hardware/avr/1.6.17/variants/eightanaloginputs;../../../karadioU8glib;C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/avr/include/;C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2//avr/include/avr/;C:/Users/jp/AppData/Local/arduino15/packages/arduino/tools/avr-gcc/4.9.2-atmel3.5.3-arduino2/lib/gcc/avr/4.8.1/include;C:/Users/jp/Documents/Arduino/libraries/Arduino-IRremote-master/utility;</VMSETTING_IncludePaths>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="karadioU8glib.ino">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="karadioutils.ino">
+      <SubType>compile</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="__vm\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="u8glibConf.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="__vm\.karadioU8glib.vsarduino.h">
+      <SubType>compile</SubType>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
+</Project>

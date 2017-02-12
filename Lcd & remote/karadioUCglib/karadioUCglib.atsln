@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Atmel Studio Solution File, Format Version 11.00
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "karadioUCglib", "karadioUCglib.cppproj", "{59CF16FB-9F67-4735-B9E6-7A77C44191DC}"
+EndProject
+Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "HelloWorld", "..\libraries\Ucglib\Examples\HelloWorld\HelloWorld.cppproj", "{6B70588E-BFF1-4B4C-8A87-359D737FA911}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{59CF16FB-9F67-4735-B9E6-7A77C44191DC}.Debug|AVR.ActiveCfg = Debug|AVR
+		{59CF16FB-9F67-4735-B9E6-7A77C44191DC}.Debug|AVR.Build.0 = Debug|AVR
+		{59CF16FB-9F67-4735-B9E6-7A77C44191DC}.Release|AVR.ActiveCfg = Release|AVR
+		{59CF16FB-9F67-4735-B9E6-7A77C44191DC}.Release|AVR.Build.0 = Release|AVR
+		{6B70588E-BFF1-4B4C-8A87-359D737FA911}.Debug|AVR.ActiveCfg = Debug|AVR
+		{6B70588E-BFF1-4B4C-8A87-359D737FA911}.Debug|AVR.Build.0 = Debug|AVR
+		{6B70588E-BFF1-4B4C-8A87-359D737FA911}.Release|AVR.ActiveCfg = Release|AVR
+		{6B70588E-BFF1-4B4C-8A87-359D737FA911}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

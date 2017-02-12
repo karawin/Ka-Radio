@@ -1,0 +1,133 @@
+HTML interface for the Wifi Webradio
+____________________________________
+Any browser or wget can be used to send basic commands to the webradio.
+Commands are:
+stop			: stop playing the current station.
+start			: start playing the current station.
+play=xxx		: with xxx from 0 to 254  play the station xxx
+volume=xxx		: with xxx from 0 to 254  change the volume to xxx
+uart			: uart baudrate at 115200 not saved on next reset
+instant="http://your url" : instant play a site
+Example: http://192.168.1.253/?instant="http://api.voicerss.org/?f=32khz_16bit_stereo&key=29334415954d491b85535df4eb4dd821&hl=en-us&src=hello?the-sun-is-yellow?and-i-like-it"
+the url must begin with http:// or https:// and be surrounded by " and no space char allowed.
+
+Volume may be combined with other command.
+Example: 192.168.1.253/?volume=50&play=128
+
+Reminder: the url without parameter is the full web interface.
+
+
+
+----------------------------------------
+| UART interface for the Wifi Webradio |
+________________________________________
+
+The uart inteface can be used to receive events from the webradio and to send commands to it.
+
+Example of indications received:
+##CLI.NAMESET#: 2 California
+##CLI.URLSET#: 194.150.236.178
+##CLI.PATHSET#: /
+##CLI.PORTSET#: 8000
+##CLI.URL#: 194.150.236.178, path: /, port: 8000
+##CLI.ICY0#: California-101 The Westcoast Radio
+##CLI.ICY1#: <BR>This stream requires <a href="http://www.winamp.com/">Winamp</a><BR>
+##CLI.ICY2#: SHOUTcast Distributed Network Audio Server/win32 v1.9.2<BR>
+##CLI.ICY3#: http://www.california101radio.com
+##CLI.ICY4#: Rock - Pop - Californian music
+##CLI.ICY5#: 128
+##CLI.META#: Carole Bayer Sager - One Star Shining
+##CLI.PLAYING#
+##CLI.STOPPED#
+##CLI.URLSET#: broadcast.infomaniak.ch
+##CLI.PATHSET#: /hitwest-high.mp3.m3u
+##CLI.PORTSET#: 80
+##CLI.URLSET#: ice5.infomaniak.ch
+##CLI.PATHSET#: /hitwest-high.mp3
+##CLI.PORTSET#: 80
+##CLI.URL#: ice5.infomaniak.ch, path: /hitwest-high.mp3, port: 80
+##CLI.STOPPED#
+##CLI.ICY0#: Hitwest Mp3  128k
+##CLI.ICY3#: http://www.hitwest.co
+##CLI.ICY4#: Hit
+##CLI.ICY5#: 128
+##CLI.ICY6#: Hitwest
+##CLI.ICY7#:  ice-samplerate=44100;ice-bitrate=128;ice-channels=2
+##CLI.PLAYING#
+##CLI.META#: KAOLIN - Partons vite
+##CLI.VOL 65
+
+
+with ICYx: 0:"icy-name:", 1:"icy-notice1:", 2:"icy-notice2:",  3:"icy-url:", 4:"icy-genre:", 5:"icy-br:", 6:"icy-description:", 7:"ice-audio-info:"
+Some other informations may be printed for debug purpose, but usefull events always start with ##
+
+
+Commands:
+---------
+////////////////////////
+// Wifi related commands
+////////////////////////
+wifi.list			: give the list of received SSID
+wifi.con			: Display the AP1 and AP2 SSID
+wifi.con("ssid","password")	: Record the given AP ssid with password in AP1 for next reboot
+wifi.discon			: disconnect the current ssid
+wifi.station		: the current ssid and password
+wifi.status			: give #WIFI.STATUS#			start of the answer
+				5						the connection state
+				192.168.1.40			the current ip
+				255.255.255.0			the network mask
+				192.168.1.70			the network gateway
+				##WIFI.STATUS#			end of the answer
+				
+///////////////////////////
+// Station Client commands
+///////////////////////////
+// instant play
+cli.url("url")		: the name or ip of the station to instant play
+cli.path("/path")	: the path of the station to instant play
+cli.port("xxxx")	: the port number of the station to instant play
+cli.instant:		: play the instant station
+// Stations play					
+cli.start			: start to play the current station
+cli.play("xxx")		: play the xxx recorded station in the list (0 = stop)
+cli.prev (or cli.previous)	: select the previous station in the list and play it
+cli.next			: select the next station in the list and play it
+// Station stop
+cli.stop			: stop the playing station or instant
+// station list
+cli.list			: list all recorded stations
+cli.list("x")		: list only one of the recorded stations 
+// volume commands
+cli.vol("xxx")		: set the volume to xxx with xxx from 0 to 254 (max volume)
+cli.vol				: ask for  the current volume. respond with ##CLI.VOL# xxx
+cli.vol-			: Decrement the volume by 10
+cli.vol+			: Increment the volume by 10
+Every vol command from uart or web or browser respond with ##CLI.VOL#: xxx
+
+//////////////////
+// System commands
+//////////////////
+sys.uart("x")	: Change the baudrate of the uart on the next reset. 
+			Valid x are: 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 76880, 115200, 230400	
+sys.i2s			: Display the current I2S speed			
+sys.i2s("x")	: Change and record the I2S clock speed of the vs1053 GPIO5 MCLK for the i2s interface to external dac. 
+				: 0=48kHz, 1=96kHz, 2=192kHz, other equal 0
+sys.erase		: erase all recorded configuration and stations.
+sys.heap		: show the ram heap size
+sys.update		: start an OTA (On The Air) update of the software
+sys.boot		: reboot the webradio.
+sys.patch("x")	: Change the status of the vs1053 patch at power on. 
+				  0 = Patch will not be loaded, 1 or up = Patch will be loaded (default) at power On
+sys.patch		: Display the vs1053 patch status
+sys.led("x")	: Change the led indication: 
+				  0 = Led is in Play mode (lighted when a station is playing), 1 or up = Led is in Blink mode (default)
+sys.led			: Display the led indication status
+
+///////
+//Other
+///////
+<enter> will display 
+#INFO:""#
+
+A command error display:
+##CMD_ERROR#
