@@ -44,7 +44,7 @@ ICACHE_FLASH_ATTR struct servFile* findFile(char* name)
 
 ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 {
-#define PART 1024
+#define PART 2048
 	int length;
 	int progress,part,gpart;
 	char buf[140];
@@ -74,8 +74,8 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 	{
 		char *con = NULL;
 		do {
-			con = (char*)inmalloc((gpart)*sizeof(char));
 			gpart /=2;
+			con = (char*)inmalloc((gpart)*sizeof(char));
 		} while ((con == NULL)&&(gpart >=32));
 		
 		if ((con == NULL)||(gpart <32))
