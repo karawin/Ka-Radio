@@ -91,7 +91,8 @@ div.LEFT {
 	font-size:15px;
 	margin-left:10px;
 	margin-top:2px;
-	margin-bottom:5px display:inline-block
+	margin-bottom:5px;
+	display:inline-block
 }
 #CONTENT a,a:visited {
 	font-size:15px;
@@ -338,7 +339,7 @@ div.LEFT {
 	overflow:auto;
 	width:100%;
 	font-size:14px;
-//	line-height:24px;
+	/*line-height:24px;*/
 	position:absolute;
 	top:53px;
 	left:0;
@@ -359,7 +360,7 @@ div.LEFT {
 table#stationsTable,table#stationsTable th,table#stationsTable td {
 	border:solid 1px;
 	border-collapse:collapse;
-	width:100%
+	width:100%;
 	overflow-y: hidden;
 }
 a.page {
