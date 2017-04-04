@@ -4,11 +4,8 @@
 ##Basic informations<BR/>
 ###Release 1.1.8 Built on 2017/04/04 <br/>
 New features:<br/>
-- <BR/>
 - new cli.info command<BR/>
 - cli.list command updated.<BR/>
-- retry client connection modified to avoid blocking situation.<BR/>
-- Many bugs removed thanks to users feedback's.<BR/><BR/>
 <BR/>
 Attention:<br/>
 The optional led is now on GPIO2. The blue led on the ESP8266 is blinking at the same rate.<BR/>
