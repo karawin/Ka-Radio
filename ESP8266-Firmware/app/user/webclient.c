@@ -64,6 +64,13 @@ void incfree(void *p,char* from)
 //	printf ("Client incfree of %x, from %s           Heap size: %d\n",p,from,xPortGetFreeHeapSize( ));
 }	
 
+ICACHE_FLASH_ATTR void clientPrintState()
+{
+	if (playing)
+		printf(strplaying);
+	else
+		printf("##CLI.STOPPED# from %s\n","State");
+}
 ICACHE_FLASH_ATTR void clientInit() {
 	vSemaphoreCreateBinary(sHeader);
 	vSemaphoreCreateBinary(sConnect);
@@ -201,6 +208,10 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 		return str;
 }
 
+ICACHE_FLASH_ATTR bool clientPrintMeta()
+{
+	printf("##CLI.META#: %s\n",header.members.mArr[METADATA]); 
+}
 // A metadata found. Extract the Stream title
 ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 {
@@ -242,7 +253,7 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 //		dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
 		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],len);
 //		dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
-		printf("##CLI.META#: %s\n",header.members.mArr[METADATA]); 
+		clientPrintMeta(); 
 		while ((header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == ' ')||
 			(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\r')||
 		(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\n')
@@ -365,7 +376,8 @@ ICACHE_FLASH_ATTR void clearHeaders()
 {
 	uint8_t header_num;
 	for(header_num=0; header_num<ICY_HEADER_COUNT; header_num++) {
-		if(header_num != METAINT) if(header.members.mArr[header_num] != NULL) {
+		if(header_num != METAINT) 
+			if(header.members.mArr[header_num] != NULL) {
 			header.members.mArr[header_num][0] = 0;				
 		}
 	}
@@ -373,6 +385,23 @@ ICACHE_FLASH_ATTR void clearHeaders()
 	wsHeaders();
 }
 	
+ICACHE_FLASH_ATTR bool clientPrintOneHeader(uint8_t header_num)
+{
+	printf("##CLI.ICY%d#: %s\n",header_num,header.members.mArr[header_num]);
+}
+
+ICACHE_FLASH_ATTR bool clientPrintHeaders()
+{
+	uint8_t header_num;
+	for(header_num=0; header_num<ICY_HEADER_COUNT; header_num++) {
+		if((header_num != METAINT) && (header_num != METADATA))
+			if(header.members.mArr[header_num] != NULL) {
+				printf("##CLI.ICY%d#: %s\n",header_num,header.members.mArr[header_num]);
+			}	
+	}
+	clientPrintMeta();	
+}	
+
 ICACHE_FLASH_ATTR bool clientSaveOneHeader(char* t, uint16_t len, uint8_t header_num)
 {
 	if(header.members.mArr[header_num] != NULL) 
@@ -388,7 +417,7 @@ ICACHE_FLASH_ATTR bool clientSaveOneHeader(char* t, uint16_t len, uint8_t header
 	strncpy(header.members.mArr[header_num], t, len);
 	header.members.mArr[header_num] = stringify(header.members.mArr[header_num],len);
 	vTaskDelay(10);
-	printf("##CLI.ICY%d#: %s\n",header_num,header.members.mArr[header_num]);
+	clientPrintOneHeader(header_num);
 //	printf("header after num:%d addr:0x%x  cont:\"%s\"\n",header_num,header.members.mArr[header_num],header.members.mArr[header_num]);
 	return true;
 }

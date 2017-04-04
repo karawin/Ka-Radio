@@ -20,42 +20,60 @@ Reminder: the url without parameter is the full web interface.
 
 ----------------------------------------
 | UART interface for the Wifi Webradio |
-________________________________________
+----------------------------------------
 
 The uart inteface can be used to receive events from the webradio and to send commands to it.
 
 Example of indications received:
-##CLI.NAMESET#: 2 California
-##CLI.URLSET#: 194.150.236.178
+##CLI.STOPPED# from playStationInt
+##CLI.NAMESET#: 88 Public Domain Classical - Swiss Internet Radio
+##CLI.URLSET#: 82.197.165.137
 ##CLI.PATHSET#: /
-##CLI.PORTSET#: 8000
-##CLI.URL#: 194.150.236.178, path: /, port: 8000
-##CLI.ICY0#: California-101 The Westcoast Radio
+##CLI.PORTSET#: 80
+##CLI.OVOLSET#: 0
+##CLI.VOL#: 110
+##CLI.ICY0#: Public Domain Classical - Swiss Internet Radio - Shoutcast Streaming Technology by www.init7.net
 ##CLI.ICY1#: <BR>This stream requires <a href="http://www.winamp.com/">Winamp</a><BR>
-##CLI.ICY2#: SHOUTcast Distributed Network Audio Server/win32 v1.9.2<BR>
-##CLI.ICY3#: http://www.california101radio.com
-##CLI.ICY4#: Rock - Pop - Californian music
+##CLI.ICY2#: SHOUTcast Distributed Network Audio Server/Linux v1.9.8<BR>
+##CLI.ICY3#: http://publicdomainproject.org
+##CLI.ICY4#: Classical
 ##CLI.ICY5#: 128
-##CLI.META#: Carole Bayer Sager - One Star Shining
+##CLI.META#: Felix Mendelssohn-Bartholdy - String Quartet in E flat major Op. 44 No.3: 4. Molto allegro con fuoco
 ##CLI.PLAYING#
-##CLI.STOPPED#
-##CLI.URLSET#: broadcast.infomaniak.ch
-##CLI.PATHSET#: /hitwest-high.mp3.m3u
-##CLI.PORTSET#: 80
-##CLI.URLSET#: ice5.infomaniak.ch
-##CLI.PATHSET#: /hitwest-high.mp3
-##CLI.PORTSET#: 80
-##CLI.URL#: ice5.infomaniak.ch, path: /hitwest-high.mp3, port: 80
-##CLI.STOPPED#
-##CLI.ICY0#: Hitwest Mp3  128k
-##CLI.ICY3#: http://www.hitwest.co
-##CLI.ICY4#: Hit
+##CLI.STOPPED# from playStationInt
+##CLI.NAMESET#: 92 ALBUMROCK.MIAMI
+##CLI.URLSET#: uk4.internet-radio.com
+##CLI.PATHSET#: /
+##CLI.PORTSET#: 8081
+##CLI.OVOLSET#: 0
+##CLI.VOL#: 110
+##CLI.ICY0#: ALBUMROCK.MIAMI
+##CLI.ICY1#: <BR>This stream requires <a href="http://www.winamp.com/">Winamp</a><BR>
+##CLI.ICY2#: SHOUTcast Distributed Network Audio Server/Linux v1.9.8<BR>
+##CLI.ICY3#: www.AlbumRock.Miami
+##CLI.ICY4#: Classic  Rock 60s 70s 80s Miaimi Florida  Album Rock
 ##CLI.ICY5#: 128
-##CLI.ICY6#: Hitwest
-##CLI.ICY7#:  ice-samplerate=44100;ice-bitrate=128;ice-channels=2
+##CLI.META#: The Who - Eminence Front 
 ##CLI.PLAYING#
-##CLI.META#: KAOLIN - Partons vite
-##CLI.VOL 65
+#CLI.LIST#
+#CLI.LISTINFO#:   2: RTL2, streaming.radio.rtl.fr:80/rtl2-1-44-128.m3u
+##CLI.LIST#
+(cli.info) typed
+##CLI.NAMESET#: 92 ALBUMROCK.MIAMI
+##CLI.ICY0#: ALBUMROCK.MIAMI
+##CLI.ICY1#: <BR>This stream requires <a href="http://www.winamp.com/">Winamp</a><BR>
+##CLI.ICY2#: SHOUTcast Distributed Network Audio Server/Linux v1.9.8<BR>
+##CLI.ICY3#: www.AlbumRock.Miami
+##CLI.ICY4#: Classic  Rock 60s 70s 80s Miaimi Florida  Album Rock
+##CLI.ICY5#: 128
+##CLI.ICY6#: 
+##CLI.ICY7#: 
+##CLI.META#: The Who - Eminence Front
+##CLI.VOL#: 108
+##CLI.PLAYING#
+##CLI.META#: The Beatles - Mother Nature's Son 
+
+
 
 
 with ICYx: 0:"icy-name:", 1:"icy-notice1:", 2:"icy-notice2:",  3:"icy-url:", 4:"icy-genre:", 5:"icy-br:", 6:"icy-description:", 7:"ice-audio-info:"
@@ -96,13 +114,16 @@ cli.next			: select the next station in the list and play it
 cli.stop			: stop the playing station or instant
 // station list
 cli.list			: list all recorded stations
-cli.list("x")		: list only one of the recorded stations 
+cli.list("x")		: list only one of the recorded stations. Answer with #CLI.LISTINFO#: followed by infos
 // volume commands
 cli.vol("xxx")		: set the volume to xxx with xxx from 0 to 254 (max volume)
 cli.vol				: ask for  the current volume. respond with ##CLI.VOL# xxx
 cli.vol-			: Decrement the volume by 10
 cli.vol+			: Increment the volume by 10
 Every vol command from uart or web or browser respond with ##CLI.VOL#: xxx
+// Client information
+cli.info			: Respond with nameset, all icy, meta, volume and stae playing or stopped. Used to refresh the lcd informations
+					: see Example of indications received
 
 //////////////////
 // System commands

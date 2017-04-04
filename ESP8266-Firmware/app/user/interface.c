@@ -21,6 +21,8 @@ extern void setRelVolume(int8_t vol);
 extern uint16_t getVolume(void);
 extern uint8_t playing;
 
+ICACHE_FLASH_ATTR void clientVol(char *s);
+
 #define MAX_WIFI_STATIONS 50
 char errmsg[]={"##CMD_ERROR#\n"};
 bool inside = false;
@@ -378,9 +380,8 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 {
 	struct shoutcast_info* si;
 	int i = 0,j = 255;
-	printf("\n#CLI.LIST#\n");
 	char *t = strstr(s, "(\"");
-	if(t != NULL)
+	if(t != NULL) // a number specified
 	{	
 		char *t_end  = strstr(t, "\")")-2;
 		if(t_end <= 0)
@@ -390,23 +391,37 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 		}	
 		i = atoi(t+2);
 		j = i+1;
-	}
-	
-	for (i ;i <j;i++)
-	{
-		si = getStation(i);
-		if (si !=NULL)
+		
+	} 
+	{	
+		printf("\n#CLI.LIST#\n");	
+		for (i ;i <j;i++)
 		{
-			if(si->port !=0)
-			{	
-				printf("%3d: %s, %s:%d%s\n",i,si->name,si->domain,si->port,si->file);	
-				vTaskDelay(1);
-			}
-			free(si);
+			si = getStation(i);
+			if (si !=NULL)
+			{
+				if(si->port !=0)
+				{	
+					printf("#CLI.LISTINFO#: %3d: %s, %s:%d%s\n",i,si->name,si->domain,si->port,si->file);	
+					vTaskDelay(1);
+				}
+				free(si);
+			}	
 		}	
-	}	
-	printf("##CLI.LIST#\n");
+		printf("##CLI.LIST#\n");
+	}
 }
+ICACHE_FLASH_ATTR void clientInfo()
+{
+	struct shoutcast_info* si;
+	si = getStation(currentStation);
+	clientSetName(si->name,currentStation);
+	clientPrintHeaders();
+	clientVol("");
+	clientPrintState();
+	free(si);
+}
+
 ICACHE_FLASH_ATTR void clientI2S(char* s)
 {
     char *t = strstr(s, "(\"");
@@ -583,6 +598,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
     else if(startsWith("cli.play",tmp)) clientPlay(tmp);
 	else if(strcmp(tmp, "cli.vol+") == 0) setVolumePlus();
 	else if(strcmp(tmp, "cli.vol-") == 0) setVolumeMinus();
+	else if(strcmp(tmp, "cli.info") == 0) clientInfo();
 	else if(startsWith("cli.vol",tmp)) clientVol(tmp);
     else if(startsWith("sys.i2s",tmp)) clientI2S(tmp);
     else if(startsWith("sys.uart",tmp)) clientUart(tmp);
