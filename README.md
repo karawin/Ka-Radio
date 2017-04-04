@@ -2,11 +2,11 @@
 
 ###Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ##Basic informations<BR/>
-###Release 1.1.7 Built on 2017/02/09 <br/>
+###Release 1.1.8 Built on 2017/04/04 <br/>
 New features:<br/>
-- Now Both AP SSID and AP Password are encoded to permit special characters like & : etc<BR/>
-- "Restore stations" corrected for some heavy lists<BR/>
-- Station information now give the number of the current station<BR/>
+- <BR/>
+- new cli.info command<BR/>
+- cli.list command updated.<BR/>
 - retry client connection modified to avoid blocking situation.<BR/>
 - Many bugs removed thanks to users feedback's.<BR/><BR/>
 <BR/>
