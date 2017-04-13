@@ -26,9 +26,10 @@
 #include "buffer.h"
 #include "extram.h"
 #include "vs1053.h"
+#include "ntp.h"
 
 #include "eeprom.h"
-
+#include <time.h>
 
 void uart_div_modify(int no, unsigned int freq);
 
@@ -365,5 +366,7 @@ void user_init(void)
 	printf("t3 task: %x\n",pxCreatedTask);
 	xTaskCreate(serverTask, "t2", 230, NULL, 3, &pxCreatedTask); //230
 	printf("t2 task: %x\n",pxCreatedTask);
+//	xTaskCreate(ntpTask, "t5", 210, NULL, 2, &pxCreatedTask); // NTP
+//	printf("t5 task: %x\n",pxCreatedTask);
 
 }

@@ -37,7 +37,8 @@ struct device_settings {
 	uint8_t i2sspeed; // 0 = 48kHz, 1 = 96kHz, 2 = 128kHz
 	uint32_t uartspeed; // serial baud
 	uint8_t options;  // bit0:0 theme ligth blue, 1 Dark brown, bit1: 0 patch load  1 no patch, bit2: O blink led  1 led on On play
-	char ua[40]; // user agent
+	char ua[39]; // user agent
+	int8_t tzoffset; //timezone offset
 	uint8_t pass2[60];
 };
 
