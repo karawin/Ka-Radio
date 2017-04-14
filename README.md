@@ -7,6 +7,8 @@ New features:<br/>
 - new cli.info command<BR/>
 - cli.list command updated.<BR/>
 <BR/>
+###Add On: add a lcd, a remote control, and other goodies: see https://github.com/karawin/Karadio-addons <br/>
+<br/>
 Attention:<br/>
 The optional led is now on GPIO2. The blue led on the ESP8266 is blinking at the same rate.<BR/>
 GPIO16 is now the Chip select for the external ram if any.<BR/>
