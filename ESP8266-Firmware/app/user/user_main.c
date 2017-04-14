@@ -358,7 +358,7 @@ void user_init(void)
 
 	xTaskCreate(testtask, "t0", 80, NULL, 1, &pxCreatedTask); // DEBUG/TEST 80
 	printf("t0 task: %x\n",pxCreatedTask);
-	xTaskCreate(uartInterfaceTask, "t1", 320, NULL, 6, &pxCreatedTask); // 244
+	xTaskCreate(uartInterfaceTask, "t1", 320, NULL, 2, &pxCreatedTask); // 244
 	printf("t1 task: %x\n",pxCreatedTask);
 	xTaskCreate(vsTask, "t4", 380, NULL,4, &pxCreatedTask); //370
 	printf("t4 task: %x\n",pxCreatedTask);
