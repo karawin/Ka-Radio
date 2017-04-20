@@ -74,7 +74,10 @@
 					</p>
 				<h1>Instant play</h1>
 					<p>
-					<span class="bold1">URL: </span><input type="text" id="instant_url" name="url"><br>
+					<span class=bold1>Full URL: </span>
+					<input type=text style="width:350px;" id=instant_URL name=URL onkeyup="parseURL(event)" ><br/>
+					or<br/> 
+					<span class="bold1">Url: </span><input type="text" id="instant_url" name="url"><br>
 					<span class="bold1">Port: </span><input type="text" id="instant_port" name="port" value="80"><br>
 					<span class="bold1">Path: </span><input type="text" id="instant_path" name="path" value="/"><br><br>
 					<input type="button" value="Play"   onClick="instantPlay()">&nbsp;
@@ -92,7 +95,9 @@
 								<p>
 									<span class="bold">Slot number: </span><input type="text" id="add_slot" disabled="true" name="slot"><br>
 									<span class="bold">Name: </span><input type="text" id="add_name" name="name"><br>
-									<span class="bold">URL: </span><input type="text" id="add_url" name="url"><br>
+									<span class=bold>Full URL: </span><input type=text style="width:350px;" id=add_URL name=URL onkeyup="parseEditURL(event)" ><br>
+									or<br>
+									<span class="bold">Url: </span><input type="text" id="add_url" name="url"><br>
 									<span class="bold">Port: </span><input type="text" id="add_port" name="port" value="80"><br>
 									<span class="bold">Path: </span><input type="text" id="add_path" name="path" value="/"><br>
 									<span class="bold">Volume offset: </span><input type="range" id="ovol" name="ovol" step=2  min=-126 max=126 value=0><br><br>
