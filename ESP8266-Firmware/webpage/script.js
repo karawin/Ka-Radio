@@ -486,7 +486,23 @@ function instantPlay() {
 		xhr.send("url=" + document.getElementById('instant_url').value + "&port=" + document.getElementById('instant_port').value + "&path=" + curl+"&");
 	} catch(e){console.log("error"+e);}
 }
-
+function parseURL(e)
+{
+	 var a = document.createElement('a');	 
+	 a.href = document.getElementById('instant_URL').value;
+	 if (a.hostname !=location.hostname)
+		document.getElementById('instant_url').value = a.hostname;
+	 else
+	 {
+		document.getElementById('instant_URL').value = "http://"+document.getElementById('instant_URL').value;
+		a.href = document.getElementById('instant_URL').value;
+		document.getElementById('instant_url').value = a.hostname;
+	 }
+	 if (a.port == "") 
+		  document.getElementById('instant_port').value= "80";
+	 else document.getElementById('instant_port').value = a.port;
+	 document.getElementById('instant_path').value = a.pathname+a.search+a.hash;	 
+}
 
 function prevStation() {
 	var select= document.getElementById('stationsSelect').selectedIndex ;
@@ -616,6 +632,7 @@ function editStation(id) {
 			document.getElementById('add_port').value = arr["Port"];
 			document.getElementById('editStationDiv').style.display = "block";
 			document.getElementById('ovol').value = arr["ovol"];
+			document.getElementById('add_URL').value = "http://"+document.getElementById('add_url').value+":"+document.getElementById('add_port').value+document.getElementById('add_path').value;
 			setMainHeight("tab-content2");
 	}
 	document.getElementById('add_slot').value = id;
@@ -642,6 +659,24 @@ function editStation(id) {
 	xhr.setRequestHeader(content,ctype);
 	xhr.send("idgp=" + id+"&");
 	}
+}
+
+function parseEditURL(e)
+{
+	 var a = document.createElement('a');
+	 a.href = document.getElementById('add_URL').value;
+	 if (a.hostname !=location.hostname)
+		document.getElementById('add_url').value = a.hostname;
+	 else
+	 {
+		document.getElementById('add_URL').value = "http://"+document.getElementById('add_URL').value;
+		a.href = document.getElementById('add_URL').value;
+		document.getElementById('add_url').value = a.hostname;
+	}
+	if (a.port == "")
+		 document.getElementById('add_port').value = "80";
+	else document.getElementById('add_port').value = a.port;
+	document.getElementById('add_path').value = a.pathname+a.search+a.hash;	 
 }
 
 function refreshList() {
