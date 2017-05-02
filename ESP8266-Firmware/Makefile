@@ -399,6 +399,7 @@ $(foreach image,$(GEN_IMAGES),$(eval $(call MakeImage,$(basename $(image)))))
 
 INCLUDES := $(INCLUDES) -I $(PDIR)include -I $(PDIR)extra_include
 INCLUDES += -I $(PDIR)include/espressif
+INCLUDES += -I $(PDIR)include/espressif/esp8266
 INCLUDES += -I $(PDIR)include/lwip
 INCLUDES += -I $(PDIR)include/lwip/ipv4
 INCLUDES += -I $(PDIR)include/lwip/ipv6

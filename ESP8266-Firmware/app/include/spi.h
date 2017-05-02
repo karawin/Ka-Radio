@@ -28,7 +28,7 @@
 #include "freertos/semphr.h"
 #include "spi_register.h"
 #include "ets_sys.h"
-#include "osapi.h"
+//#include "osapi.h"
 //#include "uart.h"
 #include "os_type.h"
 

@@ -17,7 +17,7 @@
 #include "eeprom.h"
 #include "stdio.h"
 #include "spi.h"
-#include "osapi.h"
+//#include "osapi.h"
 #include <math.h>
 
 	int vsVersion ; // the version of the chip

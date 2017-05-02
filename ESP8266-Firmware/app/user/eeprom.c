@@ -105,9 +105,9 @@ uint32_t* eebuf= malloc(4096);
 int i = 0;
 	while (eebuf == NULL) 
 	{
-		vTaskDelay(100); 
+		vTaskDelay(200); 
 		eebuf= malloc(4096); // last chance
-		if (++i > 10) break;
+		if (++i > 3) break;
 	}	
 
 	if (eebuf != NULL)

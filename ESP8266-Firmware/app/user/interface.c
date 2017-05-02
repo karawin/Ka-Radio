@@ -4,7 +4,7 @@
 */
 #include "interface.h"
 #include "user_interface.h"
-#include "osapi.h"
+//#include "osapi.h"
 #include "stdio.h"
 #include "string.h"
 #include "stdlib.h"
@@ -647,6 +647,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 	else if(startsWith ("sys.led",tmp)) 	sysled(tmp);
     else if(strcmp(tmp, "sys.date") == 0) 	ntp_print_time();
 	else if(startsWith( "sys.tzo",tmp)) 	tzoffset(tmp);
+	else if(startsWith( "sys.log",tmp)) 	; // do nothing
 	else printInfo(tmp);
 	free(tmp);
 	
