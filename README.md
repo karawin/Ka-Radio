@@ -47,6 +47,8 @@ The second step will add some hardware buttons (vol + -, station + -, play ...)<
 - Based on https://github.com/PiotrSperka/ESP8266-WebRadio<br />
 - New development based on the new https://github.com/espressif/ESP8266_RTOS_SDK<br />
 - Compiled with [esp-open-sdk](https://github.com/pfalcon/esp-open-sdk)<br />
+- Other tool to install yui_compressor. Install on ubuntu with the command:
+sudo apt-get install yui-compressor
 - software improved, new web control<br />
 - Compatible with mobile<br />
 - Stable<br />
