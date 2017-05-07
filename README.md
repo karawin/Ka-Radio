@@ -41,7 +41,8 @@ The second step will add some hardware buttons (vol + -, station + -, play ...)<
 <img src="https://github.com/karawin/ESP8266-WebRadio/blob/master/Images/webradio2mini.jpg" alt="screenshot" border=0> 
 <img src="https://github.com/karawin/ESP8266-WebRadio/blob/master/Images/webradio3mini.jpg" alt="screenshot" border=0> 
 
-
+### Generate Ka-Radio
+see the readme.txt file.
 
 ### History:
 - Based on https://github.com/PiotrSperka/ESP8266-WebRadio<br />
