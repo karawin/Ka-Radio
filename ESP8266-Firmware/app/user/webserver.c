@@ -12,6 +12,7 @@ uint32_t sleepDelay;
 LOCAL os_timer_t wakeTimer;
 uint32_t wakeDelay;
 int8_t clientOvol = 0;
+uint8_t clientIvol = 0;
 
 void *inmalloc(size_t n)
 {
@@ -168,20 +169,21 @@ ICACHE_FLASH_ATTR void setOffsetVolume(void) {
 // set the volume with vol, save it to device and add offset
 ICACHE_FLASH_ATTR void setVolume(char* vol) {
 		struct device_settings *device;
-		uint16_t ivol = atoi(vol);
-		int16_t uvol = atoi(vol);
+//		uint16_t ivol = atoi(vol);
+		clientIvol = atoi(vol);
+		uint16_t uvol = atoi(vol);
 		uvol += clientOvol;
 		if (uvol > 254) uvol = 254;
 		if (uvol <0) uvol = 0;
 		if(vol) {
-//			printf("setVol: \"%s + %d, uvol: %d, ivol:%d\"\n",vol,clientOvol,uvol,ivol);
-			device = getDeviceSettings();
+//			printf("setVol: \"%s + %d, uvol: %d, clientIvol:%d\"\n",vol,clientOvol,uvol,clientIvol);
+//			device = getDeviceSettings();
 			VS1053_SetVolume(uvol);
-			printf("##CLI.VOL#: %d\n",ivol);
-			if (device != NULL)
-				if (device->vol != (ivol)){ device->vol = ivol;saveDeviceSettings(device);}
+			printf("##CLI.VOL#: %d\n",clientIvol);
+//			if (device != NULL)
+//				if (device->vol != clientIvol){ device->vol = clientIvol;saveDeviceSettings(device);}
+//			infree(device);			
 		}
-		infree(device);			
 }
 
 ICACHE_FLASH_ATTR uint16_t getVolume() {
@@ -1001,6 +1003,7 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
 	os_timer_setfn(&sleepTimer, sleepCallback, NULL);
 	os_timer_setfn(&wakeTimer, wakeCallback, NULL);
 	int stack = 340; //340
+	
 	
 	while (1) {
         bzero(&server_addr, sizeof(struct sockaddr_in));

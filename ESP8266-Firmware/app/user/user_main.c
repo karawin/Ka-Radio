@@ -144,7 +144,7 @@ void uartInterfaceTask(void *pvParameters) {
 		{
 					printf("\n");
 //					smartconfig_stop();
-wifi_station_disconnect();
+					wifi_station_disconnect();
 					FlashOn = 10;FlashOff = 200;
 					vTaskDelay(200);
 					printf("Config not found\n\n");
@@ -222,19 +222,43 @@ UART_SetBaudrate(uint8 uart_no, uint32 baud_rate) {
 	uart_div_modify(uart_no, UART_CLK_FREQ / baud_rate);
 }
 
+
 void testtask(void* p) {
-	
+struct device_settings *device;	
 //	gpio16_output_conf();
 	gpio2_output_conf();
 	vTaskDelay(50);
+// volume restore
+	device = getDeviceSettings();
+	if (device != NULL)
+	{	
+		clientIvol = device->vol;
+		infree(device);	
+	}		
+	
+	
 	while(1) {
-//		gpio16_output_set(0);
 		if (ledStatus) gpio2_output_set(0);
 		vTaskDelay(FlashOff);
-//		gpio16_output_set(1);
-		if (ledStatus) gpio2_output_set(1);
-		vTaskDelay(FlashOn);
-	};
+		
+		if (ledStatus) // on led and save volume if changed
+		{		
+			gpio2_output_set(1);
+			vTaskDelay(FlashOn);
+		}	
+
+		// save volume if changed		
+		device = getDeviceSettings();
+		if (device != NULL)
+		{	
+			if (device->vol != clientIvol){ 
+				device->vol = clientIvol;
+				saveDeviceSettings(device);
+			}
+			infree(device);	
+		}
+		
+	}
 }
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
@@ -353,10 +377,9 @@ void user_init(void)
 	system_print_meminfo();
 	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
 	clientInit();
-//	VS1053_HW_init();
 	Delay(100);	
 
-	xTaskCreate(testtask, "t0", 80, NULL, 1, &pxCreatedTask); // DEBUG/TEST 80
+	xTaskCreate(testtask, "t0", 100, NULL, 1, &pxCreatedTask); // DEBUG/TEST 80
 	printf("t0 task: %x\n",pxCreatedTask);
 	xTaskCreate(uartInterfaceTask, "t1", 320, NULL, 2, &pxCreatedTask); // 244
 	printf("t1 task: %x\n",pxCreatedTask);

@@ -26,5 +26,7 @@
 #include "websocket.h"
 
 void serverTask(void *pvParams);
+extern int8_t clientOvol ;
+extern uint8_t clientIvol ;
 
 #endif
