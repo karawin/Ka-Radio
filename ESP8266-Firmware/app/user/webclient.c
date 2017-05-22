@@ -31,6 +31,7 @@ uint8_t playing = 0;
 
 char notfound[]={"Not Found"};
 char strplaying[]={"##CLI.PLAYING#\n"};
+char mallocmsg[] = {"%s malloc fails\n"};
 
 /* TODO:
 	- METADATA HANDLING
@@ -203,7 +204,7 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 			return new;		
 		} else 
 		{
-			printf("stringify malloc fails\n");
+			printf(mallocmsg,"stringify");
 		}	
 		return str;
 }
@@ -246,7 +247,7 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 			incfree(header.members.mArr[METADATA],"metad");
 		header.members.mArr[METADATA] = (char*)incmalloc((len+3)*sizeof(char));
 		if(header.members.mArr[METADATA] == NULL) 
-			{printf("clientsaveMeta malloc fails\n");
+			{printf(mallocmsg,"clientsaveMeta");
 			return;}
 
 		strcpy(header.members.mArr[METADATA], t);
@@ -354,7 +355,7 @@ ICACHE_FLASH_ATTR void wsHeaders()
 		((header.members.single.metadata ==NULL)?0:strlen(header.members.single.metadata))
 		;
 	char* wsh = incmalloc(json_length+1);
-	if (wsh == NULL) {printf("wsHeader malloc fails\n");return;}
+	if (wsh == NULL) {printf(mallocmsg,"wsHeader");return;}
 
 	sprintf(wsh,"{\"wsicy\":{\"curst\":\"%s\",\"descr\":\"%s\",\"meta\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\"}}",
 			currentSt,
@@ -409,7 +410,7 @@ ICACHE_FLASH_ATTR bool clientSaveOneHeader(char* t, uint16_t len, uint8_t header
 	header.members.mArr[header_num] = incmalloc((len+1)*sizeof(char));
 	if(header.members.mArr[header_num] == NULL)
 	{
-		printf("clientSaveOneHeader malloc fails\n");
+		printf(mallocmsg,"clientSaveOneHeader");
 		return false;
 	}	
 	int i;

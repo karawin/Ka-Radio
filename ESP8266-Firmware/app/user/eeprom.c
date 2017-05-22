@@ -18,6 +18,8 @@
 #define NBOLDSTATIONS	192
 #define NBSTATIONS		255
 
+char msg[] = {"%s malloc fails\n"};
+
 //uint32_t eebuf[1024];
 /*
 ICACHE_FLASH_ATTR uint8_t eeGetByte(uint32_t address) { // address = number of 1-byte parts from beginning
@@ -82,7 +84,7 @@ uint32_t* eebuf= malloc(4096);
 		size -= i;
 	}
 	free (eebuf);
-	} else printf("eebuf malloc fails\n");
+	} else printf(msg,"eebuf");
 }
 
 
@@ -133,7 +135,7 @@ int i = 0;
 //printf("set2 startaddr: %x, size:%x, maxsize: %x, sector: %x, eebuf: %x\n",startaddr,size,maxsize,sector,eebuf);
 	}
 	free (eebuf);
-	} else printf("eebuf malloc fails\n");
+	} else printf(msg,"eebuf");
 }
 
 ICACHE_FLASH_ATTR void eeSetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
@@ -180,7 +182,7 @@ int i = 0;
 //			eeSetClear1(i,buffer);
 			vTaskDelay(1); // avoid watchdog
 		}
-		printf("erase All done\n");
+//		printf("erase All done\n");
 	}
 }
 ICACHE_FLASH_ATTR void eeEraseStations() {
@@ -205,7 +207,7 @@ ICACHE_FLASH_ATTR void eeEraseStations() {
 			vTaskDelay(1); // avoid watchdog
 		}
 		free(buffer);
-	} else printf("eeEraseStations malloc fails\n");
+	} else printf(msg,"eeEraseStations");
 }
 
 ICACHE_FLASH_ATTR void saveStation(struct shoutcast_info *station, uint16_t position) {

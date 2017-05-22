@@ -195,12 +195,13 @@ ICACHE_FLASH_ATTR void setRelVolume(int8_t vol) {
 	struct device_settings *device;
 	char Vol[5];
 	int16_t rvol;
-	device = getDeviceSettings();
-	rvol = device->vol+vol;
+//	device = getDeviceSettings();
+//	rvol = device->vol+vol;
+	rvol = clientIvol+vol;
 	if (rvol <0) rvol = 0;
 	if (rvol > 254) rvol = 254;
 	sprintf(Vol,"%d",rvol);
-	infree(device);		
+//	infree(device);		
 	setVolume(Vol);
 	wsVol(Vol);
 }
@@ -782,7 +783,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			pvParams->buf = pbuf;
 			pvParams->len = buflen;
 //			printf("GET websocket\n");
-			while (xTaskCreate( websocketTask,"t11",320,(void *) pvParams,5, &pxCreatedTask )!= pdPASS)  //310
+			while (xTaskCreate( websocketTask,"t11",330,(void *) pvParams,5, &pxCreatedTask )!= pdPASS)  //310
 			{
 				printf("ws xTaskCreate  failed. Retry\n");
 				vTaskDelay(100);

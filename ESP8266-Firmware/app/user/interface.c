@@ -109,9 +109,10 @@ ICACHE_FLASH_ATTR void wifiScanCallback(void *arg, STATUS status)
 	if(status == OK)
 	{
 		int i = MAX_WIFI_STATIONS;
+		char msg[] = {"#WIFI.LIST#"};
 		char buf[64];
 		struct bss_info *bss_link = (struct bss_info *) arg;
-		printf("\n#WIFI.LIST#");
+		printf("\n%s",msg);
 		while(i > 0)
 		{
 			i--;
@@ -120,7 +121,7 @@ ICACHE_FLASH_ATTR void wifiScanCallback(void *arg, STATUS status)
 			sprintf(buf, "\n%s;%d;%d;%d", bss_link->ssid, bss_link->channel, bss_link->rssi, bss_link->authmode);
 			printf(buf);
 		}
-		printf("\n##WIFI.LIST#");
+		printf("\n#%s",msg);
 	}
 }
 

@@ -51,15 +51,16 @@ void uartInterfaceTask(void *pvParameters) {
 	uint8 ap = 0;
 	int i = 0;	
 	uint8 maxap;
-	int uxHighWaterMark;
-/*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf("watermark wsTask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
+	
+/*	int uxHighWaterMark;
+	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+	printf("watermark uartInterfaceTask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
 */
 	int t = 0;
 	for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
 	t = 0;
 	uart_rx_init();
-	printf("UART READY TO READ\n");
+	printf("UART READY\n");
 	
 //-------------------------
 // AP Connection management
@@ -210,9 +211,10 @@ void uartInterfaceTask(void *pvParameters) {
 			switchCommand() ;  // hardware panel of command
 		}
 		checkCommand(t, tmp);
-//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-//	printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 		
+/*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+	printf("watermark uartInterfaceTask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
+*/		
 		for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
 		t = 0;
 	}
@@ -225,6 +227,11 @@ UART_SetBaudrate(uint8 uart_no, uint32 baud_rate) {
 
 void testtask(void* p) {
 struct device_settings *device;	
+
+/*	int uxHighWaterMark;
+	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+	printf("watermark testtask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
+*/
 //	gpio16_output_conf();
 	gpio2_output_conf();
 	vTaskDelay(50);
@@ -254,7 +261,11 @@ struct device_settings *device;
 			if (device->vol != clientIvol){ 
 				device->vol = clientIvol;
 				saveDeviceSettings(device);
-			}
+
+/*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+	printf("watermark testtask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
+*/
+		}
 			infree(device);	
 		}
 		
@@ -360,7 +371,7 @@ void user_init(void)
 //	REG_SET_BIT(0x3ff00014, BIT(0));
 //	system_update_cpu_freq(SYS_CPU_160MHZ);
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
-
+	char msg[] = {"%s task: %x\n"};
 	xTaskHandle pxCreatedTask;
     Delay(300);
 	device = getDeviceSettings();
@@ -379,16 +390,16 @@ void user_init(void)
 	clientInit();
 	Delay(100);	
 
-	xTaskCreate(testtask, "t0", 100, NULL, 1, &pxCreatedTask); // DEBUG/TEST 80
-	printf("t0 task: %x\n",pxCreatedTask);
-	xTaskCreate(uartInterfaceTask, "t1", 320, NULL, 2, &pxCreatedTask); // 244
-	printf("t1 task: %x\n",pxCreatedTask);
+	xTaskCreate(testtask, "t0", 110, NULL, 1, &pxCreatedTask); // DEBUG/TEST 80
+	printf(msg,"t0",pxCreatedTask);
+	xTaskCreate(uartInterfaceTask, "t1", 304, NULL, 2, &pxCreatedTask); // 244
+	printf(msg,"t1",pxCreatedTask);
 	xTaskCreate(vsTask, "t4", 380, NULL,4, &pxCreatedTask); //370
-	printf("t4 task: %x\n",pxCreatedTask);
+	printf(msg,"t4",pxCreatedTask);
 	xTaskCreate(clientTask, "t3", 830, NULL, 5, &pxCreatedTask); // 830
-	printf("t3 task: %x\n",pxCreatedTask);
+	printf(msg,"t3",pxCreatedTask);
 	xTaskCreate(serverTask, "t2", 230, NULL, 3, &pxCreatedTask); //230
-	printf("t2 task: %x\n",pxCreatedTask);
+	printf(msg,"t2",pxCreatedTask);
 //	xTaskCreate(ntpTask, "t5", 210, NULL, 2, &pxCreatedTask); // NTP
 //	printf("t5 task: %x\n",pxCreatedTask);
 

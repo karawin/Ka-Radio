@@ -2,11 +2,15 @@
 
 ### Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ## Basic informations<BR/>
-### Release 1.2.1 Built on 2017/04/16 <br/>
+### Release 1.2.2 - Built on 2017/05/22
 New features:<br/>
-- new cli.info command<BR/>
-- cli.list command updated.<BR/>
-- New No needs to parse the url of stations on the web interface. Now it can be done automatically.<BR/>
+Volume correction for the control panel.<br/>
+The volume is now saved every second if needed (less stress for the flash).<br/>
+Stability<br/>
+New uart command: sys.date Send a ntp request and Display the current locale time.<br/>
+New uart command: sys.tzo Display or change the timezone offset. See Interface.txt.<br/>
+New No needs to parse the url of stations on the web interface. Now it can be done automatically.<br/>
+<br/>
 
 ###Add On: add a lcd, a remote control, and other goodies: see https://github.com/karawin/Karadio-addons <br/>
 <br/>

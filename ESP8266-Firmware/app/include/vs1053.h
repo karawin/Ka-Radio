@@ -80,6 +80,10 @@ uint16_t	VS1053_GetSampleRate();
 uint16_t	VS1053_GetDecodeTime();
 void	VS1053_flush_cancel(uint8_t mode);// 0 only fillbyte  1 before play    2 close play
 
+// admix plugin control
+void VS1053_SetVolumeLine(int16_t vol);
+void VS1053_Admix(bool val);
+
 //Volume control
 void VS1053_DisableAnalog(void);
 uint8_t 	VS1053_GetVolume();

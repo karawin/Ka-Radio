@@ -9,7 +9,29 @@
 #define ICACHE_STORE_ATTR __attribute__((aligned(4)))
 #define ICACHE_RAM_ATTR __attribute__((section(".iram0.text")))
 
-const unsigned short plugin[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR   = { /* Compressed plugin */
+// 117
+const unsigned short admix[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR   = { /* Compressed plugin */
+
+  0x0007, 0x0001, 0x8f00, 0x0006, 0x0070, 0x2803, 0xc2c0, 0x0030, /*    0 */
+  0x0697, 0x0fff, 0xfdc0, 0x3700, 0x4024, 0xb100, 0x0024, 0xbc82, /*    8 */
+  0x3c00, 0x0030, 0x1297, 0x3f10, 0x0024, 0x3f00, 0x0024, 0x2803, /*   10 */
+  0xc540, 0x0003, 0xc795, 0x0000, 0x0200, 0x3700, 0x4024, 0xc100, /*   18 */
+  0x0024, 0x3f00, 0x0024, 0x0000, 0x0040, 0x0004, 0x07c1, 0x0003, /*   20 */
+  0xc7d5, 0x0030, 0x1097, 0x3f70, 0x0024, 0x3f00, 0x4024, 0xf400, /*   28 */
+  0x5540, 0x0000, 0x08d7, 0xf400, 0x57c0, 0x0007, 0x9257, 0x0000, /*   30 */
+  0x0000, 0x3f00, 0x0024, 0x0030, 0x0297, 0x2000, 0x0000, 0x3f00, /*   38 */
+  0x0024, 0x2a08, 0x2bce, 0x2a03, 0xc80e, 0x3e12, 0xb817, 0x3e14, /*   40 */
+  0xf806, 0x3e00, 0xb804, 0x0030, 0x0317, 0x3701, 0x0024, 0x0030, /*   48 */
+  0x10d7, 0x0030, 0x1293, 0xf148, 0x1c46, 0xa64c, 0x428a, 0x3700, /*   50 */
+  0x8024, 0x2803, 0xcc11, 0xa244, 0x0024, 0xf168, 0x0024, 0x464c, /*   58 */
+  0x0024, 0xf128, 0x0024, 0x4244, 0x0024, 0x3b11, 0x8024, 0x3b00, /*   60 */
+  0x8024, 0x36f0, 0x9804, 0x36f4, 0xd806, 0x3602, 0x8024, 0x0030, /*   68 */
+  0x0717, 0x2100, 0x0000, 0x3f05, 0xdbd7,
+};
+#define ADMIX_SIZE 117
+
+
+const unsigned short patch[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR   = { /* Compressed plugin */
 	0x0007,0x0001, /*copy 1*/
 	0x8050,
 	0x0006,0x0002, /*copy 2*/
@@ -437,24 +459,26 @@ const unsigned short plugin[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR   = { /* Comp
 	0x0000,0x3580,0x01a4,
 	0x000a,0x0001, /*copy 1*/
 	0x0300,
-#define PLUGIN_SIZE 3175
+#define PATCH_SIZE 3175
 
 };
 
 
-void ICACHE_FLASH_ATTR  LoadUserCode(void) {
+void ICACHE_FLASH_ATTR  LoadUserCode( const unsigned short* plugin,uint16_t size) {
   int i = 0;
   unsigned short* iplugin;
-  iplugin = (unsigned short*)malloc(sizeof(plugin)+2);
+  int ssize = size;
+  size *= sizeof(plugin[0]);
+  iplugin = (unsigned short*)malloc(size+2);
   if (iplugin == NULL) 
   {
-	   printf("malloc fails for plugin flac\n");
+	   printf("malloc fails for plugin\n");
 	   return ;
   }
-  printf("plugin size %x %x %x \n",sizeof(plugin),sizeof(plugin[0]),sizeof(plugin)/sizeof(plugin[0]));
-  flashRead( iplugin,(uint32_t) plugin, sizeof(plugin) );
+  printf("plugin size %d %d \n",size,ssize);
+  flashRead( iplugin,(uint32_t) plugin, size );
   printf("plugin start: %x %x %x %x\n",*iplugin,*(iplugin+1),*(iplugin+2),*(iplugin+3));
-  while (i<sizeof(plugin)/sizeof(plugin[0])) {
+  while (i<ssize) {
     unsigned short addr, n, val;
     addr = iplugin[i++];
     n =  iplugin[i++];
@@ -472,6 +496,11 @@ void ICACHE_FLASH_ATTR  LoadUserCode(void) {
     }
   }
   free(iplugin);
+}
+void ICACHE_FLASH_ATTR  LoadUserCodes(void)
+{
+	LoadUserCode(patch,PATCH_SIZE);
+	LoadUserCode(admix,ADMIX_SIZE);
 }
 
 

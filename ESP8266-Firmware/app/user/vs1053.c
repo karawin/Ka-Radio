@@ -190,7 +190,6 @@ ICACHE_FLASH_ATTR void VS1053_regtest()
 	int MP3Status = VS1053_ReadRegister(SPI_STATUS);
 	int MP3Mode = VS1053_ReadRegister(SPI_MODE);
 	int MP3Clock = VS1053_ReadRegister(SPI_CLOCKF);
-//	int vsVersion ;
 	printf("SCI_Mode (0x4800) = 0x%X\n",MP3Mode);
 	printf("SCI_Status (0x48) = 0x%X\n",MP3Status);
 
@@ -267,7 +266,7 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	
 	device = getDeviceSettings();
 // plugin patch
-	if ((vsVersion == 4) && ((device->options&T_PATCH)==0))LoadUserCode() ;	// vs1053b patch
+	if ((vsVersion == 4) && ((device->options&T_PATCH)==0))LoadUserCodes() ;	// vs1053b patch and admix
 	
 	Delay(300);
 	VS1053_SetVolume( device->vol);	
@@ -278,6 +277,11 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	VS1053_SetSpatial(device->spacial);
 	incfree(device,"device");	
 	
+    if ((vsVersion == 4) && ((device->options&T_PATCH)==0))	
+	{
+		VS1053_SetVolumeLine(-31);
+		VS1053_Admix(false);
+	}
 	
 }
 
@@ -310,8 +314,24 @@ ICACHE_FLASH_ATTR int VS1053_SendMusicBytes(uint8_t* music, uint16_t quantity){
 }
 
 ICACHE_FLASH_ATTR void VS1053_SoftwareReset(){
-	VS1053_WriteRegister(SPI_MODE, SM_SDINEW>>8,SM_RESET);
-	VS1053_WriteRegister(SPI_MODE, SM_SDINEW>>8, SM_LAYER12); //mode 
+	VS1053_WriteRegister(SPI_MODE, (SM_SDINEW|SM_LINE1)>>8,SM_RESET);
+	VS1053_WriteRegister(SPI_MODE, (SM_SDINEW|SM_LINE1)>>8, SM_LAYER12); //mode 
+}
+
+// Set the volume of the line1 (for admix plugin) // -31 to -3
+ICACHE_FLASH_ATTR void VS1053_SetVolumeLine(int16_t vol){
+	if (vol > -3) vol = -3;
+	if (vol < -31) vol = -31;
+	VS1053_WriteRegister(SPI_AICTRL0,(vol&0xFF00)>>8,vol&0xFF);
+}
+// activate or stop admix plugin (true = activate)
+ICACHE_FLASH_ATTR void VS1053_Admix(bool val) {
+	uint16_t Mode = VS1053_ReadRegister(SPI_MODE);
+	VS1053_WriteRegister(SPI_MODE, MaskAndShiftRight(Mode|SM_LINE1,0xFF00,8), (Mode & 0x00FF));
+	if (val) 
+		VS1053_WriteRegister(SPI_AIADDR,0x0F,0);
+	else
+		VS1053_WriteRegister(SPI_AIADDR,0x0F,1);
 }
 
 ICACHE_FLASH_ATTR uint8_t VS1053_GetVolume(){
