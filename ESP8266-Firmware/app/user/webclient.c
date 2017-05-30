@@ -54,7 +54,7 @@ void *incmalloc(size_t n)
 	void* ret;
 //printf ("Client malloc of %d,  Heap size: %d\n",n,xPortGetFreeHeapSize( ));
 	ret = malloc(n);
-		if (ret == NULL) printf("Client: incmalloc fails for %d\n",n);
+	if (ret == NULL) printf("Client: incmalloc fails for %d\n",n);
 //	if (n <4) printf("Client: incmalloc size:%d\n",n);	
 //	printf ("Client malloc after of %d bytes ret:%x  Heap size: %d\n",n,ret,xPortGetFreeHeapSize( ));
 	return ret;
@@ -62,6 +62,7 @@ void *incmalloc(size_t n)
 void incfree(void *p,char* from)
 {
 	if (p != NULL) free(p);
+//	else printf ("Client incfree from %s NULL\n",from);
 //	printf ("Client incfree of %x, from %s           Heap size: %d\n",p,from,xPortGetFreeHeapSize( ));
 }	
 
@@ -89,6 +90,9 @@ ICACHE_FLASH_ATTR uint8_t clientIsConnected() {
 	}
 	return 1;
 }
+
+// for debug only
+/*
 ICACHE_FLASH_ATTR void dump(uint8_t* from, uint32_t len )
 {
 	uint32_t i = 0;
@@ -100,6 +104,7 @@ ICACHE_FLASH_ATTR void dump(uint8_t* from, uint32_t len )
 	}	
 	printf("\n");
 }
+*/
 ICACHE_FLASH_ATTR struct icyHeader* clientGetHeader()
 {	
 	return &header;
@@ -570,7 +575,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 			printf("\n");
 			clientSaveOneHeader(notfound, 13,METANAME);
 			wsHeaders();
-			vTaskDelay(200);
+			vTaskDelay(150);
 			clientDisconnect("C_DATA");
 			cstatus = C_HEADER;
 			return;
@@ -766,7 +771,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 		if((header.members.single.metaint != 0)&&(clen > metad)) 
 		{
 //	printf("metain len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );
-int jj = 0;
+			int jj = 0;
 			while ((clen > metad)&&(header.members.single.metaint != 0)) // in buffer
 			{
 				jj++;
@@ -869,6 +874,7 @@ IRAM_ATTR void vsTask(void *pvParams) {
 
 ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 //1440	for MTU 
+	portBASE_TYPE uxHighWaterMark;
 	struct timeval timeout; 
     timeout.tv_usec = 0;
 	int sockfd;
@@ -877,7 +883,6 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 	struct device_settings *device;
 	struct sockaddr_in dest;
 	uint8_t bufrec[RECEIVE+10];
-
 	device = getDeviceSettings();
 	strcpy(useragent,device->ua);
 	if (strlen(useragent) == 0) 
@@ -889,10 +894,10 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 
 	//	portBASE_TYPE uxHighWaterMark;
 //	clearHeaders();
-/*
+
 	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 	printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
-*/	
+	
 	while(1) {
 		xSemaphoreGive(sConnected);
 
@@ -907,7 +912,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			dest.sin_family = AF_INET;
 			dest.sin_port = htons(clientPort);
 			dest.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr*)(server -> h_addr_list[0])));
-
+			bytes_read = 0;
 			/*---Connect to server---*/
 			if(connect(sockfd, (struct sockaddr*)&dest, sizeof(dest)) >= 0) 
 			{
@@ -958,7 +963,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				printf("WebClient Socket fails to connect %d\n", errno);
 				clientSaveOneHeader("Invalid address",15,METANAME);
 				wsHeaders();	
-				vTaskDelay(200);	
+				vTaskDelay(100);	
 			}	
 			/*---Clean up---*/
 			if (bytes_read <= 0 )  //nothing received or error or disconnected
@@ -978,7 +983,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 							if (VS1053_GetVolume()==0) VS1053_SetVolume(volume);
 							printf(strplaying);
 							while (getBufferFree() < (BUFFER_SIZE)) vTaskDelay(200);							
-							vTaskDelay(200);
+							vTaskDelay(150);
 							playing=0;
 							clientDisconnect("data not played"); 
 						}
@@ -989,16 +994,16 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 							wsHeaders();
 					}	
 					else{  //playing & once=1 and no more received stream
-						while (getBufferFree() < (BUFFER_SIZE)) vTaskDelay(200);
+						while (getBufferFree() < (BUFFER_SIZE)) vTaskDelay(100);
 						vTaskDelay(200);
 						clientDisconnect("once"); 						
 					}					
 			}//jpc
 						
-/*			// marker for heap size (debug)
+			// marker for heap size (debug)
 			uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-			printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
-*/
+			printf("watermark webclient :%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
+
 			if (playing)  // stop clean
 			{		
 				volume = VS1053_GetVolume();

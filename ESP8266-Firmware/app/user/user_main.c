@@ -34,7 +34,7 @@
 void uart_div_modify(int no, unsigned int freq);
 
 //	struct station_config config;
-unsigned FlashOn = 5,FlashOff = 5;
+uint8_t FlashOn = 5,FlashOff = 5;
 bool ledStatus = true; // true: normal blink, false: led on when playing
 sc_status status = 0;
 	
@@ -52,10 +52,10 @@ void uartInterfaceTask(void *pvParameters) {
 	int i = 0;	
 	uint8 maxap;
 	
-/*	int uxHighWaterMark;
-	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf("watermark uartInterfaceTask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
-*/
+//	int uxHighWaterMark;
+//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+//	printf("watermark uartInterfaceTask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
+
 	int t = 0;
 	for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
 	t = 0;
@@ -68,10 +68,7 @@ void uartInterfaceTask(void *pvParameters) {
 	struct ip_info *info;
 	struct device_settings *device;
 	struct station_config* config;
-//	wifi_station_set_auto_connect(false);
-//	wifi_station_set_reconnect_policy(false);
 	wifi_station_set_hostname("WifiWebRadio");
-//	wifi_station_ap_number_set(2); // only 	
 	
 	device = getDeviceSettings();
 	config = malloc(sizeof(struct station_config));
@@ -126,7 +123,7 @@ void uartInterfaceTask(void *pvParameters) {
 		printf("Trying %s,  I: %d status: %d\n",config->ssid,i,wifi_station_get_connect_status());
 		FlashOn = FlashOff = 40;
 
-		vTaskDelay(400);//  ms
+		vTaskDelay(300);//  ms
 		if (( strlen(config->ssid) ==0)||  (wifi_station_get_connect_status() == STATION_WRONG_PASSWORD)||(wifi_station_get_connect_status() == STATION_CONNECT_FAIL)||(wifi_station_get_connect_status() == STATION_NO_AP_FOUND))
 		{ 
 			if ((strlen(device->ssid2) > 0)&& (ap <1))
@@ -180,14 +177,17 @@ void uartInterfaceTask(void *pvParameters) {
 	printf("autostart: playing:%d, currentstation:%d\n",device->autostart,device->currentstation);
 	currentStation = device->currentstation;
 	VS1053_I2SRate(device->i2sspeed);
+	clientIvol = device->vol;
+
 	if (device->autostart ==1)
 	{	
-		vTaskDelay(100); //1000 ms
+		vTaskDelay(10); 
 		playStationInt(device->currentstation);
 	}
 //
 	ledStatus = ((device->options & T_LED)== 0);
 //
+	
 	free(info);
 	free (device);
 	free (config);
@@ -196,7 +196,8 @@ void uartInterfaceTask(void *pvParameters) {
 	// read adc to see if it is a nodemcu with adc dividor
 		if (system_adc_read() < 400) adcdiv = 3;
 			else adcdiv = 1;
-	FlashOn = 190;FlashOff = 10;	
+	FlashOn = 190;FlashOff = 10;
+	
 	while(1) {
 		while(1) {
 			int c = uart_getchar_ms(100);
@@ -211,38 +212,30 @@ void uartInterfaceTask(void *pvParameters) {
 			switchCommand() ;  // hardware panel of command
 		}
 		checkCommand(t, tmp);
+//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+//	printf("watermark uartInterfaceTask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 		
-/*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf("watermark uartInterfaceTask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
-*/		
+		
 		for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
 		t = 0;
 	}
 }
 
+/*
 UART_SetBaudrate(uint8 uart_no, uint32 baud_rate) {
 	uart_div_modify(uart_no, UART_CLK_FREQ / baud_rate);
 }
-
+*/
 
 void testtask(void* p) {
 struct device_settings *device;	
-
-/*	int uxHighWaterMark;
+/*
+	int uxHighWaterMark;
 	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 	printf("watermark testtask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
 */
-//	gpio16_output_conf();
 	gpio2_output_conf();
-	vTaskDelay(50);
-// volume restore
-	device = getDeviceSettings();
-	if (device != NULL)
-	{	
-		clientIvol = device->vol;
-		infree(device);	
-	}		
-	
+	vTaskDelay(10);
 	
 	while(1) {
 		if (ledStatus) gpio2_output_set(0);
@@ -262,11 +255,11 @@ struct device_settings *device;
 				device->vol = clientIvol;
 				saveDeviceSettings(device);
 
-/*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf("watermark testtask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
-*/
-		}
-			infree(device);	
+//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+//	printf("watermark testtask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
+
+			}
+			free(device);	
 		}
 		
 	}
@@ -285,9 +278,8 @@ struct device_settings *device;
 *******************************************************************************/
 uint32 user_rf_cal_sector_set(void)
 {
-    flash_size_map size_map = system_get_flash_size_map();
     uint32 rf_cal_sec = 0;
-
+    flash_size_map size_map = system_get_flash_size_map();
     switch (size_map) {
         case FLASH_SIZE_4M_MAP_256_256:
             rf_cal_sec = 128 - 5;
@@ -314,23 +306,27 @@ uint32 user_rf_cal_sector_set(void)
 
     return rf_cal_sec;
 }
+
+
 /******************************************************************************
  * FunctionName : test_upgrade
  * Description  : check if it is an upgrade. Convert if needed
  * Parameters   : none
  * Returns      : none
 *******************************************************************************/
-void test_upgrade(void)
+/*void test_upgrade(void)
 {
 	uint8 autotest;
 	struct device_settings *settings;
 	struct shoutcast_info* station;
 	int j;
 	eeGetOldData(0x0C070, &autotest, 1);
+	printf ("Upgrade autotest before %d\n",autotest);
 	if (autotest == 3) // old bin before 1.0.6
 	{
 		autotest = 0; //patch espressif 1.4.2 see http://bbs.espressif.com/viewtopic.php?f=46&t=2349
 		eeSetOldData(0x0C070, &autotest, 1);
+		printf ("Upgrade autotest after %d\n",autotest);
 		settings = getOldDeviceSettings();
 		saveDeviceSettings(settings);
 		free(settings);
@@ -341,8 +337,10 @@ void test_upgrade(void)
 			free(station);			
 			vTaskDelay(1); // avoid watchdog
 		}
+		
 	}		
 }
+*/
 /******************************************************************************
  * FunctionName : checkUart
  * Description  : Check for a valid uart baudrate
@@ -373,34 +371,38 @@ void user_init(void)
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
 	char msg[] = {"%s task: %x\n"};
 	xTaskHandle pxCreatedTask;
-    Delay(300);
+    Delay(200);
 	device = getDeviceSettings();
 	uspeed = device->uartspeed;
 	free(device);
 	uspeed = checkUart(uspeed);
-	UART_SetBaudrate(0,uspeed);
+	uart_div_modify(0, UART_CLK_FREQ / uspeed);//UART_SetBaudrate(0,uspeed);
 	VS1053_HW_init(); // init spi
-	test_upgrade();
+//	test_upgrade();
 	extramInit();
 	initBuffer();
 	wifi_set_opmode_current(STATION_MODE);
-	Delay(100);	
+//	Delay(10);	
+	printf("SDK %s\n",system_get_sdk_version());
 	system_print_meminfo();
 	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
 	clientInit();
-	Delay(100);	
-
-	xTaskCreate(testtask, "t0", 110, NULL, 1, &pxCreatedTask); // DEBUG/TEST 80
+	Delay(10);	
+	
+    flash_size_map size_map = system_get_flash_size_map();
+	printf ("size_map: %d\n",size_map);
+	
+	xTaskCreate(testtask, "t0", 110, NULL, 1, &pxCreatedTask); // DEBUG/TEST 110
 	printf(msg,"t0",pxCreatedTask);
-	xTaskCreate(uartInterfaceTask, "t1", 304, NULL, 2, &pxCreatedTask); // 244
+	xTaskCreate(uartInterfaceTask, "t1", 300, NULL, 2, &pxCreatedTask); // 304
 	printf(msg,"t1",pxCreatedTask);
-	xTaskCreate(vsTask, "t4", 380, NULL,4, &pxCreatedTask); //370
+	xTaskCreate(vsTask, "t4", 370, NULL,4, &pxCreatedTask); //370
 	printf(msg,"t4",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 830, NULL, 5, &pxCreatedTask); // 830
+	xTaskCreate(clientTask, "t3", 750, NULL, 5, &pxCreatedTask); // 830
 	printf(msg,"t3",pxCreatedTask);
 	xTaskCreate(serverTask, "t2", 230, NULL, 3, &pxCreatedTask); //230
 	printf(msg,"t2",pxCreatedTask);
 //	xTaskCreate(ntpTask, "t5", 210, NULL, 2, &pxCreatedTask); // NTP
 //	printf("t5 task: %x\n",pxCreatedTask);
-
+	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
 }

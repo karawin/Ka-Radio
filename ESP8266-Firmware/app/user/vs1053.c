@@ -265,24 +265,24 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
    }
 	
 	device = getDeviceSettings();
+	if (device != NULL)
+	{	
 // plugin patch
-	if ((vsVersion == 4) && ((device->options&T_PATCH)==0))LoadUserCodes() ;	// vs1053b patch and admix
-	
-	Delay(300);
-	VS1053_SetVolume( device->vol);	
-	VS1053_SetTreble(device->treble);
-	VS1053_SetBass(device->bass);
-	VS1053_SetTrebleFreq(device->freqtreble);
-	VS1053_SetBassFreq(device->freqbass);
-	VS1053_SetSpatial(device->spacial);
-	incfree(device,"device");	
-	
-    if ((vsVersion == 4) && ((device->options&T_PATCH)==0))	
-	{
-		VS1053_SetVolumeLine(-31);
-		VS1053_Admix(false);
+		if ((vsVersion == 4) && ((device->options&T_PATCH)==0)) 
+		{	
+			LoadUserCodes() ;	// vs1053b patch and admix
+			VS1053_SetVolumeLine(-31);
+			VS1053_Admix(false);
+		}
+		Delay(300);
+		VS1053_SetVolume( device->vol);	
+		VS1053_SetTreble(device->treble);
+		VS1053_SetBass(device->bass);
+		VS1053_SetTrebleFreq(device->freqtreble);
+		VS1053_SetBassFreq(device->freqbass);
+		VS1053_SetSpatial(device->spacial);
+		free(device);
 	}
-	
 }
 
 ICACHE_FLASH_ATTR int VS1053_SendMusicBytes(uint8_t* music, uint16_t quantity){

@@ -26,10 +26,9 @@ void *inmalloc(size_t n)
 }	
 void infree(void *p)
 {
-	if (p != NULL)free(p);
 //	printf ("server free of %x,                      Heap size: %d\n",p,xPortGetFreeHeapSize( ));
+	if (p != NULL)free(p);
 }	
-
 
 
 ICACHE_FLASH_ATTR struct servFile* findFile(char* name)
@@ -84,7 +83,7 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 				sprintf(buf, "HTTP/1.1 500 Internal Server Error\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n", (f!=NULL ? f->type : "text/plain"), 0);
 				write(conn, buf, strlen(buf));
 				printf("serveFile inmalloc error\n");
-				incfree(con);
+				infree(con);
 				return ;
 		}	
 //		printf("serveFile socket:%d,  %s. Length: %d  sliced in %d\n",conn,name,length,gpart);		
@@ -300,11 +299,11 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 
 ICACHE_FLASH_ATTR void playStationInt(int sid) {
 	struct shoutcast_info* si;
-	char answer[22];
+	char answer[24];
 	struct device_settings *device;
 	si = getStation(sid);
 
-		if(si != NULL &&si->domain && si->file) {
+	if(si != NULL &&si->domain && si->file) {
 			int i;
 			vTaskDelay(5);
 			clientDisconnect("playStationInt");
@@ -325,18 +324,18 @@ ICACHE_FLASH_ATTR void playStationInt(int sid) {
 				if (clientIsConnected()) break;
 				vTaskDelay(4);
 			}
-		}
-
+	}
 	infree(si);
 	sprintf(answer,"{\"wsstation\":\"%d\"}",sid);
 	websocketbroadcast(answer, strlen(answer));
 	device = getDeviceSettings();
+//	printf ("playstationInt: %d, device: %d\n",sid,device->currentstation);
 	if (device->currentstation != sid)
 	{
 		device->currentstation = sid;
 		saveDeviceSettings(device);
 	}
-	incfree(device,"playStation");
+	infree(device);
 
 }
 	
@@ -346,7 +345,7 @@ ICACHE_FLASH_ATTR void playStation(char* id) {
 	int uid;
 	struct device_settings *device;
 	uid = atoi(id) ;
-//	printf ("playstation: %d\n",uid);
+	printf ("playstation: %d\n",uid);
 	if (uid < 255)
 		currentStation = atoi(id) ;
 	playStationInt(currentStation);	
@@ -739,7 +738,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		}	
 		infree(device);
 		if (val){
-			vTaskDelay(400);		
+			vTaskDelay(200);		
 			system_restart_enhance(SYS_BOOT_NORMAL_BIN, system_get_userbin_addr());	
 		}	
 		return;
@@ -753,6 +752,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t buflen) {
 	char* c;
 	char* d;
+	char websocketmsg[] = {"websocket request: %s\n"};
 	xTaskHandle pxCreatedTask;
 //	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
 	if( (c = strstr(buf, "GET ")) != NULL)
@@ -765,12 +765,12 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			struct websocketparam* pvParams = inmalloc(sizeof(struct websocketparam));
 			if (pvParams == NULL)
 			{	
-				printf("websocket request: pvParams null \n");
+				printf( websocketmsg,"pvParams null");
 			}
 			char* pbuf = inmalloc(buflen+1);
 			if (pbuf == NULL)
 			{	
-				printf("websocket request: pbuf null\n");
+				printf(websocketmsg,"pbuf null");
 			}			
 			if ((pbuf == NULL)|| (pvParams == NULL))
 			{
@@ -808,7 +808,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 //				printf("GET commands  socket:%d command:%s\n",conn,c);
 // uart command
 				param = strstr(c,"uart") ;
-				if (param != NULL) {UART_SetBaudrate(0, 115200);}	
+				if (param != NULL) {uart_div_modify(0, UART_CLK_FREQ / 115200) ; } //UART_SetBaudrate(0, 115200);}	
 // volume command				
 				param = getParameterFromResponse("volume=", c, strlen(c)) ;
 				if ((param != NULL)&&(atoi(param)>=0)&&(atoi(param)<=254))
@@ -816,16 +816,16 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 					setVolume(param);
 					wsVol(param);
 				}	
-				incfree(param);
+				infree(param);
 // play command				
 				param = getParameterFromResponse("play=", c, strlen(c)) ;
-				if (param != NULL) {playStation(param);free(param);}
+				if (param != NULL) {playStation(param);infree(param);}
 // start command				
 				param = strstr(c,"start") ;
 				if (param != NULL) {playStationInt(currentStation);}
 // stop command				
 				param = strstr(c,"stop") ;
-				if (param != NULL) {clientDisconnect("Web stop");free(param);}
+				if (param != NULL) {clientDisconnect("Web stop");infree(param);}
 // instantplay command				
 				param = getParameterFromComment("instant=", c, strlen(c)) ;
 				if (param != NULL) {
@@ -833,7 +833,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 					pathParse(param);
 //					printf("Instant param:%s\n",param);
 					clientParsePlaylist(param);clientConnectOnce();
-					free(param);
+					infree(param);
 				}
 				
 				respOk(conn); // response OK to the origin
@@ -1015,7 +1015,7 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
         do {		
             if (-1 == (server_sock = socket(AF_INET, SOCK_STREAM, 0))) {
 				printf ("Socket fails %d\n", errno);
-				vTaskDelay(10);	
+				vTaskDelay(5);	
                 break;
             }
 
@@ -1029,7 +1029,7 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
             if (-1 == listen(server_sock, 5)) {
 				printf ("Listen fails %d\n",errno);
 				close(server_sock);
-				vTaskDelay(100);	
+				vTaskDelay(50);	
                 break;
             }
 
@@ -1037,16 +1037,16 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
             while(1) {				
                 if ((client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &sin_size)) < 0) {
 					printf ("Accept fails %d\n",errno);
-					vTaskDelay(100);					
+					vTaskDelay(50);					
                 } else
 				{
 					while (1) 
 					{	
 						if (xPortGetFreeHeapSize( ) < 4000)
 						{
-//							printf ("Low memory %d\n",xPortGetFreeHeapSize( ));
-							vTaskDelay(300);	
-							printf ("Heap size low mem: %d\n",xPortGetFreeHeapSize( ));
+							printf ("Low memory %d\n",xPortGetFreeHeapSize( ));
+							vTaskDelay(200);	
+//							printf ("Heap size low mem: %d\n",xPortGetFreeHeapSize( ));
 							if (xPortGetFreeHeapSize( ) < 4000)
 							{
 								printf ("Low memory %d\n",xPortGetFreeHeapSize( ));					
@@ -1067,8 +1067,7 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
 							NULL ) != pdPASS) 
 							{
 								printf("xTaskCreate t10 failed for stack %d. Retrying...\n",stack);
-//								stack -=10;
-								vTaskDelay(150);	
+								vTaskDelay(100);	
 							}							
 							break;
 						} else {vTaskDelay(20);printf("server busy. Retrying...\n");}

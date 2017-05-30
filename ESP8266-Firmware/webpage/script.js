@@ -137,6 +137,8 @@ function valid() {
 	wifi(1);
     alert("System reboot. Please change your browser address to the new one.");
 }
+
+// display current time
 function dtime() {
 	var d = new Date(), elt = document.getElementById('sminutes'),eltw = document.getElementById('wminutes');
 	document.getElementById("time").innerHTML = d.toLocaleTimeString();	
@@ -619,21 +621,21 @@ function saveStation() {
 }
 function abortStation() {
 	document.getElementById('editStationDiv').style.display = "none";
-	setMainHeight("tab-content2");
+//	setMainHeight("tab-content2");
 }
 function editStation(id) {
 	var arr; 
-//	if (stchanged) stChanged();
+	document.getElementById('editStationDiv').style.display = "block";	
 	function cpedit(arr) {
+			
 			document.getElementById('add_url').value = arr["URL"];
 			document.getElementById('add_name').value = arr["Name"];
 			document.getElementById('add_path').value = arr["File"];
 			if (arr["Port"] == "0") arr["Port"] = "80";
 			document.getElementById('add_port').value = arr["Port"];
-			document.getElementById('editStationDiv').style.display = "block";
 			document.getElementById('ovol').value = arr["ovol"];
 			document.getElementById('add_URL').value = "http://"+document.getElementById('add_url').value+":"+document.getElementById('add_port').value+document.getElementById('add_path').value;
-			setMainHeight("tab-content2");
+//			setMainHeight("tab-content2");
 	}
 	document.getElementById('add_slot').value = id;
 	idstr = id.toString();			
@@ -648,16 +650,16 @@ function editStation(id) {
 	else {
 		xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4 && xhr.status == 200) {
-			try{
-				arr = JSON.parse(xhr.responseText);
-			} catch(e){console.log("error"+e);}
-			cpedit(arr);
+			if (xhr.readyState == 4 && xhr.status == 200) {
+				try{
+					arr = JSON.parse(xhr.responseText);
+				} catch(e){console.log("error"+e);}
+				cpedit(arr);
+			}
 		}
-	}
-	xhr.open("POST","getStation",false);
-	xhr.setRequestHeader(content,ctype);
-	xhr.send("idgp=" + id+"&");
+		xhr.open("POST","getStation",false);
+		xhr.setRequestHeader(content,ctype);
+		xhr.send("idgp=" + id+"&");
 	}
 }
 
@@ -897,9 +899,8 @@ function stChanged()
 	setMainHeight(curtab);
 }
 //Load the Stations table
-function loadStations(/*page*/) {
+function loadStations() {
 	var new_tbody = document.createElement('tbody'),
-//		id = 16 * (page-1),tr,td,key,arr,old_tbody;
 	id = 0;
 	function cploadStations(id,arr) {
 			tr = document.createElement('TR'),
@@ -910,7 +911,6 @@ function loadStations(/*page*/) {
 			tr.ondrop=dragDrop;
 			tr.ondragover=allowDrop;
 			td.appendChild(document.createTextNode(id ));
-//			td.style.width = "8%";
 			tr.appendChild(td);
 			for(key in arr){
 				td = document.createElement('TD');
@@ -920,11 +920,11 @@ function loadStations(/*page*/) {
 				tr.appendChild(td);
 			}
 			td = document.createElement('TD');
-			td.innerHTML = "<a href=\"#\" onClick=\"editStation("+id+")\">Edit</a>";
+//			td.innerHTML = "<div  onClick=\"editStation("+id+")\"> Edit</div>";
+			td.innerHTML = "<a href=\"javascript:void(0)\" onClick=\"editStation("+id+")\">Edit</a>";
 			tr.appendChild(td);
 			new_tbody.appendChild(tr);
 	}	
-//	for(id; id < 16*page; id++) {
 	for(id; id < maxStation; id++) {
 		idstr = id.toString();		
 		if (localStorage.getItem(idstr) != null)

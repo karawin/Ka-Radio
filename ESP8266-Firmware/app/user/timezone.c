@@ -21,7 +21,7 @@ ICACHE_FLASH_ATTR int8_t  applyTZ(struct tm *time) {
 	int8_t tzo = 0;
 	if (device != NULL)	 {
 		tzo = device->tzoffset;
-		infree(device);
+		free(device);
 	} 
 	
 	// apply base timezone offset

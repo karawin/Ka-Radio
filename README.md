@@ -2,14 +2,11 @@
 
 ### Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ## Basic informations<BR/>
-### Release 1.2.2 - Built on 2017/05/22
+### Release 1.3 - Built on 2017/05/29
 New features:<br/>
-Volume correction for the control panel.<br/>
-The volume is now saved every second if needed (less stress for the flash).<br/>
-Stability<br/>
-New uart command: sys.date Send a ntp request and Display the current locale time.<br/>
-New uart command: sys.tzo Display or change the timezone offset. See Interface.txt.<br/>
-New No needs to parse the url of stations on the web interface. Now it can be done automatically.<br/>
+- Edit station now in modal window<br
+- Added a mouse event on full url<br/>
+- Many internal optimizations<br/>
 <br/>
 
 ###Add On: add a lcd, a remote control, and other goodies: see https://github.com/karawin/Karadio-addons <br/>
@@ -46,15 +43,12 @@ The second step will add some hardware buttons (vol + -, station + -, play ...)<
 <img src="https://github.com/karawin/ESP8266-WebRadio/blob/master/Images/webradio3mini.jpg" alt="screenshot" border=0> 
 
 ### Generate Ka-Radio
-see the readme.txt file.
+see the http://karadio.karawin.fr/readme.txt file.
 
 ### History:
 - Based on https://github.com/PiotrSperka/ESP8266-WebRadio<br />
 - New development based on the new https://github.com/espressif/ESP8266_RTOS_SDK<br />
 - Compiled with [esp-open-sdk](https://github.com/pfalcon/esp-open-sdk)<br />
-- Other tool to install yui_compressor. Install on ubuntu with the command:
-sudo apt-get install yui-compressor
-- software improved, new web control<br />
 - Compatible with mobile<br />
 - Stable<br />
 - tools to save and restore the stations database<br /><br />

@@ -21,7 +21,7 @@ void *inwmalloc(size_t n)
 	void* ret;
 //printf ("ws Malloc of %d,  Heap size: %d\n",n,xPortGetFreeHeapSize( ));
 	ret = malloc(n);
-		if (ret == NULL) printf("Server: Malloc fails for %d\n",n);
+		if (ret == NULL) printf("Websocket: Malloc fails for %d\n",n);
 //	printf ("ws Malloc after of %d bytes ret:%x  Heap size: %d\n",n,ret,xPortGetFreeHeapSize( ));
 	return ret;
 }	

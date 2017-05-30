@@ -10,6 +10,10 @@
 #include "stdlib.h"
 #include "eeprom.h"
 #include "ntp.h"
+char parslashquote[] = {"(\""};
+char parquoteslash[] = {"\")"};
+char msgsys[] = {"##SYS."};
+char msgcli[] = {"##CLI."};
 
 uint16_t currentStation = 0;
 
@@ -110,9 +114,11 @@ ICACHE_FLASH_ATTR void wifiScanCallback(void *arg, STATUS status)
 	{
 		int i = MAX_WIFI_STATIONS;
 		char msg[] = {"#WIFI.LIST#"};
-		char buf[64];
+		char* buf;
 		struct bss_info *bss_link = (struct bss_info *) arg;
 		printf("\n%s",msg);
+		buf = malloc(128);
+		if (buf == NULL) return;
 		while(i > 0)
 		{
 			i--;
@@ -122,6 +128,7 @@ ICACHE_FLASH_ATTR void wifiScanCallback(void *arg, STATUS status)
 			printf(buf);
 		}
 		printf("\n#%s",msg);
+		free(buf);
 	}
 }
 
@@ -136,7 +143,7 @@ ICACHE_FLASH_ATTR void wifiConnect(char* cmd)
 	struct device_settings* devset = getDeviceSettings();
 	for(i = 0; i < 32; i++) devset->ssid[i] = 0;
 	for(i = 0; i < 64; i++) devset->pass[i] = 0;	
-	char *t = strstr(cmd, "(\"");
+	char *t = strstr(cmd, parslashquote);
 	if(t == 0)
 	{
 		printf(errmsg);
@@ -152,7 +159,7 @@ ICACHE_FLASH_ATTR void wifiConnect(char* cmd)
 	strncpy( devset->ssid, (t+2), (t_end-t-2) );
 	
 	t = t_end+3;
-	t_end = strstr(t, "\")");
+	t_end = strstr(t, parquoteslash);
 	if(t_end == 0)
 	{
 		printf(errmsg);
@@ -164,58 +171,6 @@ ICACHE_FLASH_ATTR void wifiConnect(char* cmd)
 	saveDeviceSettings(devset);
 	printf("\n##AP1: %s with dhcp on next reset#\n",devset->ssid);
 	free(devset);
-
-	
-/*	int i;
-	struct station_config* cfg = malloc(sizeof(struct station_config));
-	
-	for(i = 0; i < 32; i++) cfg->ssid[i] = 0;
-	for(i = 0; i < 64; i++) cfg->password[i] = 0;
-	cfg->bssid_set = 0;
-	
-	wifi_station_disconnect();
-	
-	char *t = strstr(cmd, "(\"");
-	if(t == 0)
-	{
-		printf(errmsg);
-		return;
-	}
-	char *t_end  = strstr(t, "\",\"");
-	if(t_end == 0)
-	{
-		printf(errmsg);
-		return;
-	}
-	
-	strncpy( cfg->ssid, (t+2), (t_end-t-2) );
-	
-	t = t_end+3;
-	t_end = strstr(t, "\")");
-	if(t_end == 0)
-	{
-		printf(errmsg);
-		return;
-	}
-	
-	strncpy( cfg->password, t, (t_end-t)) ;
-	
-	wifi_station_set_config(cfg);
-
-	if( wifi_station_connect() ) {
-		struct device_settings* devset = getDeviceSettings();
-		for(i = 0; i < 32; i++) devset->ssid[i] = 0;
-		for(i = 0; i < 64; i++) devset->pass[i] = 0;
-		for(i = 0; i < strlen(cfg->ssid); i++) devset->ssid[i] = cfg->ssid[i];
-		for(i = 0; i < strlen(cfg->password); i++) devset->pass[i] = cfg->password[i];
-		saveDeviceSettings(devset);
-		free(devset);
-		printf("\n##WIFI.CONNECTED#");
-	}
-	else printf("\n##WIFI.NOT_CONNECTED#");
-	
-	free(cfg);
-*/	
 }
 
 ICACHE_FLASH_ATTR void wifiConnectMem()
@@ -275,13 +230,13 @@ ICACHE_FLASH_ATTR void wifiGetStation()
 
 ICACHE_FLASH_ATTR void clientParseUrl(char* s)
 {
-    char *t = strstr(s, "(\"");
+    char *t = strstr(s, parslashquote);
 	if(t == 0)
 	{
 		printf(errmsg);
 		return;
 	}
-	char *t_end  = strstr(t, "\")")-2;
+	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
 		printf(errmsg);
@@ -300,14 +255,14 @@ ICACHE_FLASH_ATTR void clientParseUrl(char* s)
 
 ICACHE_FLASH_ATTR void clientParsePath(char* s)
 {
-    char *t = strstr(s, "(\"");
+    char *t = strstr(s, parslashquote);
 	printf("cli.path: %s\n",t);
 	if(t == 0)
 	{
 		printf(errmsg);
 		return;
 	}
-	char *t_end  = strstr(t, "\")")-2;
+	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
 		printf(errmsg);
@@ -327,13 +282,13 @@ ICACHE_FLASH_ATTR void clientParsePath(char* s)
 
 ICACHE_FLASH_ATTR void clientParsePort(char *s)
 {
-    char *t = strstr(s, "(\"");
+    char *t = strstr(s, parslashquote);
 	if(t == 0)
 	{
 		printf(errmsg);
 		return;
 	}
-	char *t_end  = strstr(t, "\")")-2;
+	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
 		printf(errmsg);
@@ -354,13 +309,13 @@ ICACHE_FLASH_ATTR void clientParsePort(char *s)
 
 ICACHE_FLASH_ATTR void clientPlay(char *s)
 {
-    char *t = strstr(s, "(\"");
+    char *t = strstr(s, parslashquote);
 	if(t == 0)
 	{
 		printf(errmsg);
 		return;
 	}
-	char *t_end  = strstr(t, "\")")-2;
+	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
 		printf(errmsg);
@@ -383,10 +338,10 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 	uint8_t i = 0,j = 255;
 	bool onlyOne = false;
 	char stlinf[] = {"##CLI.LIST#\n"};
-	char *t = strstr(s, "(\"");
+	char *t = strstr(s, parslashquote);
 	if(t != NULL) // a number specified
 	{	
-		char *t_end  = strstr(t, "\")")-2;
+		char *t_end  = strstr(t, parquoteslash)-2;
 		if(t_end <= 0)
 		{
 			printf(errmsg);
@@ -439,7 +394,7 @@ ICACHE_FLASH_ATTR void clientInfo()
 
 ICACHE_FLASH_ATTR void clientI2S(char* s)
 {
-    char *t = strstr(s, "(\"");
+    char *t = strstr(s, parslashquote);
 	char message[] ={"\n##I2S speed: %d, 0=48kHz, 1=96kHz, 2=192kHz#\n"};
 	struct device_settings *device;
 	device = getDeviceSettings();
@@ -449,7 +404,7 @@ ICACHE_FLASH_ATTR void clientI2S(char* s)
 		free(device);
 		return;
 	}
-	char *t_end  = strstr(t, "\")");
+	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
 		printf(errmsg);
@@ -470,13 +425,13 @@ ICACHE_FLASH_ATTR void clientUart(char* s)
 	char *t_end;
 	if (s != NULL)
 	{	
-		t = strstr(s, "(\"");
+		t = strstr(s, parslashquote);
 		if(t == NULL)
 		{
 			empty = true;
 		} else
 		{
-			t_end  = strstr(t, "\")");
+			t_end  = strstr(t, parquoteslash);
 			if(t_end == NULL)
 			{
 				empty = true;
@@ -492,19 +447,19 @@ ICACHE_FLASH_ATTR void clientUart(char* s)
 		device->uartspeed= speed;
 		saveDeviceSettings(device);	
 	}
-	printf("\n##CLI.UART= %d# on next reset\n",device->uartspeed);	
+	printf("\n%sUART= %d# on next reset\n",msgcli,device->uartspeed);	
 	free(device);
 }
 ICACHE_FLASH_ATTR void clientVol(char *s)
 {
-    char *t = strstr(s, "(\"");
+    char *t = strstr(s, parslashquote);
 	if(t == 0)
 	{
 		// no argument, return the current volume
-		printf("##CLI.VOL#: %d\n",getVolume());
+		printf("%sVOL#: %d\n",msgcli,getVolume());
 		return;
 	}
-	char *t_end  = strstr(t, "\")")-2;
+	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
 
@@ -526,7 +481,7 @@ ICACHE_FLASH_ATTR void clientVol(char *s)
 
 ICACHE_FLASH_ATTR void syspatch(char* s)
 {
-    char *t = strstr(s, "(\"");
+    char *t = strstr(s, parslashquote);
 	struct device_settings *device;
 	device = getDeviceSettings();
 	if(t == NULL)
@@ -535,7 +490,7 @@ ICACHE_FLASH_ATTR void syspatch(char* s)
 		free(device);
 		return;
 	}
-	char *t_end  = strstr(t, "\")");
+	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
 		printf(errmsg);
@@ -554,7 +509,7 @@ ICACHE_FLASH_ATTR void syspatch(char* s)
 
 ICACHE_FLASH_ATTR void sysled(char* s)
 {
-    char *t = strstr(s, "(\"");
+    char *t = strstr(s, parslashquote);
 	struct device_settings *device;
 	device = getDeviceSettings();
 	extern bool ledStatus;
@@ -564,7 +519,7 @@ ICACHE_FLASH_ATTR void sysled(char* s)
 		free(device);
 		return;
 	}
-	char *t_end  = strstr(t, "\")");
+	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
 		printf(errmsg);
@@ -584,16 +539,17 @@ ICACHE_FLASH_ATTR void sysled(char* s)
 
 ICACHE_FLASH_ATTR void tzoffset(char* s)
 {
-	char *t = strstr(s, "(\"");
+	char *t = strstr(s, parslashquote);
 	struct device_settings *device;
+	char msg[] = {"##SYS.TZO#: %d\n"};
 	device = getDeviceSettings();
 	if(t == NULL)
 	{
-		printf("##SYS.TZO#: %d\n",device->tzoffset);
+		printf(msg,device->tzoffset);
 		free(device);
 		return;
 	}
-	char *t_end  = strstr(t, "\")");
+	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
 		printf(errmsg);
@@ -602,13 +558,13 @@ ICACHE_FLASH_ATTR void tzoffset(char* s)
 	uint8_t value = atoi(t+2);
 	device->tzoffset = value;	
 	saveDeviceSettings(device);	
-	printf("##SYS.TZO#: %d\n",device->tzoffset);
+	printf(msg,device->tzoffset);
 	free(device);		
 }
 
 ICACHE_FLASH_ATTR void heapSize()
 {
-	printf("##SYS.HEAP: %d #\n",xPortGetFreeHeapSize( ));
+	printf("%sHEAP: %d #\n",msgsys,xPortGetFreeHeapSize( ));
 }
 
 ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
@@ -618,37 +574,46 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 	for(i=0;i<size;i++) tmp[i] = s[i];
 	tmp[size] = 0;
 //	printf("size: %d, cmd=%s\n",size,tmp);
-	if     (strcmp(tmp, "wifi.list") == 0) 	wifiScan();
-	else if(strcmp(tmp, "wifi.con") == 0) 	wifiConnectMem();
-	else if(startsWith ("wifi.con", tmp)) 	wifiConnect(tmp);
-	else if(strcmp(tmp, "wifi.discon") == 0) wifiDisconnect();
-	else if(strcmp(tmp, "wifi.status") == 0) wifiStatus();
-	else if(strcmp(tmp, "wifi.station") == 0) wifiGetStation();
-    else if(startsWith ("cli.url", tmp)) 	clientParseUrl(tmp);
-    else if(startsWith ("cli.path", tmp))	clientParsePath(tmp);
-    else if(startsWith ("cli.port", tmp)) 	clientParsePort(tmp);
-	else if(strcmp(tmp, "cli.instant") == 0) {clientDisconnect("cli instantplay");clientConnectOnce();}
-	else if(strcmp(tmp, "cli.start") == 0) 	clientPlay("(\"255\")"); // outside value to play the current station
-    else if(strcmp(tmp, "cli.stop") == 0) 	clientDisconnect("cli stop");
-    else if(startsWith ("cli.list", tmp)) 	clientList(tmp);
-    else if(strcmp(tmp, "cli.next") == 0) 	wsStationNext();
-    else if(strncmp(tmp,"cli.previous",8) == 0) wsStationPrev();
-    else if(startsWith ("cli.play",tmp)) 	clientPlay(tmp);
-	else if(strcmp(tmp, "cli.vol+") == 0) 	setVolumePlus();
-	else if(strcmp(tmp, "cli.vol-") == 0) 	setVolumeMinus();
-	else if(strcmp(tmp, "cli.info") == 0) 	clientInfo();
-	else if(startsWith ("cli.vol",tmp)) 	clientVol(tmp);
-    else if(startsWith ("sys.i2s",tmp)) 	clientI2S(tmp);
-    else if(startsWith ("sys.uart",tmp)) 	clientUart(tmp);
-    else if(strcmp(tmp, "sys.erase") == 0) 	eeEraseAll();
-    else if(strcmp(tmp, "sys.heap") == 0) 	heapSize();
-    else if(strcmp(tmp, "sys.boot") == 0) 	system_restart();
-    else if(strcmp(tmp, "sys.update") == 0) update_firmware();
-	else if(startsWith ("sys.patch",tmp)) 	syspatch(tmp);
-	else if(startsWith ("sys.led",tmp)) 	sysled(tmp);
-    else if(strcmp(tmp, "sys.date") == 0) 	ntp_print_time();
-	else if(startsWith( "sys.tzo",tmp)) 	tzoffset(tmp);
-	else if(startsWith( "sys.log",tmp)) 	; // do nothing
+	if(startsWith ("wifi.", tmp))
+	{
+		if     (strcmp(tmp+5, "list") == 0) 	wifiScan();
+		else if(strcmp(tmp+5, "con") == 0) 	wifiConnectMem();
+		else if(startsWith ("con", tmp+5)) 	wifiConnect(tmp);
+		else if(strcmp(tmp+5, "discon") == 0) wifiDisconnect();
+		else if(strcmp(tmp+5, "status") == 0) wifiStatus();
+		else if(strcmp(tmp+5, "station") == 0) wifiGetStation();
+	} else
+	if(startsWith ("cli.", tmp))
+	{
+		if     (startsWith (  "url", tmp+4)) 	clientParseUrl(tmp);
+		else if(startsWith (  "path", tmp+4))	clientParsePath(tmp);
+		else if(startsWith (  "port", tmp+4)) 	clientParsePort(tmp);
+		else if(strcmp(tmp+4, "instant") == 0) {clientDisconnect("cli instantplay");clientConnectOnce();}
+		else if(strcmp(tmp+4, "start") == 0) 	clientPlay("(\"255\")"); // outside value to play the current station
+		else if(strcmp(tmp+4, "stop") == 0) 	clientDisconnect("cli stop");
+		else if(startsWith (  "list", tmp+4)) 	clientList(tmp);
+		else if(strcmp(tmp+4, "next") == 0) 	wsStationNext();
+		else if(strncmp(tmp+4,"previous",4) == 0) wsStationPrev();
+		else if(startsWith (  "play",tmp+4)) 	clientPlay(tmp);
+		else if(strcmp(tmp+4, "vol+") == 0) 	setVolumePlus();
+		else if(strcmp(tmp+4, "vol-") == 0) 	setVolumeMinus();
+		else if(strcmp(tmp+4, "info") == 0) 	clientInfo();
+		else if(startsWith (  "vol",tmp+4)) 	clientVol(tmp);
+	} else
+	if(startsWith ("sys.", tmp))
+	{
+			 if(startsWith (  "i2s",tmp+4)) 	clientI2S(tmp);
+		else if(startsWith (  "uart",tmp+4)) 	clientUart(tmp);
+		else if(strcmp(tmp+4, "erase") == 0) 	eeEraseAll();
+		else if(strcmp(tmp+4, "heap") == 0) 	heapSize();
+		else if(strcmp(tmp+4, "boot") == 0) 	system_restart();
+		else if(strcmp(tmp+4, "update") == 0) update_firmware();
+		else if(startsWith (  "patch",tmp+4)) 	syspatch(tmp);
+		else if(startsWith (  "led",tmp+4)) 	sysled(tmp);
+		else if(strcmp(tmp+4, "date") == 0) 	ntp_print_time();
+		else if(startsWith(   "tzo",tmp+4)) 	tzoffset(tmp);
+		else if(startsWith(   "log",tmp+4)) 	; // do nothing
+	}
 	else printInfo(tmp);
 	free(tmp);
 	
