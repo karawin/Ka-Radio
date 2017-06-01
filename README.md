@@ -15,8 +15,12 @@ Attention:<br/>
 The optional led is now on GPIO2. The blue led on the ESP8266 is blinking at the same rate.<BR/>
 GPIO16 is now the Chip select for the external ram if any.<BR/>
 The external ram is detected at boot time if present.<BR/><BR/>
-To load this release, please flash user1.4096.new.4.bin at 0x1000 ,<BR/>
- user2.4096.new.4.bin at 0X81000 and blank.bin at	0x7e000 & 0x3fe000 <BR/>
+To load this release, please flash <BR/>
+boot_v1.6.bin at 0x0000,<BR/>
+user1.4096.new.4.bin at 0x1000 ,<BR/>
+user2.4096.new.4.bin at 0X81000,<BR/>
+esp_init_data_default.bin at 0x3FC000 <BR/>
+and blank.bin at	0x3fe000 <BR/>
 After that, all next updates are done with the On The Air (OTA) feature.<BR/>
 <BR/><BR/>
 See also https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053 <br/>
