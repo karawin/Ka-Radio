@@ -345,7 +345,7 @@ ICACHE_FLASH_ATTR void playStation(char* id) {
 	int uid;
 	struct device_settings *device;
 	uid = atoi(id) ;
-	printf ("playstation: %d\n",uid);
+//	printf ("playstation: %d\n",uid);
 	if (uid < 255)
 		currentStation = atoi(id) ;
 	playStationInt(currentStation);	

@@ -582,6 +582,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 		else if(strcmp(tmp+5, "discon") == 0) wifiDisconnect();
 		else if(strcmp(tmp+5, "status") == 0) wifiStatus();
 		else if(strcmp(tmp+5, "station") == 0) wifiGetStation();
+		else printInfo(tmp);
 	} else
 	if(startsWith ("cli.", tmp))
 	{
@@ -599,6 +600,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 		else if(strcmp(tmp+4, "vol-") == 0) 	setVolumeMinus();
 		else if(strcmp(tmp+4, "info") == 0) 	clientInfo();
 		else if(startsWith (  "vol",tmp+4)) 	clientVol(tmp);
+		else printInfo(tmp);
 	} else
 	if(startsWith ("sys.", tmp))
 	{
@@ -613,6 +615,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 		else if(strcmp(tmp+4, "date") == 0) 	ntp_print_time();
 		else if(startsWith(   "tzo",tmp+4)) 	tzoffset(tmp);
 		else if(startsWith(   "log",tmp+4)) 	; // do nothing
+		else printInfo(tmp);
 	}
 	else printInfo(tmp);
 	free(tmp);

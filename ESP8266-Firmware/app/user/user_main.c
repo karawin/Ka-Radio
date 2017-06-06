@@ -67,12 +67,26 @@ void uartInterfaceTask(void *pvParameters) {
 //-------------------------
 	struct ip_info *info;
 	struct device_settings *device;
+	struct device_settings1* device1;
 	struct station_config* config;
 	wifi_station_set_hostname("WifiWebRadio");
 	
 	device = getDeviceSettings();
+	device1 = getDeviceSettings1();  // extention of saved data
 	config = malloc(sizeof(struct station_config));
 	info = malloc(sizeof(struct ip_info));
+	
+// if device1 not initialized, erase it and copy pass2 to the new place
+	if (device1->cleared != 0xAABB)
+	{		
+		eeErasesettings1();
+		device1->cleared = 0xAABB; //marker init done
+		memcpy(device1->pass2,device->pass2, 60);
+		saveDeviceSettings1(device1);	
+	}		
+	
+	
+	
 	wifi_get_ip_info(STATION_IF, info); // ip netmask dw
 	wifi_station_get_config_default(config); //ssid passwd
 	if ((device->ssid[0] == 0xFF)&& (device->ssid2[0] == 0xFF) )  {eeEraseAll(); device = getDeviceSettings();} // force init of eeprom
@@ -95,27 +109,26 @@ void uartInterfaceTask(void *pvParameters) {
 		saveDeviceSettings(device);	
 	}
 	
-		IP4_ADDR(&(info->ip), device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3]);
-		IP4_ADDR(&(info->netmask), device->mask[0], device->mask[1],device->mask[2], device->mask[3]);
-		IP4_ADDR(&(info->gw), device->gate[0], device->gate[1],device->gate[2], device->gate[3]);
-
-		strcpy(config->ssid,device->ssid);
-		strcpy(config->password,device->pass);
-		wifi_station_set_config(config);
-	
+// set for AP1 //
+//-------------//
+	IP4_ADDR(&(info->ip), device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3]);
+	IP4_ADDR(&(info->netmask), device->mask[0], device->mask[1],device->mask[2], device->mask[3]);
+	IP4_ADDR(&(info->gw), device->gate[0], device->gate[1],device->gate[2], device->gate[3]);
+	strcpy(config->ssid,device->ssid);
+	strcpy(config->password,device->pass);
+	wifi_station_set_config(config);
 	if (!device->dhcpEn) {
 //		if ((strlen(device->ssid)!=0)&&(device->ssid[0]!=0xff)&&(!device->dhcpEn))
 //			conn = true;	//static ip
 		wifi_station_dhcpc_stop();
 		wifi_set_ip_info(STATION_IF, info);
 	} 
+	printf(" AP1:Station Ip: %d.%d.%d.%d\n",(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
+//----------------
 	
-	printf(" Station Ip: %d.%d.%d.%d\n",(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
-
+	
 //	printf("DHCP: 0x%x\n Device: Ip: %d.%d.%d.%d\n",device->dhcpEn,device->ipAddr[0], device->ipAddr[1], device->ipAddr[2], device->ipAddr[3]);
 //	printf("\nI: %d status: %d\n",i,wifi_station_get_connect_status());
-//	wifi_station_set_auto_connect(true);
-//	wifi_station_ap_change(ap);
 	wifi_station_connect();
 	i = 0;
 	while ((wifi_station_get_connect_status() != STATION_GOT_IP))
@@ -123,18 +136,28 @@ void uartInterfaceTask(void *pvParameters) {
 		printf("Trying %s,  I: %d status: %d\n",config->ssid,i,wifi_station_get_connect_status());
 		FlashOn = FlashOff = 40;
 
-		vTaskDelay(300);//  ms
+		vTaskDelay(400);//  ms
 		if (( strlen(config->ssid) ==0)||  (wifi_station_get_connect_status() == STATION_WRONG_PASSWORD)||(wifi_station_get_connect_status() == STATION_CONNECT_FAIL)||(wifi_station_get_connect_status() == STATION_NO_AP_FOUND))
 		{ 
+			// try AP2 //
 			if ((strlen(device->ssid2) > 0)&& (ap <1))
 			{
-			strcpy(config->ssid,device->ssid2);
-			strcpy(config->password,device->pass2);
-			wifi_station_set_config(config);
-			printf(" Status: %d\n",wifi_station_get_connect_status());
-			ap++;
+				IP4_ADDR(&(info->ip), device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3]);
+				IP4_ADDR(&(info->netmask), device->mask[0], device->mask[1],device->mask[2], device->mask[3]);
+				IP4_ADDR(&(info->gw), device->gate[0], device->gate[1],device->gate[2], device->gate[3]);
+				
+				strcpy(config->ssid,device->ssid2);
+				strcpy(config->password,device1->pass2);
+				wifi_station_set_config(config);
+				
+				if (!device->dhcpEn) {
+					wifi_station_dhcpc_stop();
+					wifi_set_ip_info(STATION_IF, info);
+				} 				
+				printf(" AP2:Station Ip: %d.%d.%d.%d\n",(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));		
+				ap++;
 			}
-			else i = 6;
+			else i = 6; // go to SOFTAP_MODE
 		}
 		i++;
 	
@@ -189,13 +212,19 @@ void uartInterfaceTask(void *pvParameters) {
 //
 	
 	free(info);
-	free (device);
-	free (config);
-	if (system_adc_read() < 10) adcdiv = 0; // no panel adc grounded
+	free(device);
+	free(device1);
+	free(config);
+	if ((system_adc_read() < 10)&&(system_adc_read() < 10)) // two time
+	{		
+		adcdiv = 0; // no panel adc grounded
+	}
 	else
+	{
 	// read adc to see if it is a nodemcu with adc dividor
-		if (system_adc_read() < 400) adcdiv = 3;
+		if ((system_adc_read() < 400)&&(system_adc_read() < 400)) adcdiv = 3;
 			else adcdiv = 1;
+	}
 	FlashOn = 190;FlashOff = 10;
 	
 	while(1) {
@@ -383,6 +412,7 @@ void user_init(void)
 	initBuffer();
 	wifi_set_opmode_current(STATION_MODE);
 //	Delay(10);	
+	printf("Release 1.3.1\n");
 	printf("SDK %s\n",system_get_sdk_version());
 	system_print_meminfo();
 	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
@@ -396,7 +426,7 @@ void user_init(void)
 	printf(msg,"t0",pxCreatedTask);
 	xTaskCreate(uartInterfaceTask, "t1", 300, NULL, 2, &pxCreatedTask); // 304
 	printf(msg,"t1",pxCreatedTask);
-	xTaskCreate(vsTask, "t4", 370, NULL,4, &pxCreatedTask); //370
+	xTaskCreate(vsTask, "t4", 380, NULL,4, &pxCreatedTask); //370
 	printf(msg,"t4",pxCreatedTask);
 	xTaskCreate(clientTask, "t3", 750, NULL, 5, &pxCreatedTask); // 830
 	printf(msg,"t3",pxCreatedTask);

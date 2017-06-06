@@ -153,7 +153,6 @@ ICACHE_FLASH_ATTR void eeSetClear(int address,uint8_t* eebuf) { // address, size
 		spi_flash_erase_sector(sector >> 12);
 		for(i=0; i<4096; i++) eebuf[i] = 0;	
 		spi_flash_write(sector, (uint32 *)eebuf, 4096);
-		free (eebuf);
 }
 
 ICACHE_FLASH_ATTR void eeSetClear1(int address,uint8_t* eebuf) { // address, size in BYTES !!!!
@@ -162,7 +161,6 @@ ICACHE_FLASH_ATTR void eeSetClear1(int address,uint8_t* eebuf) { // address, siz
 		spi_flash_erase_sector(sector >> 12);
 		for(i=0; i<4096; i++) eebuf[i] = 0;	
 		spi_flash_write(sector, (uint32 *)eebuf, 4096);
-		free (eebuf);
 }
 
 ICACHE_FLASH_ATTR void eeEraseAll() {
@@ -186,8 +184,27 @@ int i = 0;
 			vTaskDelay(1); // avoid watchdog
 		}
 //		printf("erase All done\n");
+		free(buffer);
 	}
 }
+
+ICACHE_FLASH_ATTR void eeErasesettings1(void) {
+uint8_t* buffer= malloc(4096);
+int i = 0;
+	if (buffer != NULL)
+	{
+		for(i=0; i<4096; i++) buffer[i] = 0;
+		printf("erase setting1 (only one time) \n",i);		
+		for(i=0; i<EEPROM_SIZE; i+=4096) {
+//			printf("erase from %x \n",i);
+			eeSetClear1(i,buffer);
+			vTaskDelay(1); // avoid watchdog
+		}
+//		printf("erase All done\n");
+		free(buffer);
+	}
+}
+
 ICACHE_FLASH_ATTR void eeEraseStations() {
 	uint8_t* buffer = malloc(4096);
 	int i=0;
@@ -266,7 +283,7 @@ ICACHE_FLASH_ATTR void saveDeviceSettings(struct device_settings *settings) {
 	if (settings == NULL) { printf("saveDeviceSetting:  null\n");return;}
 	eeSetData(0, settings, 256);
 }
-ICACHE_FLASH_ATTR void saveSettings1(struct device_settings1 *settings) {
+ICACHE_FLASH_ATTR void saveDeviceSettings1(struct device_settings1 *settings) {
 	if (settings == NULL) { printf("saveSetting1:  null\n");return;}
 	eeSetData1(0, settings, 256);
 }
@@ -291,7 +308,7 @@ ICACHE_FLASH_ATTR struct device_settings* getDeviceSettings() {
 		return (struct device_settings*)buffer;
 	} else { printf("getDeviceSetting fails\n");return NULL;}
 }
-ICACHE_FLASH_ATTR struct device_settings1* getSettings1() {
+ICACHE_FLASH_ATTR struct device_settings1* getDeviceSettings1() {
 	uint16_t size = 256;
 	uint8_t* buffer = malloc(size);
 	if(buffer) {

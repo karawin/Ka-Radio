@@ -183,6 +183,7 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 {
 //		if ((strchr(str,'"') == NULL)&&(strchr(str,'/') == NULL)) return str;
 		char* new = incmalloc(len+10);
+		int nlen = len+10;
 		if (new != NULL)
 		{
 //			printf("stringify: enter: len:%d  \"%s\"\n",len,str);
@@ -197,14 +198,23 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 				if (str[i] == '/') {
 					new[j++] = '\\';
 					new[j++] =(str)[i] ;
-				}else	// pseudo ansi utf8 convertion
+				}
+				else	// pseudo ansi utf8 convertion
 					if ((str[i] > 192) && (str[i+1] < 0x80)){ // 128 = 0x80
 					new[j++] = 195; // 192 = 0xC0   195 = 0xC3
 					new[j++] =(str)[i]-64 ; // 64 = 0x40
-				} else new[j++] =(str)[i] ;
+				} 
+				else new[j++] =(str)[i] ;
+				
+				if ( j+10> nlen) 
+				{
+					nlen +=10;
+					new = realloc(new,nlen); // some room
+				}
 			}
 			incfree(str,"str");
-			new = realloc(new,j+1);
+
+			new = realloc(new,j+1); // adjust
 //			printf("stringify: exit: len:%d  \"%s\"\n",j,new);
 			return new;		
 		} else 
@@ -218,6 +228,26 @@ ICACHE_FLASH_ATTR bool clientPrintMeta()
 {
 	printf("##CLI.META#: %s\n",header.members.mArr[METADATA]); 
 }
+
+ICACHE_FLASH_ATTR void removePartOfString(char* origine, char* remove)
+{
+	char* copy = malloc(strlen(origine));
+	char* t_end;
+	if (copy != NULL)
+	{
+		while ( (t_end = strstr(origine,remove))!= NULL)
+//		t_end = strstr(origine,remove);
+//		if (t_end != NULL)
+		{
+			*t_end = 0;
+			strcpy(copy,origine);
+			strcat(copy,t_end+(strlen(remove)));
+			strcpy(origine,copy);
+		}	
+		incfree(copy,"removePart");
+	}
+}
+
 // A metadata found. Extract the Stream title
 ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 {
@@ -226,8 +256,24 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 		bool found = false;
 		if (len > 256) return;
 		t = s;
-		t_end = strstr(t,";StreamUrl='");
-		if (t_end != NULL) { *t_end = 0;found = true;} 
+		len = strlen(t);
+//printf("clientSaveMetadata:  len:%d   char:%s\n",len,s);
+		t_end = strstr(t,"song_spot=");
+		if (t_end != NULL)
+		{ 
+			*t_end = 0;
+			found = true;
+			removePartOfString(t, "text=");
+			removePartOfString(t, "\"");
+		}
+		else
+		{
+			t_end = strstr(t,";StreamUrl='");
+			if (t_end != NULL) 
+			{
+				*t_end = 0;found = true;
+			} 
+		}			
 		t = strstr(t,"StreamTitle='");
 		if (t!= NULL) {t += 13;found = true;} else t = s;
 		len = strlen(t);
@@ -238,6 +284,7 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 			if (len >=2) {t_end = t+len-2;found = true;} 
 			else t_end = t+len;
 		}
+
 		if (found)
 		{	
 			t_end = strstr(t_end,"'");
@@ -247,7 +294,7 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 		{
 			if (len >=2) len-=2; 
 		}
-
+		
 		if (header.members.mArr[METADATA] != NULL)
 			incfree(header.members.mArr[METADATA],"metad");
 		header.members.mArr[METADATA] = (char*)incmalloc((len+3)*sizeof(char));
@@ -257,8 +304,9 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 
 		strcpy(header.members.mArr[METADATA], t);
 //		dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
-		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],len);
+		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],strlen(t));
 //		dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
+
 		clientPrintMeta(); 
 		while ((header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == ' ')||
 			(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\r')||
@@ -273,6 +321,7 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 			t_end = header.members.mArr[METADATA];
 		else	
 			t_end = (header.members.single.name ==NULL)?"":header.members.single.name;
+		
 		char* title = incmalloc(strlen(t_end)+15);
 		if (title != NULL)
 		{
@@ -874,7 +923,7 @@ IRAM_ATTR void vsTask(void *pvParams) {
 
 ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 //1440	for MTU 
-	portBASE_TYPE uxHighWaterMark;
+//	portBASE_TYPE uxHighWaterMark;
 	struct timeval timeout; 
     timeout.tv_usec = 0;
 	int sockfd;
@@ -895,8 +944,8 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 	//	portBASE_TYPE uxHighWaterMark;
 //	clearHeaders();
 
-	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
+//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+//	printf("watermark:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 	
 	while(1) {
 		xSemaphoreGive(sConnected);
@@ -1001,8 +1050,8 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			}//jpc
 						
 			// marker for heap size (debug)
-			uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-			printf("watermark webclient :%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
+//			uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+//			printf("watermark webclient :%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 
 			if (playing)  // stop clean
 			{		

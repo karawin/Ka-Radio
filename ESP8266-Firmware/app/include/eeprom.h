@@ -47,7 +47,12 @@ struct device_settings1 {
 	uint16_t cleared; 		// 0xAABB if initialized
 	uint32_t sleepValue; 	//6
 	uint32_t wakeValue;		//10
-	uint8_t pass2[246];
+	uint8_t dhcpEn;			//11
+	uint8_t ipAddr[4];		//15
+	uint8_t mask[4];		//19
+	uint8_t gate[4];		//23	
+	uint8_t pass2[60];
+	uint8_t fill[173];
 };
 
 struct shoutcast_info {
@@ -70,14 +75,14 @@ void eeSet4Byte(uint32_t address, uint32_t data);
 //void eeSetOldData(int address, void* buffer, int size);
 void eeGetData(int address, void* buffer, int size);
 void eeSetData(int address, void* buffer, int size);
-
+void eeErasesettings1(void);
 void saveStation(struct shoutcast_info *station, uint16_t position);
 void saveMultiStation(struct shoutcast_info *station, uint16_t position, uint8_t number);
-void eeEraseStations();
+void eeEraseStations(void);
 struct shoutcast_info* getStation(uint8_t position);
 //struct shoutcast_info* getOldStation(uint8_t position);
 void saveDeviceSettings(struct device_settings *settings);
-void saveSettings1(struct device_settings1 *settings);
+void saveDeviceSettings1(struct device_settings1 *settings);
 struct device_settings* getDeviceSettings();
-struct device_settings1* getSettings1(void);
+struct device_settings1* getDeviceSettings1(void);
 //struct device_settings* getOldDeviceSettings();

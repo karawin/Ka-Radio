@@ -264,6 +264,13 @@ div.LEFT {
 .tabs input[type="button"]:hover {
 	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
+
+.tabs [class="icon icons8"]:hover {
+	box-shadow: 3px 3px 15px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)	
+}
+
+
+
 .tabs [id^="sw"] input[type="button"] {
 	font-size:14px;
 	min-width:50px;

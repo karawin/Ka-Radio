@@ -182,6 +182,7 @@ bool sendFrame(int socket, wsopcode_t opcode, uint8_t * payload , size_t length 
     bool ret = true;
 
     // calculate header Size
+//	printf("websocket len: %d  payload: %s\n",length,payload);
     if(length < 126) {
         headerSize = 2;
     } else if(length < 0xFFFF) {
@@ -237,6 +238,7 @@ bool sendFrame(int socket, wsopcode_t opcode, uint8_t * payload , size_t length 
     // send payload
         write(socket,payloadPtr, length) ;
     }
+//	printf("websocket len: %d  payloadPtr: %s\n",length,payloadPtr);
     return true;
 }
 

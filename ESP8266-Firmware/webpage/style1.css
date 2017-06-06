@@ -291,9 +291,19 @@ border:1px solid #444;
 	border:1px solid #444;
 	border-radius:5px
 }
-.tabs [id^="sw"] nput[type="button"]:hover {
-  box-shadow:3px 3px 3px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
+.tabs [class="icon icons8"]:hover {
+	box-shadow:3px 3px 15px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
 }
+.tabs input[type="button"]:hover {
+	box-shadow:3px 3px 3px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
+}
+
+.tabs span.icon icons8:hover {
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)	
+}
+
+
+
 .tabs span input[type="button"] {
 	font-size:14px;
 	min-width:100px;
