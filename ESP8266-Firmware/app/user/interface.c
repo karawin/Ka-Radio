@@ -49,50 +49,51 @@ unsigned short adcdiv;
 // Read the command panel
 void switchCommand() {
 	int adc;
+	int i = 0;
 	char Vol[22];
 	if (adcdiv == 0) return; // no panel
 
-		adc = system_adc_read(); 
-		adc *= adcdiv;
-//		if (adc < 930) 
-//			printf("adc: %d  div: %d\n",adc,adcdiv);
-//		if (adc >940) vTaskDelay(10);
-		if (inside&&(adc > 930)) inside = false;
-		
-		if ((adc >400) && (adc < 580)) // volume +
-		{
-			setVolumePlus();
-		}
-		else if ((adc >730) && (adc < 830)) // volume -
-		{
-			setVolumeMinus();
-		}		
-		if (!inside)
-		{	
-			if (adc < 220) // stop
-			{
-				inside = true;
-				clientDisconnect("Adc Stop");
-			}
-			else if ((adc >278) && (adc < 380)) //start
-			{
-				inside = true;
-				sprintf(Vol,"%d",currentStation);
-				playStation	(Vol);
-			}
-			else if ((adc >830) && (adc < 920)) // station+
-			{
-				inside = true;
-				wsStationNext();
-			}
-			else if ((adc >590) && (adc < 710)) // station-
-			{
-				inside = true;
-				wsStationPrev();
-			}
-		}
-}
+	adc = system_adc_read(); 
+	adc *= adcdiv;
+	
+//	if (adc < 930) 
+//		printf("adc: %d  div: %d\n",adc,adcdiv);
 
+	if (inside&&(adc > 930)) inside = false;
+		
+	if ((adc >400) && (adc < 580)) // volume +
+	{
+		setVolumePlus();
+	}
+	else if ((adc >730) && (adc < 830)) // volume -
+	{
+		setVolumeMinus();
+	}		
+	if (!inside)
+	{	
+		if (adc < 220) // stop
+		{
+			inside = true;
+			clientDisconnect("Adc Stop");
+		}
+		else if ((adc >278) && (adc < 380)) //start
+		{
+			inside = true;
+			sprintf(Vol,"%d",currentStation);
+			playStation	(Vol);
+		}
+		else if ((adc >830) && (adc < 920)) // station+
+		{
+			inside = true;
+			wsStationNext();
+		}
+		else if ((adc >590) && (adc < 710)) // station-
+		{
+			inside = true;
+		wsStationPrev();
+		}
+	}
+}
 
 
 

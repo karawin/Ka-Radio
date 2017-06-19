@@ -35,6 +35,8 @@ void uart_div_modify(int no, unsigned int freq);
 
 //	struct station_config config;
 uint8_t FlashOn = 5,FlashOff = 5;
+uint8_t FlashCount = 0xFF;
+os_timer_t ledTimer;
 bool ledStatus = true; // true: normal blink, false: led on when playing
 sc_status status = 0;
 	
@@ -44,6 +46,89 @@ void cb(sc_status stat, void *pdata)
 	status = stat;
 	if (stat == SC_STATUS_LINK_OVER) if (pdata) printf("SmartConfig: %d:%d:%d:%d\n",((char*) pdata)[0],((char*)pdata)[1],((char*)pdata)[2],((char*)pdata)[3]);
 }
+
+
+
+void testtask(void* p) {
+struct device_settings *device;	
+/*
+	int uxHighWaterMark;
+	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+	printf("watermark testtask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
+*/
+
+	gpio2_output_conf();
+	vTaskDelay(10);
+	
+	while(FlashCount==0xFF) {
+		if (ledStatus) gpio2_output_set(0);
+		vTaskDelay(FlashOff);
+		
+		if (ledStatus) // on led and save volume if changed
+		{		
+			gpio2_output_set(1);
+			vTaskDelay(FlashOn);
+		}	
+
+		// save volume if changed		
+		device = getDeviceSettings();
+		if (device != NULL)
+		{	
+			if (device->vol != clientIvol){ 
+				device->vol = clientIvol;
+				saveDeviceSettings(device);
+
+//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+//	printf("watermark testtask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
+
+			}
+			free(device);	
+		}	
+	}
+//	printf("t0 end\n");
+	vTaskDelete( NULL ); // stop the task
+}
+
+
+ICACHE_FLASH_ATTR void ledCallback(void *pArg) {
+struct device_settings *device;	
+
+		FlashCount++;
+		
+		if ((ledStatus)&&(FlashCount == FlashOff)) gpio2_output_set(1);
+		if (FlashCount == FlashOn)
+		{
+			// save volume if changed		
+			device = getDeviceSettings();
+			if (device != NULL)
+			{	
+				if (device->vol != clientIvol)
+				{ 
+					device->vol = clientIvol;
+					saveDeviceSettings(device);
+				}
+				free(device);	
+			}
+		}		
+		if ((ledStatus)&&(FlashCount == FlashOn)) // on led and save volume if changed
+		{		
+			gpio2_output_set(0);
+			FlashCount = 0;
+		}	
+		
+}
+
+ICACHE_FLASH_ATTR void initLed(void) 
+{	
+	os_timer_disarm(&ledTimer);
+	FlashCount = 0;
+	os_timer_setfn(&ledTimer, ledCallback, NULL);
+	os_timer_arm(&ledTimer, 10, true); //  and rearm
+	vTaskDelay(1);	
+//	printf("initLed done\n");
+}
+
+
 
 void uartInterfaceTask(void *pvParameters) {
 	char tmp[255];
@@ -84,8 +169,7 @@ void uartInterfaceTask(void *pvParameters) {
 		memcpy(device1->pass2,device->pass2, 60);
 		saveDeviceSettings1(device1);	
 	}		
-	
-	
+
 	
 	wifi_get_ip_info(STATION_IF, info); // ip netmask dw
 	wifi_station_get_config_default(config); //ssid passwd
@@ -215,17 +299,25 @@ void uartInterfaceTask(void *pvParameters) {
 	free(device);
 	free(device1);
 	free(config);
-	if ((system_adc_read() < 10)&&(system_adc_read() < 10)) // two time
+	
+	ap = 0;
+	ap =system_adc_read();
+	vTaskDelay(10);
+	ap += system_adc_read();
+	
+	if (ap <15) // two time
 	{		
 		adcdiv = 0; // no panel adc grounded
+		printf("No panel\n");
 	}
 	else
 	{
 	// read adc to see if it is a nodemcu with adc dividor
-		if ((system_adc_read() < 400)&&(system_adc_read() < 400)) adcdiv = 3;
-			else adcdiv = 1;
+		if (ap < 800) adcdiv = 3;
+			else adcdiv = 1;	
 	}
 	FlashOn = 190;FlashOff = 10;
+	initLed(); // start the timer for led. This will kill the ttest task to free memory
 	
 	while(1) {
 		while(1) {
@@ -256,43 +348,7 @@ UART_SetBaudrate(uint8 uart_no, uint32 baud_rate) {
 }
 */
 
-void testtask(void* p) {
-struct device_settings *device;	
-/*
-	int uxHighWaterMark;
-	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf("watermark testtask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
-*/
-	gpio2_output_conf();
-	vTaskDelay(10);
-	
-	while(1) {
-		if (ledStatus) gpio2_output_set(0);
-		vTaskDelay(FlashOff);
-		
-		if (ledStatus) // on led and save volume if changed
-		{		
-			gpio2_output_set(1);
-			vTaskDelay(FlashOn);
-		}	
 
-		// save volume if changed		
-		device = getDeviceSettings();
-		if (device != NULL)
-		{	
-			if (device->vol != clientIvol){ 
-				device->vol = clientIvol;
-				saveDeviceSettings(device);
-
-//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-//	printf("watermark testtask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
-
-			}
-			free(device);	
-		}
-		
-	}
-}
 /******************************************************************************
  * FunctionName : user_rf_cal_sector_set
  * Description  : SDK just reversed 4 sectors, used for rf init data and paramters.
@@ -412,7 +468,7 @@ void user_init(void)
 	initBuffer();
 	wifi_set_opmode_current(STATION_MODE);
 //	Delay(10);	
-	printf("Release 1.3.1\n");
+	printf("Release 1.3.2\n");
 	printf("SDK %s\n",system_get_sdk_version());
 	system_print_meminfo();
 	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));

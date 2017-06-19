@@ -17,6 +17,7 @@
 #include "eeprom.h"
 #include "buffer.h"
 
+
 static enum clientStatus cstatus;
 //static uint32_t metacount = 0;
 //static uint16_t metasize = 0;
@@ -65,6 +66,11 @@ void incfree(void *p,char* from)
 //	else printf ("Client incfree from %s NULL\n",from);
 //	printf ("Client incfree of %x, from %s           Heap size: %d\n",p,from,xPortGetFreeHeapSize( ));
 }	
+
+
+
+
+
 
 ICACHE_FLASH_ATTR void clientPrintState()
 {
@@ -182,6 +188,7 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 {
 //		if ((strchr(str,'"') == NULL)&&(strchr(str,'/') == NULL)) return str;
+        if (len == 0) return str;
 		char* new = incmalloc(len+10);
 		int nlen = len+10;
 		if (new != NULL)
@@ -231,13 +238,12 @@ ICACHE_FLASH_ATTR bool clientPrintMeta()
 
 ICACHE_FLASH_ATTR void removePartOfString(char* origine, char* remove)
 {
-	char* copy = malloc(strlen(origine));
+	if (strlen(origine) == 0) return;
+	char* copy = incmalloc(strlen(origine));
 	char* t_end;
 	if (copy != NULL)
 	{
 		while ( (t_end = strstr(origine,remove))!= NULL)
-//		t_end = strstr(origine,remove);
-//		if (t_end != NULL)
 		{
 			*t_end = 0;
 			strcpy(copy,origine);
@@ -295,16 +301,18 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 			if (len >=2) len-=2; 
 		}
 		
+//printf("clientSaveMetadata0:  len:%d   char:%s\n",strlen(t),t);
 		if (header.members.mArr[METADATA] != NULL)
 			incfree(header.members.mArr[METADATA],"metad");
 		header.members.mArr[METADATA] = (char*)incmalloc((len+3)*sizeof(char));
 		if(header.members.mArr[METADATA] == NULL) 
-			{printf(mallocmsg,"clientsaveMeta");
-			return;}
+			{	printf(mallocmsg,"clientsaveMeta");
+				return;
+			}
 
 		strcpy(header.members.mArr[METADATA], t);
 //		dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
-		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],strlen(t));
+		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],len);
 //		dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
 
 		clientPrintMeta(); 
@@ -890,10 +898,10 @@ IRAM_ATTR void vsTask(void *pvParams) {
 //	portBASE_TYPE uxHighWaterMark;
 	struct device_settings *device;
 	register uint16_t size ,s;
-	Delay(100);
+	vTaskDelay(10);
 	VS1053_Start();
 	device = getDeviceSettings();
-	Delay(300);
+	vTaskDelay(30);
 	VS1053_SetVolume( device->vol);	
 	VS1053_SetTreble(device->treble);
 	VS1053_SetBass(device->bass);
@@ -914,7 +922,7 @@ IRAM_ATTR void vsTask(void *pvParams) {
 			vTaskDelay(1);			
 		} else 
 		{
-			vTaskDelay(30);		
+			vTaskDelay(20);		
 //	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 //	printf("watermark vstask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);			
 		}	
@@ -932,6 +940,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 	struct device_settings *device;
 	struct sockaddr_in dest;
 	uint8_t bufrec[RECEIVE+10];
+	
 	device = getDeviceSettings();
 	strcpy(useragent,device->ua);
 	if (strlen(useragent) == 0) 

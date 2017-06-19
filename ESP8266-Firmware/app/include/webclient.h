@@ -38,8 +38,6 @@ struct icyHeader
 	} members;
 };
 
-
-
 static const char* icyHeaders[] = { "icy-name:", "icy-notice1:", "icy-notice2:",  "icy-url:", "icy-genre:", "icy-br:","icy-description:","ice-audio-info:", "icy-metaint:" };
 
 
