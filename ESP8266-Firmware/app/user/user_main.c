@@ -166,15 +166,15 @@ void uartInterfaceTask(void *pvParameters) {
 	{		
 		eeErasesettings1();
 		device1->cleared = 0xAABB; //marker init done
-		memcpy(device1->pass2,device->pass2, 60);
+		memcpy(device1->pass2,device->pass2, 64);
 		saveDeviceSettings1(device1);	
 	}		
 
-	
+	wifi_station_set_auto_connect(false);
 	wifi_get_ip_info(STATION_IF, info); // ip netmask dw
 	wifi_station_get_config_default(config); //ssid passwd
 	if ((device->ssid[0] == 0xFF)&& (device->ssid2[0] == 0xFF) )  {eeEraseAll(); device = getDeviceSettings();} // force init of eeprom
-	if (device->ssid2[0] == 0xFF) {device->ssid2[0] = 0; device->pass2[0] = 0; }
+	if (device->ssid2[0] == 0xFF) {device->ssid2[0] = 0; device1->pass2[0] = 0; }
 	printf("AP1: %s, AP2: %s\n",device->ssid,device->ssid2);
 		
 	if ((strlen(device->ssid)==0)||(device->ssid[0]==0xff)/*||(device->ipAddr[0] ==0)*/) // first use
@@ -217,7 +217,7 @@ void uartInterfaceTask(void *pvParameters) {
 	i = 0;
 	while ((wifi_station_get_connect_status() != STATION_GOT_IP))
 	{	
-		printf("Trying %s,  I: %d status: %d\n",config->ssid,i,wifi_station_get_connect_status());
+		printf("Trying %s ,  I: %d status: %d\n",config->ssid,i,wifi_station_get_connect_status());
 		FlashOn = FlashOff = 40;
 
 		vTaskDelay(400);//  ms
@@ -226,6 +226,8 @@ void uartInterfaceTask(void *pvParameters) {
 			// try AP2 //
 			if ((strlen(device->ssid2) > 0)&& (ap <1))
 			{
+				i = -1;
+				wifi_station_disconnect();
 				IP4_ADDR(&(info->ip), device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3]);
 				IP4_ADDR(&(info->netmask), device->mask[0], device->mask[1],device->mask[2], device->mask[3]);
 				IP4_ADDR(&(info->gw), device->gate[0], device->gate[1],device->gate[2], device->gate[3]);
@@ -237,7 +239,9 @@ void uartInterfaceTask(void *pvParameters) {
 				if (!device->dhcpEn) {
 					wifi_station_dhcpc_stop();
 					wifi_set_ip_info(STATION_IF, info);
-				} 				
+				} 	
+				
+				wifi_station_connect();
 				printf(" AP2:Station Ip: %d.%d.%d.%d\n",(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));		
 				ap++;
 			}
@@ -468,7 +472,7 @@ void user_init(void)
 	initBuffer();
 	wifi_set_opmode_current(STATION_MODE);
 //	Delay(10);	
-	printf("Release 1.3.2\n");
+	printf("Release 1.3.3\n");
 	printf("SDK %s\n",system_get_sdk_version());
 	system_print_meminfo();
 	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
@@ -486,7 +490,7 @@ void user_init(void)
 	printf(msg,"t4",pxCreatedTask);
 	xTaskCreate(clientTask, "t3", 750, NULL, 5, &pxCreatedTask); // 830
 	printf(msg,"t3",pxCreatedTask);
-	xTaskCreate(serverTask, "t2", 230, NULL, 3, &pxCreatedTask); //230
+	xTaskCreate(serverTask, "t2", 240, NULL, 3, &pxCreatedTask); //230
 	printf(msg,"t2",pxCreatedTask);
 //	xTaskCreate(ntpTask, "t5", 210, NULL, 2, &pxCreatedTask); // NTP
 //	printf("t5 task: %x\n",pxCreatedTask);

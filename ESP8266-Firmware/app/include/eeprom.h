@@ -1,15 +1,7 @@
 #pragma once
 
 #include "c_types.h"
-struct device_settings_ext {
-	uint8_t dhcpEn2;
-	uint8_t ipAddr2[4];
-	uint8_t mask2[4];
-	uint8_t gate2[4];	
-	char ssid2[64]; 
-	uint8_t pass2[64];
-	uint8_t  futur[115];
-};
+
 
 //define for bit array in theme
 #define T_THEME 	1
@@ -51,8 +43,8 @@ struct device_settings1 {
 	uint8_t ipAddr[4];		//15
 	uint8_t mask[4];		//19
 	uint8_t gate[4];		//23	
-	uint8_t pass2[60];
-	uint8_t fill[173];
+	uint8_t pass2[64];
+	uint8_t fill[169];
 };
 
 struct shoutcast_info {

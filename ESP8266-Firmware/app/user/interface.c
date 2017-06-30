@@ -59,7 +59,16 @@ void switchCommand() {
 //	if (adc < 930) 
 //		printf("adc: %d  div: %d\n",adc,adcdiv);
 
-	if (inside&&(adc > 930)) inside = false;
+	if (inside&&(adc > 930)) 
+	{
+		inside = false;
+		return;
+	}	
+	
+//	vTaskDelay(1);
+	Delay(1);
+	adc = system_adc_read(); 
+	adc *= adcdiv;
 		
 	if ((adc >400) && (adc < 580)) // volume +
 	{

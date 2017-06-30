@@ -661,7 +661,9 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		bool val = false;
 		char tmpip[16],tmpmsk[16],tmpgw[16];
 		struct device_settings *device;
+		struct device_settings1 *device1;
 		device = getDeviceSettings();
+		device1 = getDeviceSettings1();
 		uint8_t a,b,c,d;
 				
 		if(data_size > 0) {
@@ -694,14 +696,15 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				strcpy(device->ssid,(ssid==NULL)?"":ssid);
 				strcpy(device->pass,(pasw==NULL)?"":pasw);
 				strcpy(device->ssid2,(ssid2==NULL)?"":ssid2);
-				strcpy(device->pass2,(pasw2==NULL)?"":pasw2);				
+				strcpy(device1->pass2,(pasw2==NULL)?"":pasw2);				
 			}
 			if (strlen(device->ua)==0)
 			{
 				if (aua==NULL) {aua=malloc(strlen("Karadio/1.1")+1); strcpy(aua,"Karadio/1.1");}
 			}	
 			if (aua!=NULL) strcpy(device->ua,aua);
-			saveDeviceSettings(device);		
+			saveDeviceSettings(device);	
+			saveDeviceSettings1(device1);				
 			uint8_t *macaddr = malloc(10*sizeof(uint8_t));
 			char* macstr = malloc(20*sizeof(char));
 			wifi_get_macaddr ( 0, macaddr );			
@@ -710,7 +713,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			strlen(device->ssid) +
 			strlen(device->pass) +
 			strlen(device->ssid2) +
-			strlen(device->pass2) +
+			strlen(device1->pass2) +
 			strlen(device->ua)+
 			sprintf(tmpip,"%d.%d.%d.%d",device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3])+
 			sprintf(tmpmsk,"%d.%d.%d.%d",device->mask[0], device->mask[1],device->mask[2], device->mask[3])+
@@ -727,7 +730,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			else {				
 				sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ssid2\":\"%s\",\"pasw2\":\"%s\",\"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\",\"mac\":\"%s\"}",
 				json_length,
-				device->ssid,device->pass,device->ssid2,device->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp,macstr);
+				device->ssid,device->pass,device->ssid2,device1->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp,macstr);
 //				printf("wifi Buf len:%d : %s\n",strlen(buf),buf);
 				write(conn, buf, strlen(buf));
 				infree(buf);
@@ -737,6 +740,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			infree(valid); infree(adhcp); infree(macaddr); infree(macstr);
 		}	
 		infree(device);
+		infree(device1);
 		if (val){
 			vTaskDelay(200);		
 			system_restart_enhance(SYS_BOOT_NORMAL_BIN, system_get_userbin_addr());	
