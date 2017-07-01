@@ -72,6 +72,8 @@ Example of indications received:
 ##CLI.VOL#: 108
 ##CLI.PLAYING#
 ##CLI.META#: The Beatles - Mother Nature's Son 
+##SYS.TZO#: 1
+##SYS.DATE#: 2017-04-13T22:47:44+01:00
 
 
 
@@ -143,6 +145,11 @@ sys.patch		: Display the vs1053 patch status
 sys.led("x")	: Change the led indication: 
 				  0 = Led is in Play mode (lighted when a station is playing), 1 or up = Led is in Blink mode (default)
 sys.led			: Display the led indication status
+sys.tzo("xx")	: Set the timezone offset of your country.
+sys.tzo			: Display the timezone offset
+sys.date		: Send a ntp request and Display the current locale time
+				: Format ISO-8601 local time   https://www.w3.org/TR/NOTE-datetime
+				: YYYY-MM-DDThh:mm:ssTZD (eg 2017-07-16T19:20:30+01:00)
 
 ///////
 //Other
