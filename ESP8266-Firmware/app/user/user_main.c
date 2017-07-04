@@ -306,10 +306,8 @@ void uartInterfaceTask(void *pvParameters) {
 	
 	ap = 0;
 	ap =system_adc_read();
-	vTaskDelay(10);
-	ap += system_adc_read();
-	
-	if (ap <15) // two time
+
+	if (ap <10) 
 	{		
 		adcdiv = 0; // no panel adc grounded
 		printf("No panel\n");
