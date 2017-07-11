@@ -6,6 +6,7 @@
  *
  * Description: entry file of user application
 *******************************************************************************/
+#define RELEASE "1.3.4"
 #include "esp_common.h"
 #include "esp_softap.h"
 #include "esp_wifi.h"
@@ -133,7 +134,7 @@ ICACHE_FLASH_ATTR void initLed(void)
 void uartInterfaceTask(void *pvParameters) {
 	char tmp[255];
 //	bool conn = false;
-	uint8 ap = 0;
+	uint16 ap = 0;
 	int i = 0;	
 	uint8 maxap;
 	
@@ -315,9 +316,10 @@ void uartInterfaceTask(void *pvParameters) {
 	else
 	{
 	// read adc to see if it is a nodemcu with adc dividor
-		if (ap < 800) adcdiv = 3;
+		if (ap < 400) adcdiv = 3;
 			else adcdiv = 1;	
 	}
+	printf("ADC Divisor: %d from adc: %d\n",adcdiv,ap);
 	FlashOn = 190;FlashOff = 10;
 	initLed(); // start the timer for led. This will kill the ttest task to free memory
 	
@@ -470,7 +472,7 @@ void user_init(void)
 	initBuffer();
 	wifi_set_opmode_current(STATION_MODE);
 //	Delay(10);	
-	printf("Release 1.3.3\n");
+	printf("Release %s\n",RELEASE);
 	printf("SDK %s\n",system_get_sdk_version());
 	system_print_meminfo();
 	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
@@ -488,8 +490,11 @@ void user_init(void)
 	printf(msg,"t4",pxCreatedTask);
 	xTaskCreate(clientTask, "t3", 750, NULL, 5, &pxCreatedTask); // 830
 	printf(msg,"t3",pxCreatedTask);
-	xTaskCreate(serverTask, "t2", 240, NULL, 3, &pxCreatedTask); //230
+	xTaskCreate(serverTask, "t2", 380, NULL, 3, &pxCreatedTask); //230
 	printf(msg,"t2",pxCreatedTask);
+	xTaskCreate(websocketTask, "t5", 380, NULL, 3, &pxCreatedTask); //230
+	printf(msg,"t5",pxCreatedTask);
+	
 //	xTaskCreate(ntpTask, "t5", 210, NULL, 2, &pxCreatedTask); // NTP
 //	printf("t5 task: %x\n",pxCreatedTask);
 	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));

@@ -46,9 +46,16 @@ void setVolumew(char* vol)
 }	
 
 unsigned short adcdiv;	
+
+void readAdc()
+{
+	uint16_t adc;
+	adc = system_adc_read();
+	printf("##ADC: %d * %d = %d\n",adc,adcdiv,adc*adcdiv);
+}
 // Read the command panel
 void switchCommand() {
-	int adc;
+	uint16_t adc;
 	int i = 0;
 	char Vol[22];
 	if (adcdiv == 0) return; // no panel
@@ -615,6 +622,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 	if(startsWith ("sys.", tmp))
 	{
 			 if(startsWith (  "i2s",tmp+4)) 	clientI2S(tmp);
+		else if(strcmp(tmp+4, "adc") == 0) 		readAdc();
 		else if(startsWith (  "uart",tmp+4)) 	clientUart(tmp);
 		else if(strcmp(tmp+4, "erase") == 0) 	eeEraseAll();
 		else if(strcmp(tmp+4, "heap") == 0) 	heapSize();

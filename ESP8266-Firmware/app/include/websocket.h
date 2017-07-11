@@ -63,6 +63,8 @@ struct websocketparam {
 // public:
 // init some data
 void websocketinit(void);
+// a demand received, accept it
+void websocketAccept(int wsocket,char* bufin,int buflen);
 // a socket with a websocket . 
 bool websocketnewclient(int socket);
 // a socket with a websocket closed

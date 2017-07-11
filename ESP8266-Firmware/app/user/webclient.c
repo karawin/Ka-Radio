@@ -937,7 +937,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 	int sockfd;
 	int bytes_read;
 	char useragent[41];
-	struct device_settings *device;
+	struct device_settings*device;
 	struct sockaddr_in dest;
 	uint8_t bufrec[RECEIVE+10];
 	

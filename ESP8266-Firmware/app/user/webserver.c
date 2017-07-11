@@ -764,35 +764,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 //		printf("GET socket:%d str:\n%s\n",conn,buf);
 		if( ((d = strstr(buf,"Connection:")) !=NULL)&& ((d = strstr(d," Upgrade")) != NULL))
 		{  // a websocket request
-			// prepare the parameter of the websocket task
-//			printf("websocket request\n");
-			struct websocketparam* pvParams = inmalloc(sizeof(struct websocketparam));
-			if (pvParams == NULL)
-			{	
-				printf( websocketmsg,"pvParams null");
-			}
-			char* pbuf = inmalloc(buflen+1);
-			if (pbuf == NULL)
-			{	
-				printf(websocketmsg,"pbuf null");
-			}			
-			if ((pbuf == NULL)|| (pvParams == NULL))
-			{
-				char resp[] = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 0\r\n\r\n";
-				write(conn, resp, strlen(resp));
-				return true;
-			}	
-			memcpy(pbuf,buf,buflen);
-			pvParams->socket = conn;
-			pvParams->buf = pbuf;
-			pvParams->len = buflen;
-//			printf("GET websocket\n");
-			while (xTaskCreate( websocketTask,"t11",330,(void *) pvParams,5, &pxCreatedTask )!= pdPASS)  //310
-			{
-				printf("ws xTaskCreate  failed. Retry\n");
-				vTaskDelay(100);
-			}
-//			printf("t11 task: %x\n",pxCreatedTask);
+			websocketAccept(conn,buf,buflen);
 			return false;
 		} else
 		{
@@ -880,7 +852,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 
 // Server child to handle a request from a browser.
 ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
-#define RECLEN	638
+#define RECLEN	1024
 	struct timeval timeout; 
     timeout.tv_sec = 2000; // bug *1000 for seconds
     timeout.tv_usec = 0;
@@ -1026,14 +998,14 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
             if (-1 == bind(server_sock, (struct sockaddr *)(&server_addr), sizeof(struct sockaddr))) {
 				printf ("Bind fails %d\n", errno);
 				close(server_sock);
-				vTaskDelay(100);	
+				vTaskDelay(10);	
                 break;
             }
 
             if (-1 == listen(server_sock, 5)) {
 				printf ("Listen fails %d\n",errno);
 				close(server_sock);
-				vTaskDelay(50);	
+				vTaskDelay(10);	
                 break;
             }
 
@@ -1041,12 +1013,12 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
             while(1) {				
                 if ((client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &sin_size)) < 0) {
 					printf ("Accept fails %d\n",errno);
-					vTaskDelay(50);					
+					vTaskDelay(10);					
                 } else
 				{
 					while (1) 
 					{	
-						if (xPortGetFreeHeapSize( ) < 4000)
+						if (xPortGetFreeHeapSize( ) < 3000)
 						{
 							printf ("Low memory %d\n",xPortGetFreeHeapSize( ));
 							vTaskDelay(200);	
@@ -1067,7 +1039,7 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
 							"t10",
 							stack,
 							(void *) client_sock,
-							4, 
+							3, 
 							NULL ) != pdPASS) 
 							{
 								printf("xTaskCreate t10 failed for stack %d. Retrying...\n",stack);

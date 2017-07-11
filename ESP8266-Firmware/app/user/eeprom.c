@@ -109,8 +109,8 @@ uint32_t* eebuf= malloc(4096);
 uint16_t i = 0;
 	while (eebuf == NULL) 
 	{
-		if (++i > 2) break;
-		vTaskDelay(350); 
+		if (++i > 3) break;
+		vTaskDelay(50); 
 		eebuf= malloc(4096); // last chance
 	}	
 
@@ -137,7 +137,7 @@ uint16_t i = 0;
 //printf("set2 startaddr: %x, size:%x, maxsize: %x, sector: %x, eebuf: %x\n",startaddr,size,maxsize,sector,eebuf);
 	}
 	free (eebuf);
-	} else printf(msg,"eebuf");
+	} else {/*printf(msg,"eebuf");*/heapSize();}
 }
 
 ICACHE_FLASH_ATTR void eeSetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
