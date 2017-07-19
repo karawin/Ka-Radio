@@ -588,9 +588,9 @@ ICACHE_FLASH_ATTR void syspatch(char* s)
 	if(t == NULL)
 	{
 		if ((device->options & T_PATCH)!= 0)
-			kprintf(PSTR("\n##VS1053 Patch is loaded#%c"),0x0d);
-		else
 			kprintf(PSTR("\n##VS1053 Patch is not loaded#%c"),0x0d);
+		else
+			kprintf(PSTR("\n##VS1053 Patch is loaded#%c"),0x0d);
 		free(device);
 		return;
 	}
