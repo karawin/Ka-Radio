@@ -2,12 +2,21 @@
 
 ### Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ## Basic informations<BR/>
+### Release 1.4 - Built on 2017/07/19
+New:<br/>
+- A telnet server multi clients on port 23. It is the same interface as the uart one. So the low level management can be done via the network and it offer a complete interface for remote addons.<br/>
+- A deep modification of the memory management. More free room.<br/>
+- new commands: help and sys.adc.<br/>
+- The web volume command is now on a POST if the websocket is not ready.<br/>
+<br/>
+Bugs resolved:<br/>
+- a problem on the web interface close resolved.<br/>
+<br/>
 ### Release 1.3.4 - Built on 2017/07/11
 Bugs removed:<br/>
 - Internal optimization on websocket. More free ram for the web interface multi-user.
-- A problem when a control panel and an addon are present is removed<BR/>
-- A problem with the AP2 password not working is removed (regression).<BR/>
-
+- 1.3.3 A problem when a control panel and an addon are present is removed<BR/>
+- 1.3.3 A problem with the AP2 password not working is removed (regression).<BR/>
 <br/>
 ### Release 1.3.2 - Built on 2017/06/19
 New features:<br/>

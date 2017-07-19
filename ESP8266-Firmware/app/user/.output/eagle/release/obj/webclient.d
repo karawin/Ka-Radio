@@ -10,9 +10,10 @@
  ../../extra_include/xtensa/config/core-isa.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/include/stdbool.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/include/stddef.h \
- ../include/websocket.h ../../include/lwip/lwip/opt.h \
- ../../include/lwip/lwipopts.h ../../include/lwip/lwip/debug.h \
- ../../include/lwip/lwip/arch.h ../../include/lwip/arch/cc.h \
+ ../include/webserver.h ../include/webclient.h ../include/vs1053.h \
+ ../../include/lwip/lwip/opt.h ../../include/lwip/lwipopts.h \
+ ../../include/lwip/lwip/debug.h ../../include/lwip/lwip/arch.h \
+ ../../include/lwip/arch/cc.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/stdio.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/_ansi.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/include/stdarg.h \
@@ -73,12 +74,12 @@
  ../../include/espressif/esp8266/uart_register.h \
  ../../include/espressif/smartconfig.h \
  ../../include/espressif/spi_flash.h ../../include/espressif/pwm.h \
- ../../include/espressif/esp_softap.h ../../include/espressif/esp_wifi.h \
- ../../include/lwip/lwip/sockets.h ../../include/lwip/ipv4/lwip/inet.h \
- ../../include/lwip/ipv6/lwip/inet6.h ../../include/lwip/lwip/dns.h \
- ../../include/lwip/lwip/netdb.h ../../include/ssl/ssl_crypto.h \
+ ../../include/espressif/esp_softap.h ../../include/espressif/esp_timer.h \
+ ../../include/espressif/esp_wifi.h ../../include/lwip/lwip/sockets.h \
+ ../../include/lwip/ipv4/lwip/inet.h ../../include/lwip/ipv6/lwip/inet6.h \
+ ../../include/lwip/lwip/dns.h ../../include/lwip/lwip/netdb.h \
+ ../include/flash.h ../include/eeprom.h ../include/interface.h \
+ ../include/websocket.h ../../include/ssl/ssl_crypto.h \
  ../../include/ssl/ssl_config.h ../../include/ssl/ssl_bigint_impl.h \
  ../../include/ssl/ssl_bigint.h ../include/cencode_inc.h \
- ../include/webserver.h ../include/webclient.h ../include/vs1053.h \
- ../../include/espressif/esp_timer.h ../include/flash.h \
- ../include/eeprom.h ../include/interface.h ../include/buffer.h
+ ../include/buffer.h ../include/interface.h

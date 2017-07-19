@@ -1,6 +1,6 @@
 #include "el_uart.h"
 
-//#define DBG printf
+//#define DBG kprintf
 #define DBG (void)
 // if you get lots of rx_overruns, increase this (or read the data quicker!)
 #define UART_RX_QUEUE_SIZE 32
@@ -12,8 +12,7 @@ volatile uint16_t uart_rx_bytes;
 /*
  * UART rx Interrupt routine
  */
-static void 
-uart_isr(void *arg)
+static void uart_isr(void *arg)
 {
 	uint8_t temp;
 	signed portBASE_TYPE ret;

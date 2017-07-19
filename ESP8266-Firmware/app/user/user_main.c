@@ -6,7 +6,9 @@
  *
  * Description: entry file of user application
 *******************************************************************************/
-#define RELEASE "1.3.4"
+#define RELEASE "1.4"
+#define REVISION "0"
+
 #include "esp_common.h"
 #include "esp_softap.h"
 #include "esp_wifi.h"
@@ -21,16 +23,32 @@
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
 
-#include "interface.h"
+
 #include "webserver.h"
 #include "webclient.h"
 #include "buffer.h"
 #include "extram.h"
 #include "vs1053.h"
 #include "ntp.h"
+#include "telnet.h"
 
-#include "eeprom.h"
-#include <time.h>
+//#include "eeprom.h"
+//#include <time.h>
+
+#include "interface.h"
+
+const char striDEF0[] STORE_ATTR ICACHE_RODATA_ATTR = {"The default AP is  WifiWebRadio. Connect your wifi to it.\nThen connect a webbrowser to 192.168.4.1 and go to Setting\nMay be long to load the first time.Be patient.%c"};
+const char striDEF1[] STORE_ATTR ICACHE_RODATA_ATTR = {"Erase the database and set ssid, password and ip's field%c"};
+const char striAP[] STORE_ATTR ICACHE_RODATA_ATTR = {"AP1: %s, AP2: %s\n"};
+const char striSTA1[] STORE_ATTR ICACHE_RODATA_ATTR = {" AP1:Station Ip: %d.%d.%d.%d\n"};
+const char striSTA2[] STORE_ATTR ICACHE_RODATA_ATTR = {" AP1:Station Ip: %d.%d.%d.%d\n"};
+const char striTRY[] STORE_ATTR ICACHE_RODATA_ATTR = {"Trying %s ,  I: %d status: %d\n"};
+const char striTASK[] STORE_ATTR ICACHE_RODATA_ATTR = {"%s task: %x\n"};
+const char striHEAP[] STORE_ATTR ICACHE_RODATA_ATTR = {"Heap size: %d\n"};
+const char striUART[] STORE_ATTR ICACHE_RODATA_ATTR = {"UART READY%c"};
+const char striWATERMARK[] STORE_ATTR ICACHE_RODATA_ATTR = {"watermark %s: %d  heap:%d\n"};
+
+
 
 void uart_div_modify(int no, unsigned int freq);
 
@@ -40,14 +58,15 @@ uint8_t FlashCount = 0xFF;
 os_timer_t ledTimer;
 bool ledStatus = true; // true: normal blink, false: led on when playing
 sc_status status = 0;
-	
+
+/*	
 void cb(sc_status stat, void *pdata)
 {
-	printf("SmartConfig status received: %d\n",status);
+	kprintf(PSTR("SmartConfig status received: %d\n",status));
 	status = stat;
-	if (stat == SC_STATUS_LINK_OVER) if (pdata) printf("SmartConfig: %d:%d:%d:%d\n",((char*) pdata)[0],((char*)pdata)[1],((char*)pdata)[2],((char*)pdata)[3]);
+	if (stat == SC_STATUS_LINK_OVER) if (pdata) kprintf("SmartConfig: %d:%d:%d:%d\n",((char*) pdata)[0],((char*)pdata)[1],((char*)pdata)[2],((char*)pdata)[3]);
 }
-
+*/
 
 
 void testtask(void* p) {
@@ -55,7 +74,7 @@ struct device_settings *device;
 /*
 	int uxHighWaterMark;
 	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf("watermark testtask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
+	printf(striWATERMARK,"testtask",uxHighWaterMark,xPortGetFreeHeapSize( ));
 */
 
 	gpio2_output_conf();
@@ -80,7 +99,7 @@ struct device_settings *device;
 				saveDeviceSettings(device);
 
 //	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-//	printf("watermark testtask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
+//	printf(striWATERMARK,"testtask",uxHighWaterMark,xPortGetFreeHeapSize( ));
 
 			}
 			free(device);	
@@ -140,13 +159,13 @@ void uartInterfaceTask(void *pvParameters) {
 	
 //	int uxHighWaterMark;
 //	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-//	printf("watermark uartInterfaceTask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);
+//	printf("watermark uartInterfaceTask: %d  %d\n","uartInterfaceTask",uxHighWaterMark,,xPortGetFreeHeapSize( ));
 
 	int t = 0;
 	for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
 	t = 0;
 	uart_rx_init();
-	printf("UART READY\n");
+	printf(striUART,0x0d);
 	
 //-------------------------
 // AP Connection management
@@ -176,11 +195,11 @@ void uartInterfaceTask(void *pvParameters) {
 	wifi_station_get_config_default(config); //ssid passwd
 	if ((device->ssid[0] == 0xFF)&& (device->ssid2[0] == 0xFF) )  {eeEraseAll(); device = getDeviceSettings();} // force init of eeprom
 	if (device->ssid2[0] == 0xFF) {device->ssid2[0] = 0; device1->pass2[0] = 0; }
-	printf("AP1: %s, AP2: %s\n",device->ssid,device->ssid2);
+	printf(striAP,device->ssid,device->ssid2);
 		
 	if ((strlen(device->ssid)==0)||(device->ssid[0]==0xff)/*||(device->ipAddr[0] ==0)*/) // first use
 	{
-		printf("first use\n");
+		printf(PSTR("first use%c"),0x0d);
 		IP4_ADDR(&(info->ip), 192, 168, 1, 254);
 		IP4_ADDR(&(info->netmask), 0xFF, 0xFF,0xFF, 0);
 		IP4_ADDR(&(info->gw), 192, 168, 1, 254);
@@ -208,7 +227,7 @@ void uartInterfaceTask(void *pvParameters) {
 		wifi_station_dhcpc_stop();
 		wifi_set_ip_info(STATION_IF, info);
 	} 
-	printf(" AP1:Station Ip: %d.%d.%d.%d\n",(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
+	printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
 //----------------
 	
 	
@@ -218,7 +237,7 @@ void uartInterfaceTask(void *pvParameters) {
 	i = 0;
 	while ((wifi_station_get_connect_status() != STATION_GOT_IP))
 	{	
-		printf("Trying %s ,  I: %d status: %d\n",config->ssid,i,wifi_station_get_connect_status());
+		printf(striTRY,config->ssid,i,wifi_station_get_connect_status());
 		FlashOn = FlashOff = 40;
 
 		vTaskDelay(400);//  ms
@@ -243,7 +262,7 @@ void uartInterfaceTask(void *pvParameters) {
 				} 	
 				
 				wifi_station_connect();
-				printf(" AP2:Station Ip: %d.%d.%d.%d\n",(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));		
+				printf(striSTA2,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));		
 				ap++;
 			}
 			else i = 6; // go to SOFTAP_MODE
@@ -252,15 +271,15 @@ void uartInterfaceTask(void *pvParameters) {
 	
 		if (i >= 6)
 		{
-					printf("\n");
+					printf(PSTR("%c"),0x0d);
 //					smartconfig_stop();
 					wifi_station_disconnect();
 					FlashOn = 10;FlashOff = 200;
 					vTaskDelay(200);
-					printf("Config not found\n\n");
+					printf(PSTR("Config not found%c%c"),0x0d,0x0d);
 					saveDeviceSettings(device);	
-					printf("The default AP is  WifiWebRadio. Connect your wifi to it.\nThen connect a webbrowser to 192.168.4.1 and go to Setting\n");
-					printf("Erase the database and set ssid, password and ip's field\n");
+					printf(striDEF0,0x0d);
+					printf(striDEF1,0x0d);
 					struct softap_config *apconfig;
 					apconfig = malloc(sizeof(struct softap_config));
 					wifi_set_opmode_current(SOFTAP_MODE);
@@ -286,7 +305,7 @@ void uartInterfaceTask(void *pvParameters) {
 	saveDeviceSettings(device);	
 
 //autostart	
-	printf("autostart: playing:%d, currentstation:%d\n",device->autostart,device->currentstation);
+	kprintf(PSTR("autostart: playing:%d, currentstation:%d\n"),device->autostart,device->currentstation);
 	currentStation = device->currentstation;
 	VS1053_I2SRate(device->i2sspeed);
 	clientIvol = device->vol;
@@ -311,7 +330,7 @@ void uartInterfaceTask(void *pvParameters) {
 	if (ap <10) 
 	{		
 		adcdiv = 0; // no panel adc grounded
-		printf("No panel\n");
+		kprintf(PSTR("No panel%c"),0x0d);
 	}
 	else
 	{
@@ -319,7 +338,7 @@ void uartInterfaceTask(void *pvParameters) {
 		if (ap < 400) adcdiv = 3;
 			else adcdiv = 1;	
 	}
-	printf("ADC Divisor: %d from adc: %d\n",adcdiv,ap);
+	kprintf(PSTR("ADC Div: %d from adc: %d\n"),adcdiv,ap);
 	FlashOn = 190;FlashOff = 10;
 	initLed(); // start the timer for led. This will kill the ttest task to free memory
 	
@@ -332,7 +351,7 @@ void uartInterfaceTask(void *pvParameters) {
 				if((char)c == '\n') break;
 				tmp[t] = (char)c;
 				t++;
-				if(t == sizeof(tmp)) t = 0;
+				if(t == sizeof(tmp)-1) t = 0;
 			}
 			switchCommand() ;  // hardware panel of command
 		}
@@ -458,7 +477,6 @@ void user_init(void)
 //	REG_SET_BIT(0x3ff00014, BIT(0));
 //	system_update_cpu_freq(SYS_CPU_160MHZ);
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
-	char msg[] = {"%s task: %x\n"};
 	xTaskHandle pxCreatedTask;
     Delay(200);
 	device = getDeviceSettings();
@@ -472,30 +490,30 @@ void user_init(void)
 	initBuffer();
 	wifi_set_opmode_current(STATION_MODE);
 //	Delay(10);	
-	printf("Release %s\n",RELEASE);
-	printf("SDK %s\n",system_get_sdk_version());
+	printf(PSTR("Release %s, Revision %s\n"),RELEASE,REVISION);
+	printf(PSTR("SDK %s\n"),system_get_sdk_version());
 	system_print_meminfo();
-	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
+	printf (PSTR("Heap size: %d\n"),xPortGetFreeHeapSize( ));
 	clientInit();
 	Delay(10);	
 	
     flash_size_map size_map = system_get_flash_size_map();
-	printf ("size_map: %d\n",size_map);
+	printf (PSTR("size_map: %d\n"),size_map);
 	
-	xTaskCreate(testtask, "t0", 110, NULL, 1, &pxCreatedTask); // DEBUG/TEST 110
-	printf(msg,"t0",pxCreatedTask);
-	xTaskCreate(uartInterfaceTask, "t1", 300, NULL, 2, &pxCreatedTask); // 304
-	printf(msg,"t1",pxCreatedTask);
-	xTaskCreate(vsTask, "t4", 380, NULL,4, &pxCreatedTask); //370
-	printf(msg,"t4",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 750, NULL, 5, &pxCreatedTask); // 830
-	printf(msg,"t3",pxCreatedTask);
-	xTaskCreate(serverTask, "t2", 380, NULL, 3, &pxCreatedTask); //230
-	printf(msg,"t2",pxCreatedTask);
-	xTaskCreate(websocketTask, "t5", 380, NULL, 3, &pxCreatedTask); //230
-	printf(msg,"t5",pxCreatedTask);
+	xTaskCreate(testtask, "t0", 130, NULL, 1, &pxCreatedTask); // DEBUG/TEST 110
+	printf(striTASK,"t0",pxCreatedTask);
+	xTaskCreate(uartInterfaceTask, "t1", 430, NULL, 2, &pxCreatedTask); // 310
+	printf(striTASK, "t1",pxCreatedTask);
+	xTaskCreate(vsTask, "t4", 230, NULL,5, &pxCreatedTask); //380 230
+	printf(striTASK,"t4",pxCreatedTask);
+	xTaskCreate(clientTask, "t3", 340, NULL, 6, &pxCreatedTask); // 340
+	printf(striTASK,"t3",pxCreatedTask);
+	xTaskCreate(serverTask, "t2", 230, NULL, 3, &pxCreatedTask); //230
+	printf(striTASK,"t2",pxCreatedTask);
+	xTaskCreate(websocketTask, "t5", 380, NULL, 4, &pxCreatedTask); //380
+	printf(striTASK,"t5",pxCreatedTask);
+	xTaskCreate(telnetTask, "t6", 380, NULL, 4, &pxCreatedTask); //380
+	printf(striTASK,"t6",pxCreatedTask);
 	
-//	xTaskCreate(ntpTask, "t5", 210, NULL, 2, &pxCreatedTask); // NTP
-//	printf("t5 task: %x\n",pxCreatedTask);
-	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
+	printf (striHEAP,xPortGetFreeHeapSize( ));
 }

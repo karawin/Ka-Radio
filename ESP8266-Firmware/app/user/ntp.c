@@ -10,6 +10,7 @@
 #include "lwip/netdb.h"
 
 #include "ntp.h"
+#include "interface.h"
 
 // list of major public servers http://tf.nist.gov/tf-cgi/servers.cgi
 //time.nist.gov 
@@ -45,7 +46,7 @@ bool ICACHE_FLASH_ATTR ntp_get_time(struct tm **dt) {
 	
 	msg = zalloc(sizeof(ntp_t));
 	if (msg == NULL){
-		printf(msp,"msg",0);
+		kprintf(PSTR("##SYS.DATE#: ntp fails on %s %d\n"),"msg",0);
 		return false;
 	} 
 	// build the message to send
@@ -60,30 +61,30 @@ bool ICACHE_FLASH_ATTR ntp_get_time(struct tm **dt) {
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_DGRAM; // Use UDP
 	if ((rv = getaddrinfo(node, service, &hints, &servinfo)) != 0) {
-		printf(msp,"getaddrinfo",rv);free (msg);
+		kprintf(PSTR("##SYS.DATE#: ntp fails on %s %d\n"),"getaddrinfo",rv);free (msg);
 		return false;
 	} 		
 // loop in result socket
 	for (p = servinfo; p != NULL; p = p->ai_next) {
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,p->ai_protocol)) == -1) {
-			printf(msp,"sockfd",sockfd);
+			kprintf(PSTR("##SYS.DATE#: ntp fails on %s %d\n"),"sockfd",sockfd);
 			continue;
 		}
 		break;
 	}
 // set a timeout for recvfrom
 	if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0){
-		printf(msp,"setsockopt",0);	free (msg);freeaddrinfo(servinfo);	close(sockfd);
+		kprintf(PSTR("##SYS.DATE#: ntp fails on %s %d\n"),"setsockopt",0);	free (msg);freeaddrinfo(servinfo);	close(sockfd);
 		return false;
 	} 	
 //send the request	
 	if ((rv = sendto(sockfd, msg, sizeof(ntp_t), 0,p->ai_addr, p->ai_addrlen)) == -1) {
-		printf(msp,"sendto",rv); free (msg);freeaddrinfo(servinfo);	close(sockfd);
+		kprintf(PSTR("##SYS.DATE#: ntp fails on %s %d\n"),"sendto",rv); free (msg);freeaddrinfo(servinfo);	close(sockfd);
 		return false;					
 	}
 	freeaddrinfo(servinfo);	
  	if ((rv = recvfrom(sockfd, msg, sizeof(ntp_t) , 0,NULL, NULL)) <=0) {
-		printf(msp,"recvfrom",rv);free(msg);close(sockfd);
+		kprintf(PSTR("##SYS.DATE#: ntp fails on %s %d\n"),"recvfrom",rv);free(msg);close(sockfd);
 		return false;	
 	}	
 			
@@ -108,15 +109,15 @@ void ICACHE_FLASH_ATTR ntp_print_time() {
 	if (ntp_get_time(&dt) )
 	{
 		tz =applyTZ(dt);
-//	printf("##Time: isdst: %d %02d:%02d:%02d\n",dt->tm_isdst, dt->tm_hour, dt->tm_min, dt->tm_sec);		
-//	printf("##Date: %02d-%02d-%04d\n", dt->tm_mday, dt->tm_mon+1, dt->tm_year+1900);	
+//	os_printf("##Time: isdst: %d %02d:%02d:%02d\n",dt->tm_isdst, dt->tm_hour, dt->tm_min, dt->tm_sec);		
+//	os_printf("##Date: %02d-%02d-%04d\n", dt->tm_mday, dt->tm_mon+1, dt->tm_year+1900);	
 		strftime(msg, 48, "%Y-%m-%dT%H:%M:%S", dt);
 //	ISO-8601 local time   https://www.w3.org/TR/NOTE-datetime
 //  YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
 		if (tz >=0)
-			printf("##SYS.DATE#: %s+%02d:00\n",msg,tz);
+			kprintf(PSTR("##SYS.DATE#: %s+%02d:00\n"),msg,tz);
 		else
-			printf("##SYS.DATE#: %s%03d:00\n",msg,tz);
+			kprintf(PSTR("##SYS.DATE#: %s%03d:00\n"),msg,tz);
 		
 		free(dt);
 	}

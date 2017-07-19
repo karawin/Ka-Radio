@@ -72,4 +72,4 @@
  ../../include/lwip/ipv6/lwip/inet6.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/math.h \
  ../../include/lwip/lwip/dns.h ../../include/lwip/lwip/err.h \
- ../../include/lwip/lwip/netdb.h
+ ../../include/lwip/lwip/netdb.h ../include/interface.h

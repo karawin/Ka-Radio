@@ -7,7 +7,7 @@ struct servFile
 	const char name[32];
 	const char type[16];
 	uint16_t size;
-	char* content;
+	const char* content;
 	struct servFile *next;
 };
 

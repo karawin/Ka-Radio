@@ -52,4 +52,5 @@
  ../../include/freertos/semphr.h ../../include/freertos/queue.h \
  ../../include/lwip/lwip/netdb.h ../include/ntp.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/time.h \
- /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/time.h
+ /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/time.h \
+ ../include/interface.h

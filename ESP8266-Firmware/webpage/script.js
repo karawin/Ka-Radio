@@ -432,20 +432,21 @@ function logValue(value) {
 //	console.log("Value= "+value+"   log de val="+log+" "+255/log +"  = "+Math.log10(255/log)  +"   new value= "+val );
 	return val;
 }
+
 function onRangeVolChange($value,$local) {
 	var value = logValue($value);
 	document.getElementById('vol1_span').innerHTML = (value * -0.5) + " dB";
 	document.getElementById('vol_span').innerHTML = (value * -0.5) + " dB";
 	document.getElementById('vol_range').value = $value;
 	document.getElementById('vol1_range').value = $value;
-	 if ($local &&websocket.readyState == websocket.OPEN) websocket.send("wsvol=" + $value+"&");
-/*	if ($local)
+	if ($local &&websocket.readyState == websocket.OPEN) websocket.send("wsvol=" + $value+"&");
+	else if ($local)	
 	{
 		xhr = new XMLHttpRequest();
 		xhr.open("POST","soundvol",false);
 		xhr.setRequestHeader(content,ctype);
 		xhr.send(  "vol=" + $value+"&");
-	}*/
+	}
 }
 function wifi(valid) {
 	xhr = new XMLHttpRequest();

@@ -35,10 +35,18 @@
 #include "lwip/sockets.h"
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
+#include "interface.h"
+
+//#define pheadbuffer "Connection: keep-alive\r\n\
+//Cache-Control: no-cache\r\n\
+//User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36 \r\n\
+//Accept: */*\r\n\
+//Accept-Encoding: gzip,deflate,sdch\r\n\
+//\r\n"
 
 #define pheadbuffer "Connection: keep-alive\r\n\
 Cache-Control: no-cache\r\n\
-User-Agent: Mozilla/5.0 (Windows NT 5.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36 \r\n\
+User-Agent: Karadio 1.3 \r\n\
 Accept: */*\r\n\
 Accept-Encoding: gzip,deflate,sdch\r\n\
 \r\n"
@@ -59,10 +67,10 @@ void user_esp_upgrade_rsp(void *arg)
 {
 	struct upgrade_server_info *server = (struct upgrade_server_info *)arg;
 	if(server->upgrade_flag == true){
-		printf(" +OK: FW upgrade success.\n");
+		kprintf(PSTR(" +OK: FW upgrade success.%c"),0x0d);
 		system_upgrade_reboot();
 	} else {
-		printf("-ERR: FW upgrade failed.\n");
+		kprintf(PSTR("-ERR: FW upgrade failed.%c"),0x0d);
 	}
     free(server->url);
     server->url = NULL;
@@ -79,9 +87,9 @@ void user_esp_upgrade_rsp(void *arg)
 *******************************************************************************/
 void update_firmware(void)
 {
-    printf("update  firmware\r\n");
+    kprintf(PSTR("update  firmware\r%c"),0x0d);
     uint8 current_id = system_upgrade_userbin_check();
-    os_printf("current id %d\n", current_id);
+    kprintf(PSTR("current id %d\n"), current_id);
 
 	char* client_url = "karadio.karawin.fr";
 //	char* client_url = "192.168.1.2";
@@ -98,7 +106,7 @@ void update_firmware(void)
     }
 
     flash_size_map f_size = system_get_flash_size_map();
-    os_printf("flash size  %d\n",f_size);
+    printf(PSTR("flash size  %d\n"),f_size);
     if (current_id == 0) {
 		 current_id = 2;
 	} else current_id = 1;
@@ -112,7 +120,7 @@ void update_firmware(void)
     server->sockaddrin.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr*)(serv-> h_addr_list[0]))); // remote server ip
 //	os_printf("distant ip: %x   ADDR:%s\n",server->sockaddrin.sin_addr.s_addr,inet_ntoa(*(struct in_addr*)(serv-> h_addr_list[0])));
     if (system_upgrade_start(server) == false) {
-        os_printf("upgrade error\n");
+        printf(PSTR("upgrade error%c"),0x0d);
     }
 	
 

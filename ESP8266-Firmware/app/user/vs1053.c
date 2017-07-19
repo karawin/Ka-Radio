@@ -19,10 +19,15 @@
 #include "spi.h"
 //#include "osapi.h"
 #include <math.h>
+#include "interface.h"
 
 	int vsVersion ; // the version of the chip
 //	SS_VER is 0 for VS1001, 1 for VS1011, 2 for VS1002, 3 for VS1003, 4 for VS1053 and VS8053, 5 for VS1033, 7 for VS1103, and 6 for VS1063.
-
+//char strvMODE[] STORE_ATTR ICACHE_RODATA_ATTR = {"SCI_Mode (0x4800) = 0x%X\n"};
+const char strvSTATUS[] STORE_ATTR ICACHE_RODATA_ATTR = {"SCI_Status (0x48) = 0x%X\n"};
+const char strvVERSION[] STORE_ATTR ICACHE_RODATA_ATTR = {"VS Version (VS1053 is 4) = %d\n"};
+const char strvCLOCK[] STORE_ATTR ICACHE_RODATA_ATTR = {"SCI_ClockF = 0x%X\n"};
+const char strvI2S[] STORE_ATTR ICACHE_RODATA_ATTR = {"I2S Speed: %d\n"};
 
 extern volatile uint32_t PIN_OUT;
 extern volatile uint32_t PIN_OUT_SET;
@@ -190,13 +195,13 @@ ICACHE_FLASH_ATTR void VS1053_regtest()
 	int MP3Status = VS1053_ReadRegister(SPI_STATUS);
 	int MP3Mode = VS1053_ReadRegister(SPI_MODE);
 	int MP3Clock = VS1053_ReadRegister(SPI_CLOCKF);
-	printf("SCI_Mode (0x4800) = 0x%X\n",MP3Mode);
-	printf("SCI_Status (0x48) = 0x%X\n",MP3Status);
+	printf(PSTR("SCI_Mode (0x4800) = 0x%X\n"),MP3Mode);
+	printf(strvSTATUS,MP3Status);
 
 	vsVersion = (MP3Status >> 4) & 0x000F; //Mask out only the four version bits
-	printf("VS Version (VS1053 is 4) = %d\n",vsVersion);
+	printf(strvVERSION,vsVersion);
 	//The 1053B should respond with 4. VS1001 = 0, VS1011 = 1, VS1002 = 2, VS1003 = 3, VS1054 = 4
-	printf("SCI_ClockF = 0x%X\n",MP3Clock);
+	printf(strvCLOCK,MP3Clock);
 }
 /*
 void VS1053_PluginLoad()
@@ -217,7 +222,7 @@ ICACHE_FLASH_ATTR void VS1053_I2SRate(uint8_t speed){ // 0 = 48kHz, 1 = 96kHz, 2
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0x8|speed); //
 	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x40); //address of GPIO_ODATA is 0xC017	
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0xC|speed); //
-	printf("I2S Speed: %d\n",speed);
+	printf(strvI2S,speed);
 }
 
 ICACHE_FLASH_ATTR void VS1053_DisableAnalog(){

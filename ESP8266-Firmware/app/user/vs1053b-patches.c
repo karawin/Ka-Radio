@@ -5,6 +5,7 @@
 #include "flash.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include "interface.h"
 #define ICACHE_STORE_TYPEDEF_ATTR __attribute__((aligned(4),packed))
 #define ICACHE_STORE_ATTR __attribute__((aligned(4)))
 #define ICACHE_RAM_ATTR __attribute__((section(".iram0.text")))
@@ -472,12 +473,12 @@ void ICACHE_FLASH_ATTR  LoadUserCode( const unsigned short* plugin,uint16_t size
   iplugin = (unsigned short*)malloc(size+2);
   if (iplugin == NULL) 
   {
-	   printf("malloc fails for plugin\n");
+	   kprintf(PSTR("malloc fails for plugin%c"),0x0d);
 	   return ;
   }
-  printf("plugin size %d %d \n",size,ssize);
+  kprintf(PSTR("plugin size %d %d \n"),size,ssize);
   flashRead( iplugin,(uint32_t) plugin, size );
-  printf("plugin start: %x %x %x %x\n",*iplugin,*(iplugin+1),*(iplugin+2),*(iplugin+3));
+  kprintf(PSTR("plugin start: %x %x %x %x\n"),*iplugin,*(iplugin+1),*(iplugin+2),*(iplugin+3));
   while (i<ssize) {
     unsigned short addr, n, val;
     addr = iplugin[i++];

@@ -24,4 +24,5 @@
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/stdlib.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/stdlib.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/alloca.h \
- ../../include/espressif/spi_flash.h
+ ../../include/espressif/spi_flash.h ../../include/espressif/esp_libc.h \
+ ../include/interface.h

@@ -5,7 +5,7 @@
 #define __WEBCLIENT_H__
 
 #include "c_types.h"
-#include "websocket.h"
+//#include "websocket.h"
 
 #define METADATA 9
 #define METAINT 8
@@ -53,7 +53,7 @@ void clientSetPort(uint16_t port);
 
 struct icyHeader* clientGetHeader();
 void clientConnect();
-void clientDisconnect(char* from);
+void clientDisconnect(const char* from);
 void clientSilentDisconnect();
 void clientTask(void *pvParams);
 void vsTask(void *pvParams) ;

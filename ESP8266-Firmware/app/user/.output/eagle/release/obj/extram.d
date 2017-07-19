@@ -73,4 +73,4 @@
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/sysroot/usr/include/ets_sys.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/sysroot/usr/include/c_types.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/sysroot/usr/include/eagle_soc.h \
- ../include/buffer.h
+ ../include/buffer.h ../include/interface.h

@@ -7,6 +7,12 @@
 */
 
 #include "websocket.h"
+#include "interface.h"
+
+char strwMALLOC[] STORE_ATTR ICACHE_RODATA_ATTR = {"inwmalloc fails for %d\n"};
+char strwMALLOC1[] STORE_ATTR ICACHE_RODATA_ATTR = {"Websocket %s malloc fails\n"};
+char strwSOCKET[] STORE_ATTR ICACHE_RODATA_ATTR = {"Websocket socket fails %s errno: %d\n"};
+
 client_t webserverclients[NBCLIENT];
 //set of socket descriptors
 fd_set readfds;
@@ -23,7 +29,7 @@ void *inwmalloc(size_t n)
 	void* ret;
 //printf ("ws Malloc of %d,  Heap size: %d\n",n,xPortGetFreeHeapSize( ));
 	ret = malloc(n);
-		if (ret == NULL) printf("Websocket: Malloc fails for %d\n",n);
+		if (ret == NULL) printf(strwMALLOC,n);
 //	printf ("ws Malloc after of %d bytes ret:%x  Heap size: %d\n",n,ret,xPortGetFreeHeapSize( ));
 	return ret;
 }	
@@ -380,10 +386,15 @@ char *buf = NULL;
 	buf = (char *)inwmalloc(MAXDATA);	
 	bufin[buflen] = 0;
 //	printf("ws write accept request entry soc: %d\n",wsocket);
+    if (buf == NULL)
+	{
+		vTaskDelay(100); // wait a while and retry
+		buf = (char *)inwmalloc(MAXDATA);	
+	}
 	if (buf != NULL)
 	{
 		if (setsockopt (wsocket, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
-				printf("setsockopt failed\n");
+				printf(strwSOCKET,"setsockopt",errno);
 		if ((!iswebsocket(wsocket ))&&(websocketnewclient(wsocket))) 
 		{
 			recbytes = decodeHttpMessage (bufin, buf);
@@ -391,40 +402,46 @@ char *buf = NULL;
 //			printf("ws write accept request: \"%s\" len:%d\n",buf,recbytes);
 			write(wsocket, buf, recbytes);  // reply to accept	
 		}
-		inwfree(buf,"websocketAccept");
+		inwfree(buf,"websAccept");
 	}
 }
 
-ICACHE_FLASH_ATTR int websocketRead(int conn,char* buf)
+ICACHE_FLASH_ATTR int websocketRead(int conn)
 {
+	char *buf = NULL;
+	buf = (char *)inwmalloc(MAXDATA);
 	int32_t recbytes = 0;
-	recbytes = read(conn , buf, MAXDATA);
-	if (recbytes < 0) {
-		if ((errno != EAGAIN )&&(errno != 0 ))
-		{
-			if (errno != ECONNRESET )
-			{
-				printf ("ws Socket %d read fails %d\n",conn, errno);
-				wsclientDisconnect(conn, 500,NULL,0);		
-			} else websocketremoveclient(conn);
-			return recbytes;
-		} //else printf("ws try again\n");
+    if (buf == NULL)
+	{
+		vTaskDelay(100); // wait a while and retry
+		buf = (char *)inwmalloc(MAXDATA);	
 	}	
-	if (recbytes > 0) websocketparsedata(conn, buf, recbytes);	
+	if (buf != NULL)
+	{
+		recbytes = read(conn , buf, MAXDATA);
+		if (recbytes < 0) {
+			if ((errno != EAGAIN )&&(errno != 0 ))
+			{
+				if (errno != ECONNRESET )
+				{
+					printf (strwSOCKET,"read", errno);
+					wsclientDisconnect(conn, 500,NULL,0);		
+				} else websocketremoveclient(conn);
+				return recbytes;
+			} //else printf("ws try again\n");
+		}	
+		buf = realloc(buf,recbytes+1);
+		if (recbytes > 0) websocketparsedata(conn, buf, recbytes);
+		inwfree(buf,"websRead");	
+	}
 	return recbytes;
 }
 
 ICACHE_FLASH_ATTR void websocketTask(void* pvParams) {
 	// retrieve parameters
 
-//	struct websocketparam* param = (struct websocketparam*) pvParams;
-//	portBASE_TYPE uxHighWaterMark;
-//	int conn  = param->socket;
-//	printf("ws task entry socket:%d\n",conn);
-//	char* bufin = param->buf;
-//	int buflen = param->len;
-	
-//	inwfree (param,"pvParam");
+	portBASE_TYPE uxHighWaterMark;
+
 	struct timeval timeout;      
 //    timeout.tv_sec = 1000/ portTICK_RATE_MS; // bug *1000 for seconds
     timeout.tv_sec = 2; // bug *1000 for seconds
@@ -433,17 +450,14 @@ ICACHE_FLASH_ATTR void websocketTask(void* pvParams) {
 	int activity;
 	int	ret, sd;	
 	websocketinit();
-/*	
-	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf("watermark wsTask: %d  %d\n",conn,uxHighWaterMark);
-*/	
-	char *buf = NULL;
-	buf = (char *)inwmalloc(MAXDATA);
+	
+/*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+	printf("watermark wstask %d\n",uxHighWaterMark);
+	
+*/
 	int i;
 	while(1)
 	{
-		if (buf != NULL)
-		{
 			//clear the socket set
 			FD_ZERO(&readfds);
 			max_sd = 0;
@@ -469,7 +483,7 @@ ICACHE_FLASH_ATTR void websocketTask(void* pvParams) {
     
 			if ((activity < 0) && (errno!=EINTR)) 
 			{
-				printf("select error\n");
+				printf(strwSOCKET,"select",errno);
 				break;
 			}	
 			if (activity == 0)	{continue;}		
@@ -480,30 +494,26 @@ ICACHE_FLASH_ATTR void websocketTask(void* pvParams) {
 				if ((sd!=-1) &&(FD_ISSET( sd , &readfds))) 
 				{
 					FD_CLR(sd , &readfds);  
-					ret =websocketRead(sd,buf);
+					ret =websocketRead(sd);
 					//printf("Call websocketRead i: %d, socket: %d, ret: %d\n" ,i, sd,ret);  
 					if (ret <= 0) 
 					{
-						printf("Clear i: %d, socket: %d, errno: %d\n" ,i, sd,errno); 
-						websocketremoveclient(sd);
-						//webserverclients[i].socket = -1;						
+						websocketremoveclient(sd);						
 						close(sd); // closed by peer
+//						printf("Clear i: %d, socket: %d, errno: %d\n" ,i, sd,errno); 
 					}
 					if (--activity ==0) break;;
 				}
 			}          
 
-/*				
-			uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-			printf("watermark middle wsTask: %d    %d\n",conn,uxHighWaterMark);
-*/				
-		}	
-		else printf("ws  malloc buf fails\n");		
-
+				
+/*			uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+			printf(PSTR("watermark middle wsTask: %d\n"),uxHighWaterMark);
+					
+*/
 	} 
 
-
-	printf("ws task exit\n");
+//	printf("ws task exit\n");
 /*
 	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 	printf("watermark end wsTask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);

@@ -77,4 +77,5 @@
  ../../include/lwip/ipv6/lwip/inet6.h ../../include/lwip/lwip/dns.h \
  ../../include/lwip/lwip/netdb.h ../../include/ssl/ssl_crypto.h \
  ../../include/ssl/ssl_config.h ../../include/ssl/ssl_bigint_impl.h \
- ../../include/ssl/ssl_bigint.h ../include/cencode_inc.h
+ ../../include/ssl/ssl_bigint.h ../include/cencode_inc.h \
+ ../include/interface.h

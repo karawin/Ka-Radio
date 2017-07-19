@@ -15,6 +15,80 @@ char parquoteslash[] = {"\")"};
 char msgsys[] = {"##SYS."};
 char msgcli[] = {"##CLI."};
 
+const char stritWIFISTATUS[] STORE_ATTR ICACHE_RODATA_ATTR = {"#WIFI.STATUS#\nStatus: %d\nIP: %d.%d.%d.%d\nMask: %d.%d.%d.%d\nGateway: %d.%d.%d.%d\n##WIFI.STATUS#\n"};
+const char stritWIFISTATION[] STORE_ATTR ICACHE_RODATA_ATTR = {"\n#WIFI.STATION#\n%s\n%s\n##WIFI.STATION#\n"};
+const char stritPATCH[] STORE_ATTR ICACHE_RODATA_ATTR = {"\n##VS1053 Patch will be %s after power Off and On#\n"};
+const char stritCMDERROR[] STORE_ATTR ICACHE_RODATA_ATTR = {"##CMD_ERROR#\n"};
+const char stritHELP0[] STORE_ATTR ICACHE_RODATA_ATTR = {" \
+Commands:\n\
+---------\n\
+ Wifi related commands\n\
+//////////////////\n\
+wifi.lis: give the list of received SSID\n\
+wifi.con: Display the AP1 and AP2 SSID\n\
+wifi.con(\"ssid\",\"password\"): Record the given AP ssid with password in AP1 for next reboot\n\
+wifi.discon: disconnect the current ssid\n\
+wifi.station: the current ssid and password\n\
+wifi.status: give #WIFI.STATUS#\n\n\
+//////////////////\n\
+  Station Client commands\n\
+//////////////////\n\
+cli.url(\"url\"): the name or ip of the station to instant play\n\
+cli.path(\"/path\"): the path of the station to instant play\n\
+cli.port(\"xxxx\"): the port number of the station to instant play\n\
+cli.instant: play the instant station\n\
+cli.start: start to play the current station\n\
+cli.play(\"xxx\"): play the xxx recorded station in the list (0 = stop)\n\
+cli.prev (or cli.previous): select the previous station in the list and play it\n\
+cli.next: select the next station in the list and play it%c"};
+
+const char stritHELP1[] STORE_ATTR ICACHE_RODATA_ATTR = {" \
+cli.stop: stop the playing station or instant\n\
+cli.list: list all recorded stations\n\
+cli.list(\"x\"): list only one of the recorded stations. Answer with #CLI.LISTINFO#: followed by infos\n\
+cli.vol(\"xxx\"): set the volume to xxx with xxx from 0 to 254 (max volume)\n\
+cli.vol: ask for  the current volume. respond with ##CLI.VOL# xxx\n\
+cli.vol-: Decrement the volume by 10 \n\
+cli.vol+: Increment the volume by 10 \n\
+Every vol command from uart or web or browser respond with ##CLI.VOL#: xxx\n\
+cli.info: Respond with nameset, all icy, meta, volume and stae playing or stopped. Used to refresh the lcd informations \n\n\
+//////////////////\n\
+  System commands\n\
+//////////////////\n\
+sys.uart(\"x\"): Change the baudrate of the uart on the next reset.\n\
+ Valid x are: 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 76880, 115200, 230400\n\
+sys.i2s: Display the current I2S speed%c"};
+
+const char stritHELP2[] STORE_ATTR ICACHE_RODATA_ATTR = {" \
+sys.i2s(\"x\"): Change and record the I2S clock speed of the vs1053 GPIO5 MCLK for the i2s interface to external dac.\n\
+: 0=48kHz, 1=96kHz, 2=192kHz, other equal 0\n\
+sys.erase: erase all recorded configuration and stations.\n\
+sys.heap: show the ram heap size\n\
+sys.update: start an OTA (On The Air) update of the software\n\
+sys.boot: reboot the webradio.\n\
+sys.patch(\"x\"): Change the status of the vs1053 patch at power on.\n\
+0 = Patch will not be loaded, 1 or up = Patch will be loaded (default) at power On \n\
+sys.patch: Display the vs1053 patch status\n\
+sys.led(\"x\"): Change the led indication:\n\
+0 = Led is in Play mode (lighted when a station is playing), 1 or up = Led is in Blink mode (default)\n\
+sys.led: Display the led indication status\n\
+sys.tzo(\"xx\"): Set the timezone offset of your country.\n\
+sys.tzo: Display the timezone offset\n\
+sys.date: Send a ntp request and Display the current locale time\n\
+: Format ISO-8601 local time   https://www.w3.org/TR/NOTE-datetime%c"};
+
+const char stritHELP3[] STORE_ATTR ICACHE_RODATA_ATTR = {" \
+: YYYY-MM-DDThh:mm:ssTZD (eg 2017-07-16T19:20:30+01:00)\n\
+sys.adc: Display the adc value\n\n\
+///////\n\
+  Other\n\
+///////\n\
+help: this command\n\
+<enter> will display\n\
+#INFO:\"\"#\n\
+\n\
+A command error display:\n\
+##CMD_ERROR#\n%c"}; 
 uint16_t currentStation = 0;
 
 //extern uint16_t currentStation;
@@ -28,7 +102,6 @@ extern uint8_t playing;
 ICACHE_FLASH_ATTR void clientVol(char *s);
 
 #define MAX_WIFI_STATIONS 50
-char errmsg[]={"##CMD_ERROR#\n"};
 bool inside = false;
 
 void setVolumePlus()
@@ -47,11 +120,13 @@ void setVolumew(char* vol)
 
 unsigned short adcdiv;	
 
+
+
 void readAdc()
 {
 	uint16_t adc;
 	adc = system_adc_read();
-	printf("##ADC: %d * %d = %d\n",adc,adcdiv,adc*adcdiv);
+	kprintf(PSTR("##ADC: %d * %d = %d\n"),adc,adcdiv,adc*adcdiv);
 }
 // Read the command panel
 void switchCommand() {
@@ -64,7 +139,7 @@ void switchCommand() {
 	adc *= adcdiv;
 	
 //	if (adc < 930) 
-//		printf("adc: %d  div: %d\n",adc,adcdiv);
+//		os_printf("adc: %d  div: %d\n",adc,adcdiv);
 
 	if (inside&&(adc > 930)) 
 	{
@@ -90,7 +165,7 @@ void switchCommand() {
 		if (adc < 220) // stop
 		{
 			inside = true;
-			clientDisconnect("Adc Stop");
+			clientDisconnect(PSTR("Adc Stop"));
 		}
 		else if ((adc >278) && (adc < 380)) //start
 		{
@@ -122,7 +197,7 @@ uint8_t startsWith(const char *pre, const char *str)
 
 ICACHE_FLASH_ATTR void printInfo(char* s)
 {
-	printf("#INFO:\"%s\"#\n", s);
+	kprintf(PSTR("#INFO:\"%s\"#\n"), s);
 }
 
 ICACHE_FLASH_ATTR void wifiScanCallback(void *arg, STATUS status)
@@ -133,7 +208,7 @@ ICACHE_FLASH_ATTR void wifiScanCallback(void *arg, STATUS status)
 		char msg[] = {"#WIFI.LIST#"};
 		char* buf;
 		struct bss_info *bss_link = (struct bss_info *) arg;
-		printf("\n%s",msg);
+		kprintf(PSTR("\n%s"),msg);
 		buf = malloc(128);
 		if (buf == NULL) return;
 		while(i > 0)
@@ -142,9 +217,9 @@ ICACHE_FLASH_ATTR void wifiScanCallback(void *arg, STATUS status)
 			bss_link = bss_link->next.stqe_next;
 			if(bss_link == NULL) break;
 			sprintf(buf, "\n%s;%d;%d;%d", bss_link->ssid, bss_link->channel, bss_link->rssi, bss_link->authmode);
-			printf(buf);
+			kprintf(PSTR("%s\n"),buf);
 		}
-		printf("\n#%s",msg);
+		kprintf(PSTR("\n#%s"),msg);
 		free(buf);
 	}
 }
@@ -163,13 +238,15 @@ ICACHE_FLASH_ATTR void wifiConnect(char* cmd)
 	char *t = strstr(cmd, parslashquote);
 	if(t == 0)
 	{
-		printf(errmsg);
+		kprintf(stritCMDERROR);
+		free(devset);
 		return;
 	}
 	char *t_end  = strstr(t, "\",\"");
 	if(t_end == 0)
 	{
-		printf(errmsg);
+		kprintf(stritCMDERROR);
+		free(devset);
 		return;
 	}
 	
@@ -179,14 +256,15 @@ ICACHE_FLASH_ATTR void wifiConnect(char* cmd)
 	t_end = strstr(t, parquoteslash);
 	if(t_end == 0)
 	{
-		printf(errmsg);
+		kprintf(stritCMDERROR);
+		free(devset);
 		return;
 	}
 	
 	strncpy( devset->pass, t, (t_end-t)) ;
 	devset->dhcpEn = 1;
 	saveDeviceSettings(devset);
-	printf("\n##AP1: %s with dhcp on next reset#\n",devset->ssid);
+	kprintf(PSTR("\n##AP1: %s with dhcp on next reset#\n"),devset->ssid);
 	free(devset);
 }
 
@@ -194,8 +272,8 @@ ICACHE_FLASH_ATTR void wifiConnectMem()
 {
 	
 	struct device_settings* devset = getDeviceSettings();
-	printf("\n##AP1: %s#",devset->ssid);
-	printf("\n##AP2: %s#\n",devset->ssid2);
+	kprintf(PSTR("\n##AP1: %s#"),devset->ssid);
+	kprintf(PSTR("\n##AP2: %s#\n"),devset->ssid2);
 	free(devset);
 	 
 /*	int i;
@@ -214,8 +292,8 @@ ICACHE_FLASH_ATTR void wifiConnectMem()
 
 	wifi_station_set_config(cfg);
 
-	if( wifi_station_connect() ) printf("\n##WIFI.CONNECTED#");
-	else printf("\n##WIFI.NOT_CONNECTED#");
+	if( wifi_station_connect() ) kprintf(PSTR("\n##WIFI.CONNECTED#"));
+	else kprintf(PSTR("\n##WIFI.NOT_CONNECTED#"));
 	
 	free(cfg);
 	*/
@@ -223,8 +301,8 @@ ICACHE_FLASH_ATTR void wifiConnectMem()
 
 ICACHE_FLASH_ATTR void wifiDisconnect()
 {
-	if(wifi_station_disconnect()) printf("\n##WIFI.NOT_CONNECTED#");
-	else printf("\n##WIFI.DISCONNECT_FAILED#");
+	if(wifi_station_disconnect()) kprintf(PSTR("\n##WIFI.NOT_CONNECTED#"));
+	else kprintf(PSTR("\n##WIFI.DISCONNECT_FAILED#"));
 }
 
 ICACHE_FLASH_ATTR void wifiStatus()
@@ -232,7 +310,7 @@ ICACHE_FLASH_ATTR void wifiStatus()
 	struct ip_info ipi;
 	uint8_t t = wifi_station_get_connect_status();	
 	wifi_get_ip_info(0, &ipi);
-	printf("#WIFI.STATUS#\n%d\n%d.%d.%d.%d\n%d.%d.%d.%d\n%d.%d.%d.%d\n##WIFI.STATUS#\n",
+	kprintf(stritWIFISTATUS,
 			  t, (ipi.ip.addr&0xff), ((ipi.ip.addr>>8)&0xff), ((ipi.ip.addr>>16)&0xff), ((ipi.ip.addr>>24)&0xff),
 			 (ipi.netmask.addr&0xff), ((ipi.netmask.addr>>8)&0xff), ((ipi.netmask.addr>>16)&0xff), ((ipi.netmask.addr>>24)&0xff),
 			 (ipi.gw.addr&0xff), ((ipi.gw.addr>>8)&0xff), ((ipi.gw.addr>>16)&0xff), ((ipi.gw.addr>>24)&0xff));
@@ -242,7 +320,7 @@ ICACHE_FLASH_ATTR void wifiGetStation()
 {
 	struct station_config cfgg;
 	wifi_station_get_config(&cfgg);
-	printf("\n#WIFI.STATION#\n%s\n%s\n##WIFI.STATION#\n", cfgg.ssid, cfgg.password);
+	kprintf(stritWIFISTATION, cfgg.ssid, cfgg.password);
 }
 
 ICACHE_FLASH_ATTR void clientParseUrl(char* s)
@@ -250,13 +328,13 @@ ICACHE_FLASH_ATTR void clientParseUrl(char* s)
     char *t = strstr(s, parslashquote);
 	if(t == 0)
 	{
-		printf(errmsg);
+		kprintf(stritCMDERROR);
 		return;
 	}
 	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
-		printf(errmsg);
+		kprintf(stritCMDERROR);
 		return;
     }
     char *url = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -273,16 +351,16 @@ ICACHE_FLASH_ATTR void clientParseUrl(char* s)
 ICACHE_FLASH_ATTR void clientParsePath(char* s)
 {
     char *t = strstr(s, parslashquote);
-	printf("cli.path: %s\n",t);
 	if(t == 0)
 	{
-		printf(errmsg);
+		kprintf(stritCMDERROR);
 		return;
 	}
+//	kprintf(PSTR("cli.path: %s\n"),t);
 	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
-		printf(errmsg);
+		kprintf(stritCMDERROR);
 		return;
     }
     char *path = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -291,7 +369,7 @@ ICACHE_FLASH_ATTR void clientParsePath(char* s)
         uint8_t tmp;
         for(tmp=0; tmp<(t_end-t+1); tmp++) path[tmp] = 0;
         strncpy(path, t+2, (t_end-t));
-	printf("cli.path: %s\n",path);
+	kprintf(PSTR("cli.path: %s\n"),path);
         clientSetPath(path);
         free(path);
     }
@@ -302,13 +380,13 @@ ICACHE_FLASH_ATTR void clientParsePort(char *s)
     char *t = strstr(s, parslashquote);
 	if(t == 0)
 	{
-		printf(errmsg);
+		kprintf(stritCMDERROR);
 		return;
 	}
 	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
-		printf(errmsg);
+		kprintf(stritCMDERROR);
 		return;
     }
     char *port = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -329,13 +407,13 @@ ICACHE_FLASH_ATTR void clientPlay(char *s)
     char *t = strstr(s, parslashquote);
 	if(t == 0)
 	{
-		printf(errmsg);
+		kprintf(stritCMDERROR);
 		return;
 	}
 	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
-		printf(errmsg);
+		kprintf(stritCMDERROR);
 		return;
     }
    char *id = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -349,19 +427,25 @@ ICACHE_FLASH_ATTR void clientPlay(char *s)
     }	
 }
 
+const char strilLIST[] STORE_ATTR ICACHE_RODATA_ATTR = {"##CLI.LIST#%c"};
+const char strilINFOND[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTINFO#: %3d: not defined\n"};
+const char strilINFO[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTINFO#: %3d: %s, %s:%d%s\n"};
+const char strilDINFO[] STORE_ATTR ICACHE_RODATA_ATTR = {"\n#CLI.LIST#%d"};
+
+
 ICACHE_FLASH_ATTR void clientList(char *s)
 {
 	struct shoutcast_info* si;
 	uint8_t i = 0,j = 255;
 	bool onlyOne = false;
-	char stlinf[] = {"##CLI.LIST#\n"};
+	
 	char *t = strstr(s, parslashquote);
 	if(t != NULL) // a number specified
 	{	
 		char *t_end  = strstr(t, parquoteslash)-2;
 		if(t_end <= 0)
 		{
-			printf(errmsg);
+			kprintf(stritCMDERROR);
 			return;
 		}	
 		i = atoi(t+2);
@@ -371,30 +455,28 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 		
 	} 
 	{	
-		printf("\n#CLI.LIST#\n");	
+		kprintf(strilDINFO,0x0d);	
 		for (i ;i <j;i++)
 		{
+			vTaskDelay(1);
 			si = getStation(i);
 			if ((si == NULL) || (si->port ==0))
 			{
-				printf("#CLI.LISTINFO#: %3d: not defined, Try\n",i);
-				printf(stlinf);
-//				printf("##CLI.NAMESET#: %3d\n",i);
-				if (si != NULL) free(si);
-				return;
+				kprintf(strilINFOND,i);
+				if (si != NULL) {free(si);si = NULL;}
+				continue;
 			}
 
 			if (si !=NULL)
 			{
 				if(si->port !=0)
 				{	
-					printf("#CLI.LISTINFO#: %3d: %s, %s:%d%s\n",i,si->name,si->domain,si->port,si->file);	
-					vTaskDelay(1);
+					kprintf(strilINFO,i,si->name,si->domain,si->port,si->file);	
 				}
 				free(si);
 			}	
 		}	
-		printf(stlinf);
+		kprintf(strilLIST,0x0d);
 	}
 }
 ICACHE_FLASH_ATTR void clientInfo()
@@ -409,22 +491,24 @@ ICACHE_FLASH_ATTR void clientInfo()
 	free(si);
 }
 
+
+
 ICACHE_FLASH_ATTR void clientI2S(char* s)
 {
     char *t = strstr(s, parslashquote);
-	char message[] ={"\n##I2S speed: %d, 0=48kHz, 1=96kHz, 2=192kHz#\n"};
 	struct device_settings *device;
 	device = getDeviceSettings();
 	if(t == NULL)
 	{
-		printf(message,device->i2sspeed);
+		kprintf(PSTR("\n##I2S speed: %d, 0=48kHz, 1=96kHz, 2=192kHz#\n"),device->i2sspeed);
 		free(device);
 		return;
 	}
 	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
-		printf(errmsg);
+		kprintf(stritCMDERROR);
+		free(device);
 		return;
     }	
 	uint8_t speed = atoi(t+2);
@@ -432,7 +516,7 @@ ICACHE_FLASH_ATTR void clientI2S(char* s)
 
 	device->i2sspeed = speed;
 	saveDeviceSettings(device);	
-	printf(message,speed);
+	kprintf(PSTR("\n##I2S speed: %d, 0=48kHz, 1=96kHz, 2=192kHz#\n"),speed);
 	free(device);
 }
 ICACHE_FLASH_ATTR void clientUart(char* s)
@@ -464,7 +548,7 @@ ICACHE_FLASH_ATTR void clientUart(char* s)
 		device->uartspeed= speed;
 		saveDeviceSettings(device);	
 	}
-	printf("\n%sUART= %d# on next reset\n",msgcli,device->uartspeed);	
+	kprintf(PSTR("\n%sUART= %d# on next reset\n"),msgcli,device->uartspeed);	
 	free(device);
 }
 ICACHE_FLASH_ATTR void clientVol(char *s)
@@ -473,14 +557,14 @@ ICACHE_FLASH_ATTR void clientVol(char *s)
 	if(t == 0)
 	{
 		// no argument, return the current volume
-		printf("%sVOL#: %d\n",msgcli,getVolume());
+		kprintf(PSTR("%sVOL#: %d\n"),msgcli,getVolume());
 		return;
 	}
 	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
 
-		printf(errmsg);
+		kprintf(stritCMDERROR);
 		return;
     }
    char *vol = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -503,14 +587,18 @@ ICACHE_FLASH_ATTR void syspatch(char* s)
 	device = getDeviceSettings();
 	if(t == NULL)
 	{
-		printf("\n##VS1053 Patch is %s#\n",((device->options & T_PATCH)!= 0)?"Not loaded":"Loaded");
+		if ((device->options & T_PATCH)!= 0)
+			kprintf(PSTR("\n##VS1053 Patch is loaded#%c"),0x0d);
+		else
+			kprintf(PSTR("\n##VS1053 Patch is not loaded#%c"),0x0d);
 		free(device);
 		return;
 	}
 	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
-		printf(errmsg);
+		kprintf(stritCMDERROR);
+		free(device);
 		return;
     }	
 	uint8_t value = atoi(t+2);
@@ -520,7 +608,7 @@ ICACHE_FLASH_ATTR void syspatch(char* s)
 		device->options &= NT_PATCH; // 0 = load patch
 	
 	saveDeviceSettings(device);	
-	printf("\n##VS1053 Patch will be %s after power Off and On#\n",((device->options & T_PATCH)!= 0)?"unloaded":"Loaded");
+	kprintf(stritPATCH,(device->options & T_PATCH)!= 0?"unloaded":"Loaded");
 	free(device);	
 }
 
@@ -532,14 +620,15 @@ ICACHE_FLASH_ATTR void sysled(char* s)
 	extern bool ledStatus;
 	if(t == NULL)
 	{
-		printf("##Led is in %s#\n",((device->options & T_LED)== 0)?"Blink mode":"Play mode");
+		kprintf(PSTR("##Led is in %s mode#\n"),((device->options & T_LED)== 0)?"Blink":"Play");
 		free(device);
 		return;
 	}
 	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
-		printf(errmsg);
+		kprintf(stritCMDERROR);
+		free(device);
 		return;
     }	
 	uint8_t value = atoi(t+2);
@@ -549,7 +638,7 @@ ICACHE_FLASH_ATTR void sysled(char* s)
 	{device->options &= NT_LED; ledStatus =true;} // options:0 = ledStatus true = Blink mode
 	
 	saveDeviceSettings(device);	
-	printf("##LED is in %s#\n",((device->options & T_LED)== 0)?"Blink mode":"Play mode");
+	kprintf(PSTR("##LED is in %s mode#\n"),((device->options & T_LED)== 0)?"Blink":"Play");
 	free(device);
 	
 }
@@ -558,30 +647,32 @@ ICACHE_FLASH_ATTR void tzoffset(char* s)
 {
 	char *t = strstr(s, parslashquote);
 	struct device_settings *device;
-	char msg[] = {"##SYS.TZO#: %d\n"};
+	
 	device = getDeviceSettings();
 	if(t == NULL)
 	{
-		printf(msg,device->tzoffset);
+		kprintf(PSTR("##SYS.TZO#: %d\n"),device->tzoffset);
 		free(device);
 		return;
 	}
 	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
-		printf(errmsg);
+		kprintf(stritCMDERROR);
+		free(device);
 		return;
     }	
 	uint8_t value = atoi(t+2);
 	device->tzoffset = value;	
 	saveDeviceSettings(device);	
-	printf(msg,device->tzoffset);
+	kprintf(PSTR("##SYS.TZO#: %d\n"),device->tzoffset);
 	free(device);		
 }
 
 ICACHE_FLASH_ATTR void heapSize()
 {
-	printf("%sHEAP: %d #\n",msgsys,xPortGetFreeHeapSize( ));
+	int hps = xPortGetFreeHeapSize( );
+	kprintf(PSTR("%sHEAP: %d #\n"),msgsys,hps);
 }
 
 ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
@@ -590,7 +681,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 	int i;
 	for(i=0;i<size;i++) tmp[i] = s[i];
 	tmp[size] = 0;
-//	printf("size: %d, cmd=%s\n",size,tmp);
+//	kprintf(PSTR("size: %d, cmd=%s\n"),size,tmp);
 	if(startsWith ("wifi.", tmp))
 	{
 		if     (strcmp(tmp+5, "list") == 0) 	wifiScan();
@@ -606,9 +697,9 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 		if     (startsWith (  "url", tmp+4)) 	clientParseUrl(tmp);
 		else if(startsWith (  "path", tmp+4))	clientParsePath(tmp);
 		else if(startsWith (  "port", tmp+4)) 	clientParsePort(tmp);
-		else if(strcmp(tmp+4, "instant") == 0) {clientDisconnect("cli instantplay");clientConnectOnce();}
+		else if(strcmp(tmp+4, "instant") == 0) {clientDisconnect(PSTR("cli instantplay"));clientConnectOnce();}
 		else if(strcmp(tmp+4, "start") == 0) 	clientPlay("(\"255\")"); // outside value to play the current station
-		else if(strcmp(tmp+4, "stop") == 0) 	clientDisconnect("cli stop");
+		else if(strcmp(tmp+4, "stop") == 0) 	clientDisconnect(PSTR("cli stop"));
 		else if(startsWith (  "list", tmp+4)) 	clientList(tmp);
 		else if(strcmp(tmp+4, "next") == 0) 	wsStationNext();
 		else if(strncmp(tmp+4,"previous",4) == 0) wsStationPrev();
@@ -635,7 +726,17 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 		else if(startsWith(   "log",tmp+4)) 	; // do nothing
 		else printInfo(tmp);
 	}
-	else printInfo(tmp);
+	else 
+	{
+		if(strcmp(tmp, "help") == 0)
+		{
+			kprintfl(stritHELP0,0x0d);
+			kprintfl(stritHELP1,0x0d);
+			kprintfl(stritHELP2,0x0d);
+			kprintfl(stritHELP3,0x0d);
+		}
+		else printInfo(tmp);
+	}	
 	free(tmp);
 	
 }
