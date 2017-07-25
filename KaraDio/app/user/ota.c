@@ -93,7 +93,7 @@ void update_firmware(void)
 
 	char* client_url = "karadio.karawin.fr";
 //	char* client_url = "192.168.1.2";
-#define bin_url  "user%d.4096.test.4.bin"
+#define bin_url  "user%d.4096.new.4.bin"
     struct upgrade_server_info *server = NULL;
     server = (struct upgrade_server_info *)malloc(sizeof(struct upgrade_server_info));
     memset(server, 0, sizeof(struct upgrade_server_info));
