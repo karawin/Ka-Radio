@@ -33,10 +33,10 @@ echo install Ka-Radio
 #-----------------
 cd
 git clone --recursive https://github.com/karawin/Ka-Radio.git
-cd Ka-Radio/KaraDio
-chmod +x app/*.sh
+cd Ka-Radio/ESP8266-Firmware
+chmod +x *.sh
 chmod +x webpage/*.sh
-cd app
+
 echo generate karadio
 ./genall.sh
 

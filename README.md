@@ -2,19 +2,14 @@
 
 ### Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ## Basic informations<BR/>
-### Release 1.5 - Built on 2017/07/24
-New:<br/>
-- New KaraDio based on Espressif RTOS SDK 1.5.0-dev<br/>
-<br/>
-Bugs resolved:<br/>
-- Some minor problems found thanks to the new sdk.<br/>
-<br/>
-### Release 1.4 - Built on 2017/07/19
+### Release 1.4.1 - Built on 2017/07/28
 New:<br/>
 - A telnet server multi clients on port 23. It is the same interface as the uart one. So the low level management can be done via the network and it offer a complete interface for remote addons.<br/>
 - A deep modification of the memory management. More free room.<br/>
 - new commands: help and sys.adc.<br/>
 - The web volume command is now on a POST if the websocket is not ready.<br/>
+- Play all 320Kb/s Stations<br/>
+-new command: sys.version<br/>
 <br/>
 Bugs resolved:<br/>
 - a problem on the web interface close resolved.<br/>

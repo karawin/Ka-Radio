@@ -1,0 +1,44 @@
+554a18b5382bc4f4bc93f7c8b6f51b2261851830 a4f7eecf9a39100cf43cc485ca692fb9a84ab1e1 karawin <jp@cocatrix.fr> 1484002404 +0100	update by push
+a4f7eecf9a39100cf43cc485ca692fb9a84ab1e1 ae85267646f60003db7de4e14bea5416318ca019 karawin <jp@cocatrix.fr> 1484432108 +0100	pull --progress --rebase --prune origin master: fast-forward
+ae85267646f60003db7de4e14bea5416318ca019 91f7aed4f6c0bdf97806610c24d8c0ce3d5d3cbb karawin <jp@cocatrix.fr> 1484432197 +0100	update by push
+91f7aed4f6c0bdf97806610c24d8c0ce3d5d3cbb 01c47c8449b06e9fff98f0db6d84ba58eb2ca94e karawin <jp@cocatrix.fr> 1485296505 +0100	pull --progress --prune origin master: fast-forward
+01c47c8449b06e9fff98f0db6d84ba58eb2ca94e a0aedd0f90f6b4253d1334d909f183cfbf0ecc96 karawin <jp@cocatrix.fr> 1485296524 +0100	update by push
+a0aedd0f90f6b4253d1334d909f183cfbf0ecc96 585edcf6edfaad21601cb6bfb904be3796f8faae karawin <jp@cocatrix.fr> 1485361399 +0100	update by push
+585edcf6edfaad21601cb6bfb904be3796f8faae 6c1e4f83f84f67a7035736d8083e9e4479893b5b karawin <jp@cocatrix.fr> 1486027627 +0100	pull --progress --rebase --prune origin master: fast-forward
+6c1e4f83f84f67a7035736d8083e9e4479893b5b e4ade763d7e15b80ca6ed8d79ea10a83afb945a5 karawin <jp@cocatrix.fr> 1486027718 +0100	update by push
+e4ade763d7e15b80ca6ed8d79ea10a83afb945a5 3cc037b678e0da9b30860a7f97c9762776680061 karawin <jp@cocatrix.fr> 1486242194 +0100	pull --progress --rebase --prune origin master: fast-forward
+3cc037b678e0da9b30860a7f97c9762776680061 63f23e3407b604ea8e37f3cf6958de59036eea5c karawin <jp@cocatrix.fr> 1486242230 +0100	update by push
+63f23e3407b604ea8e37f3cf6958de59036eea5c ac439dac9a405ce75b8de9041b6ecd8239032da2 karawin <jp@cocatrix.fr> 1486674133 +0100	update by push
+ac439dac9a405ce75b8de9041b6ecd8239032da2 edb80f5eb3c332431842630bb3763c6fa0746921 karawin <jp@cocatrix.fr> 1486674609 +0100	fetch --prune --recurse-submodules=on-demand origin: fast-forward
+edb80f5eb3c332431842630bb3763c6fa0746921 e48825bb041595796f38793e4ee258dc328e809a karawin <jp@cocatrix.fr> 1486760396 +0100	update by push
+e48825bb041595796f38793e4ee258dc328e809a 2598e1dcf1d7b3e777c0baa968bf5722acc72a27 karawin <jp@cocatrix.fr> 1486932260 +0100	pull --progress --prune origin master: fast-forward
+2598e1dcf1d7b3e777c0baa968bf5722acc72a27 43fc2325ca93d7c0be5c16642856781a054c15c6 karawin <jp@cocatrix.fr> 1486932279 +0100	update by push
+43fc2325ca93d7c0be5c16642856781a054c15c6 5362ba1f557c8962f3f7cedd8d089c1cb9650490 karawin <jp@cocatrix.fr> 1491170024 +0200	pull --progress --prune origin master: fast-forward
+5362ba1f557c8962f3f7cedd8d089c1cb9650490 bcfac6d0af6d58168c8efd99750b5035e848ab7a karawin <jp@cocatrix.fr> 1491322536 +0200	update by push
+bcfac6d0af6d58168c8efd99750b5035e848ab7a b4cecf0743840aef9d18936e8f98107394150004 karawin <jp@cocatrix.fr> 1491324695 +0200	update by push
+b4cecf0743840aef9d18936e8f98107394150004 c70e7dc3c8ab529ec3e084ad5bba28ecdf38aba8 karawin <jp@cocatrix.fr> 1492117606 +0200	pull --progress --rebase --prune origin master: fast-forward
+c70e7dc3c8ab529ec3e084ad5bba28ecdf38aba8 60e38145a29a27499bd47c85d870b7b09932ad14 karawin <jp@cocatrix.fr> 1492117686 +0200	update by push
+60e38145a29a27499bd47c85d870b7b09932ad14 78aa3d5f7548725b052ebecbc01aef02683244b1 karawin <jp@cocatrix.fr> 1492121345 +0200	fetch --prune --recurse-submodules=on-demand origin: fast-forward
+78aa3d5f7548725b052ebecbc01aef02683244b1 dc876920300028b2d3be76d70f8057adc4a148b1 karawin <jp@cocatrix.fr> 1492198082 +0200	update by push
+dc876920300028b2d3be76d70f8057adc4a148b1 4b5791403117c3249cb38acf6ff43d48c9c4be1b karawin <jp@cocatrix.fr> 1492198421 +0200	update by push
+4b5791403117c3249cb38acf6ff43d48c9c4be1b 25ab2419f69c661d314daf5507919f09331c3e37 karawin <jp@cocatrix.fr> 1492672907 +0200	pull --progress --rebase --prune origin master: fast-forward
+25ab2419f69c661d314daf5507919f09331c3e37 445322efbd63c5045b2b62cabe16be085ba3914f karawin <jp@cocatrix.fr> 1492673005 +0200	update by push
+445322efbd63c5045b2b62cabe16be085ba3914f 7c835ad06eb0ec3f81d3f8d107e9f38d42fe205b karawin <jp@cocatrix.fr> 1492678232 +0200	update by push
+7c835ad06eb0ec3f81d3f8d107e9f38d42fe205b 27e862330d150f51d995f8068baaae350a8e8e3d karawin <jp@cocatrix.fr> 1493760303 +0200	pull --progress --rebase --prune origin master: fast-forward
+27e862330d150f51d995f8068baaae350a8e8e3d 23d1eff97c25c2b489389ae40219fd373cbe40a8 karawin <jp@cocatrix.fr> 1493760381 +0200	update by push
+23d1eff97c25c2b489389ae40219fd373cbe40a8 65fc9aeadaaa2b3352c0d36e5815e943e3e496a4 karawin <jp@cocatrix.fr> 1493761172 +0200	fetch --prune --recurse-submodules=on-demand origin: fast-forward
+65fc9aeadaaa2b3352c0d36e5815e943e3e496a4 44f6e8e228c61cbb6ca79e9350ba2844e14304e7 karawin <jp@cocatrix.fr> 1494198685 +0200	update by push
+44f6e8e228c61cbb6ca79e9350ba2844e14304e7 8edcb12e1c3930c242e0404f1504f1e97666e99a karawin <jp@cocatrix.fr> 1494199220 +0200	pull --progress --rebase --prune origin master: fast-forward
+8edcb12e1c3930c242e0404f1504f1e97666e99a 7f1a2a033bae488d7d53808614ea8597cb31fadf karawin <jp@cocatrix.fr> 1494236448 +0200	update by push
+7f1a2a033bae488d7d53808614ea8597cb31fadf 8726d098df5de419f9653027fc121945d0c8d69c karawin <jp@cocatrix.fr> 1494968212 +0200	update by push
+8726d098df5de419f9653027fc121945d0c8d69c bfacc6a49ff3942e07f708ca88f994b67d64715f karawin <jp@cocatrix.fr> 1495458594 +0200	update by push
+bfacc6a49ff3942e07f708ca88f994b67d64715f 7e90f251b9b20517d8c2b0cd1f79f7acbc32cbbc karawin <jp@cocatrix.fr> 1496157955 +0200	update by push
+7e90f251b9b20517d8c2b0cd1f79f7acbc32cbbc eb527eae0387e1141d74979eac6f18aaad4bb75e karawin <jp@cocatrix.fr> 1496307806 +0200	update by push
+eb527eae0387e1141d74979eac6f18aaad4bb75e 8245ef5956848da4b972fdad5f6e6a93ecd5bde0 karawin <jp@cocatrix.fr> 1496743865 +0200	update by push
+8245ef5956848da4b972fdad5f6e6a93ecd5bde0 f699ec69029fe86ecd348f599f4f6160f9b8b3f7 karawin <jp@cocatrix.fr> 1497880591 +0200	update by push
+f699ec69029fe86ecd348f599f4f6160f9b8b3f7 b171ff91ba93018c91e0c5daa268aab43af74817 karawin <jp@cocatrix.fr> 1498834983 +0200	update by push
+b171ff91ba93018c91e0c5daa268aab43af74817 b042d467a200f1e412565ba58e27e636f200d4af karawin <jp@cocatrix.fr> 1498900061 +0200	update by push
+b042d467a200f1e412565ba58e27e636f200d4af a8241cec8123e11b295082a07bbf51747a587590 karawin <jp@cocatrix.fr> 1499175882 +0200	update by push
+a8241cec8123e11b295082a07bbf51747a587590 72bda576efa957183856fd35a4dbe5615d4f26ed karawin <jp@cocatrix.fr> 1499807689 +0200	update by push
+72bda576efa957183856fd35a4dbe5615d4f26ed e79e25c18aba23779701296570a647ee849ec2ff karawin <jp@cocatrix.fr> 1500472286 +0200	update by push
+e79e25c18aba23779701296570a647ee849ec2ff 6adc25b058af7c4321a765040f16a733fbda07b7 karawin <jp@cocatrix.fr> 1500476181 +0200	update by push
