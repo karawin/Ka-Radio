@@ -506,15 +506,15 @@ void user_init(void)
     flash_size_map size_map = system_get_flash_size_map();
 	printf (PSTR("size_map: %d\n"),size_map);
 	
-	xTaskCreate(testtask, "t0", 130, NULL, 1, &pxCreatedTask); // DEBUG/TEST 110
+	xTaskCreate(testtask, "t0", 130, NULL, 1, &pxCreatedTask); // DEBUG/TEST 130
 	printf(striTASK,"t0",pxCreatedTask);
 	xTaskCreate(uartInterfaceTask, "t1", 430, NULL, 2, &pxCreatedTask); // 310
 	printf(striTASK, "t1",pxCreatedTask);
 	xTaskCreate(vsTask, "t4", 230, NULL,5, &pxCreatedTask); //380 230
 	printf(striTASK,"t4",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 512, NULL, 4, &pxCreatedTask); // 340
+	xTaskCreate(clientTask, "t3", 340, NULL, 4, &pxCreatedTask); // 340
 	printf(striTASK,"t3",pxCreatedTask);
-	xTaskCreate(serverTask, "t2", 512, NULL, 4, &pxCreatedTask); //230
+	xTaskCreate(serverTask, "t2", 230, NULL, 4, &pxCreatedTask); //230
 	printf(striTASK,"t2",pxCreatedTask);
 	xTaskCreate(websocketTask, "t5", 380, NULL, 3, &pxCreatedTask); //380
 	printf(striTASK,"t5",pxCreatedTask);

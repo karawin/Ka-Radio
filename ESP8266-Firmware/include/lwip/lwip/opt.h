@@ -879,7 +879,7 @@
  * LWIP_UDPLITE==1: Turn on UDP-Lite. (Requires LWIP_UDP)
  */
 #ifndef LWIP_UDPLITE
-#define LWIP_UDPLITE                    0
+#define LWIP_UDPLITE                    1
 #endif
 
 /**
