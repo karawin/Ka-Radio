@@ -10,9 +10,10 @@
 //#define USE_EXTERNAL_SRAM 1
 
 extern bool externram;
-uint32_t BUFFER_SIZE;
+extern uint32_t BUFFER_SIZE;
 
 uint32_t getBufferFree();
+bool getBufferEmpty();
 uint32_t getBufferFilled();
 uint32_t bufferWrite(uint8_t *data, uint32_t size);
 uint32_t bufferRead(uint8_t *data, uint32_t size);

@@ -26,7 +26,7 @@ bool fdevice = false;
 struct device_settings1 device1;
 bool fdevice1 = false;
 */
-const char streMSG[]  STORE_ATTR ICACHE_RODATA_ATTR = {"%s malloc fails\n"};
+const char streMSG[]  STORE_ATTR ICACHE_RODATA_ATTR = {"Warning %s malloc low memory\n"};
 const char saveStationPos[] STORE_ATTR ICACHE_RODATA_ATTR = {"saveStation fails pos=%d\n"};
 const char getStationPos[] STORE_ATTR ICACHE_RODATA_ATTR = {"getStation fails pos=%d\n"};
 const char streERASE[] STORE_ATTR ICACHE_RODATA_ATTR = {"erase setting1 (only one time) \n"};

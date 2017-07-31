@@ -1,10 +1,10 @@
-/* (c)jp cocatrix May 2006 
+/* (c)jp cocatrix May 2017 
 	quick and dirty telnet inplementation for wifi webradio
 Inspirated by:
- * Copyright (c) 2015 Markus Sattler. All rights reserved.
+ * 
  * This file is part of the WebSockets for Arduino.
 /*
- * Copyright 2016 karawin (http://www.karawin.fr)
+ * Copyright 2017 karawin (http://www.karawin.fr)
 */
 
 #ifndef __TELNET_H__
@@ -28,7 +28,8 @@ Inspirated by:
 #define NBCLIENTT 5
 //#define MAXDATAT	 256
 
-
+//extern const char strtWELCOME[] ;
+extern int telnetclients[NBCLIENTT];
 
 // public:
 // init some data

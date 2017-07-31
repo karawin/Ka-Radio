@@ -219,12 +219,6 @@
    ---------- TCP options ----------
    ---------------------------------
 */
-/**
- * TCP_WND: The size of a TCP window.  This must be at least
- * (2 * TCP_MSS) for things to work well
- */
-
-#define TCP_WND                        (*(volatile uint32*)0x600011F0)
 
 /**
  * TCP_QUEUE_OOSEQ==1: TCP will queue segments that arrive out of order.
@@ -240,6 +234,13 @@
 */
 #define TCP_MSS                         1460
 //#define TCP_MSS                         1085
+
+/**
+ * TCP_WND: The size of a TCP window.  This must be at least
+ * (2 * TCP_MSS) for things to work well
+ */
+
+#define TCP_WND                        (6*TCP_MSS) //(*(volatile uint32*)0x600011F0)
 
 /**
  * TCP_MAXRTX: Maximum number of retransmissions of data segments.

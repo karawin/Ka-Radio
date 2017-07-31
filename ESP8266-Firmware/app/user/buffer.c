@@ -11,6 +11,7 @@
 #endif
 */
 bool externram;
+uint32_t BUFFER_SIZE;
 uint8_t *buffer;
 uint32_t wptr = 0;
 uint32_t rptr = 0;
@@ -32,6 +33,9 @@ ICACHE_FLASH_ATTR uint32_t getBufferFree() {
 	if(wptr > rptr ) return BUFFER_SIZE - wptr + rptr;
 	else if(wptr < rptr) return rptr - wptr;
 	else if(bempty) return BUFFER_SIZE; else return 0;
+}
+ICACHE_FLASH_ATTR bool getBufferEmpty() {
+	return bempty;
 }
 
 ICACHE_FLASH_ATTR uint32_t getBufferFilled() {

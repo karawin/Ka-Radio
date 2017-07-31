@@ -30,6 +30,7 @@
 #include "vs1053.h"
 #include "ntp.h"
 #include "telnet.h"
+#include "servers.h"
 
 //#include "eeprom.h"
 //#include <time.h>
@@ -54,6 +55,7 @@ void uart_div_modify(int no, unsigned int freq);
 //	struct station_config config;
 uint8_t FlashOn = 5,FlashOff = 5;
 uint8_t FlashCount = 0xFF;
+uint8_t FlashVolume = 0;
 os_timer_t ledTimer;
 bool ledStatus = true; // true: normal blink, false: led on when playing
 sc_status status = 0;
@@ -112,12 +114,15 @@ struct device_settings *device;
 ICACHE_FLASH_ATTR void ledCallback(void *pArg) {
 struct device_settings *device;	
 
-		FlashCount++;
+	FlashCount++;
 		
-		if ((ledStatus)&&(FlashCount == FlashOff)) gpio2_output_set(1);
-		if (FlashCount == FlashOn)
+	if ((ledStatus)&&(FlashCount == FlashOff)) gpio2_output_set(1);
+	if (FlashCount == FlashOn)
+	{
+		if (FlashVolume++ == 5) // every 10 sec
 		{
-			// save volume if changed		
+			// save volume if changed
+			FlashVolume = 0;
 			device = getDeviceSettings();
 			if (device != NULL)
 			{	
@@ -128,12 +133,13 @@ struct device_settings *device;
 				}
 				free(device);	
 			}
-		}		
-		if ((ledStatus)&&(FlashCount == FlashOn)) // on led and save volume if changed
-		{		
-			gpio2_output_set(0);
-			FlashCount = 0;
-		}	
+		}
+	}		
+	if ((ledStatus)&&(FlashCount == FlashOn)) // on led and save volume if changed
+	{		
+		gpio2_output_set(0);
+		FlashCount = 0;
+	}	
 		
 }
 
@@ -156,10 +162,10 @@ void uartInterfaceTask(void *pvParameters) {
 	int i = 0;	
 	uint8 maxap;
 	
-//	int uxHighWaterMark;
-//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-//	printf("watermark uartInterfaceTask: %d  %d\n","uartInterfaceTask",uxHighWaterMark,,xPortGetFreeHeapSize( ));
 
+/*	int uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+	printf("watermark uartInterfaceTask: %d  %d\n","uartInterfaceTask",uxHighWaterMark,xPortGetFreeHeapSize( ));
+*/
 	int t = 0;
 	for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
 	t = 0;
@@ -362,9 +368,10 @@ void uartInterfaceTask(void *pvParameters) {
 			switchCommand() ;  // hardware panel of command
 		}
 		checkCommand(t, tmp);
-//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-//	printf("watermark uartInterfaceTask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 		
+/*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+	printf("watermark uartInterfaceTask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
+*/		
 		
 		for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
 		t = 0;
@@ -508,18 +515,16 @@ void user_init(void)
 	
 	xTaskCreate(testtask, "t0", 130, NULL, 1, &pxCreatedTask); // DEBUG/TEST 130
 	printf(striTASK,"t0",pxCreatedTask);
-	xTaskCreate(uartInterfaceTask, "t1", 430, NULL, 2, &pxCreatedTask); // 310
+	xTaskCreate(uartInterfaceTask, "t1", 360, NULL, 2, &pxCreatedTask); // 350
 	printf(striTASK, "t1",pxCreatedTask);
 	xTaskCreate(vsTask, "t4", 230, NULL,5, &pxCreatedTask); //380 230
 	printf(striTASK,"t4",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 340, NULL, 4, &pxCreatedTask); // 340
+	xTaskCreate(clientTask, "t3", 350, NULL, 5, &pxCreatedTask); // 340
 	printf(striTASK,"t3",pxCreatedTask);
 	xTaskCreate(serverTask, "t2", 230, NULL, 4, &pxCreatedTask); //230
 	printf(striTASK,"t2",pxCreatedTask);
-	xTaskCreate(websocketTask, "t5", 380, NULL, 3, &pxCreatedTask); //380
+	xTaskCreate(serversTask, "t5", 300, NULL, 3, &pxCreatedTask); //380
 	printf(striTASK,"t5",pxCreatedTask);
-	xTaskCreate(telnetTask, "t6", 380, NULL, 2, &pxCreatedTask); //380
-	printf(striTASK,"t6",pxCreatedTask);
-	
+
 	printf (striHEAP,xPortGetFreeHeapSize( ));
 }

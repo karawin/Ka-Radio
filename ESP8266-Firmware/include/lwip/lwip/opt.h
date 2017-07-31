@@ -129,7 +129,7 @@
  * a lot of data that needs to be copied, this should be set high.
  */
 #ifndef MEM_SIZE
-#define MEM_SIZE                        1600
+#define MEM_SIZE                        1600  //jpc 1600
 #endif
 
 /**
@@ -151,7 +151,7 @@
  *      memp_malloc() or memp_free() is called (useful but slow!)
  */
 #ifndef MEMP_OVERFLOW_CHECK
-#define MEMP_OVERFLOW_CHECK             0
+#define MEMP_OVERFLOW_CHECK             1
 #endif
 
 /**
@@ -240,7 +240,7 @@
  * (requires the LWIP_UDP option)
  */
 #ifndef MEMP_NUM_UDP_PCB
-#define MEMP_NUM_UDP_PCB                4
+#define MEMP_NUM_UDP_PCB                2
 #endif
 
 /**
@@ -293,7 +293,7 @@
  * (requires the ARP_QUEUEING option)
  */
 #ifndef MEMP_NUM_ARP_QUEUE
-#define MEMP_NUM_ARP_QUEUE              30
+#define MEMP_NUM_ARP_QUEUE              15
 #endif
 
 /**
@@ -974,7 +974,7 @@
  * To achieve good performance, this should be at least 2 * TCP_MSS.
  */
 #ifndef TCP_SND_BUF
-#define TCP_SND_BUF                     (4 * TCP_MSS)
+#define TCP_SND_BUF                     (2 * TCP_MSS)
 #endif
 
 /**
@@ -1050,7 +1050,7 @@
  * TCP_MSS/4: Try to create 4 fragments or less per TCP packet.
  */
 #ifndef TCP_OVERSIZE
-#define TCP_OVERSIZE                    TCP_MSS
+#define TCP_OVERSIZE                   TCP_MSS/4 // jpc  TCP_MSS
 #endif
 
 /**

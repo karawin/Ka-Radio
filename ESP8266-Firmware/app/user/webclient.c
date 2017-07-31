@@ -828,14 +828,28 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 // meta data computing
 		if (rest <0) 
 		{
-//	os_printf("Negative len= %d, metad= %d  rest= %d   pdata= \"%s\"\n",len,metad,rest,pdata);
-			strncat(metadata,pdata,0-rest);
-			clientSaveMetadata(metadata,strlen(metadata));
-			len += rest;
+//	printf("Negative len= %d, metad= %d  rest= %d   pdata= %x :\"%s\"\n",len,metad,rest,pdata,pdata);
+			if (len>-rest)
+				*(pdata+len-rest) = 0; //truncated
+			else
+				*(pdata+len) = 0; //truncated
+			strcat(metadata,pdata);
 			metad = header.members.single.metaint ;
-			pdata -= rest;
-//	os_printf("Negative len out = %d, metad= %d  rest= %d \n",len,metad,rest);
-			rest = 0;
+			if (len>-rest)
+			{
+				clientSaveMetadata(metadata,strlen(metadata));
+				pdata -= rest;	
+				len += rest;
+				rest = 0;
+			}
+			else
+			{
+				pdata += len;
+				rest += len;
+				len = 0;
+			}			
+//	printf("Negative len out = %d, pdata: %x,metad= %d  rest= %d \n",len,pdata,metad,rest);
+
 		}
 		inpdata = pdata;
 		clen = len;
@@ -859,6 +873,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 					if (rest <0)
 					{
 						*(inpdata+clen) = 0; //truncated
+//	printf("mtlen len:%d, clen:%d, metad:%d, l:%d, inpdata:%x,  rest:%d\n",len,clen,metad, l,inpdata,rest );				
 						
 						if (metadata != NULL) incfree(metadata,"meta"); 
 						metadata = incmalloc(l+1);	
@@ -866,12 +881,12 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 					}
 					else clientSaveMetadata(inpdata+metad+1,l);
 				}				
-				while(getBufferFree() < metad)	vTaskDelay(1);
+				while(getBufferFree() < metad)	vTaskDelay(10);
 				if (metad >0) bufferWrite(inpdata, metad); 
 				metad  = header.members.single.metaint;
 				inpdata = inpdata+clen-rest;
 				clen = rest;				
-//	os_printf("mt1 len:%d, clen:%d, metad:%d, l:%d, inpdata:%x,  rest:%d\n",len,clen,metad, l,inpdata,rest );
+//	printf("mt1 len:%d, clen:%d, metad:%d, l:%d, inpdata:%x,  rest:%d\n",len,clen,metad, l,inpdata,rest );
 				if (rest <0) {clen = 0; break;}
 			}	// while
 //	os_printf("\nmetaout len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );			
@@ -880,7 +895,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 				metad = header.members.single.metaint - rest ; //until next
 				while(getBufferFree() < rest) 
 				{					
-					vTaskDelay(1);// 
+					vTaskDelay(10);// 
 				}
 				if (rest >0) bufferWrite(inpdata, rest); 
 				rest = 0;
@@ -890,7 +905,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 			if (header.members.single.metaint != 0) metad -= len;
 //	os_printf("out len = %d, metad = %d  metaint= %d, rest:%d\n",len,metad,header.members.single.metaint,rest);
 			while(getBufferFree() < len) 
-				{vTaskDelay(1); }
+				{vTaskDelay(10); }
 			if (len >0) bufferWrite(pdata+rest, len);	
 		}
 // ---------------			
@@ -911,7 +926,7 @@ uint8_t b[VSTASKBUF];
 IRAM_ATTR void vsTask(void *pvParams) { 
 //	portBASE_TYPE uxHighWaterMark;
 	struct device_settings *device;
-	register uint16_t size ,s;
+	uint16_t size ,s;
 	VS1053_Start();
 	
 	device = getDeviceSettings();
@@ -931,9 +946,9 @@ IRAM_ATTR void vsTask(void *pvParams) {
 			s = 0; 			
 			while(s < size) 
 			{
-				s += VS1053_SendMusicBytes(b+s, size-s);
+				s += VS1053_SendMusicBytes(b+s, size-s);	
 			}
-			vTaskDelay(1);			
+			vTaskDelay(1);					
 		} else 
 		{
 			vTaskDelay(30);		
@@ -1066,7 +1081,7 @@ printf("Client socket: %d  read: %d  errno:%d ",sockfd, bytes_read,errno);
 							vTaskDelay(1);
 							if (VS1053_GetVolume()==0) VS1053_SetVolume(volume);
 							kprintf(CLIPLAY,0x0d,0x0a);
-							while (getBufferFree() < (BUFFER_SIZE)) vTaskDelay(100);							
+							while (!getBufferEmpty()) vTaskDelay(100);							
 							vTaskDelay(150);
 							playing=0;
 							clientDisconnect(PSTR("data not played")); 
@@ -1079,7 +1094,7 @@ printf("Client socket: %d  read: %d  errno:%d ",sockfd, bytes_read,errno);
 							wsHeaders();
 					}	
 					else{  //playing & once=1 and no more received stream
-						while (getBufferFree() < (BUFFER_SIZE)) vTaskDelay(100);
+						while (!getBufferEmpty()) vTaskDelay(100);
 						vTaskDelay(200);
 						clientDisconnect(PSTR("once")); 						
 					}					
@@ -1095,7 +1110,7 @@ printf("Client socket: %d  read: %d  errno:%d ",sockfd, bytes_read,errno);
 				VS1053_SetVolume(0);
 				VS1053_flush_cancel(2);
 				playing = 0;
-				vTaskDelay(1);	
+				vTaskDelay(20);	// stop without click
 				//VS1053_LowPower();
 				VS1053_SetVolume(volume);
 			}	

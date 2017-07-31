@@ -1,10 +1,10 @@
-/* (c)jp cocatrix May 2006 
+/* (c)jp cocatrix May 2017 
 	quick and dirty websocket inplementation for wifi webradio
 Inspirated by:
  * Copyright (c) 2015 Markus Sattler. All rights reserved.
  * This file is part of the WebSockets for Arduino.
 /*
- * Copyright 2016 karawin (http://www.karawin.fr)
+ * Copyright 2017 karawin (http://www.karawin.fr)
 */
 
 #ifndef __WEBSOCKET_H__
@@ -27,6 +27,9 @@ Inspirated by:
 
 #define NBCLIENT 5
 #define MAXDATA	 528
+
+
+
 typedef enum {
     WSop_continuation = 0x00, ///< %x0 denotes a continuation frame
     WSop_text = 0x01,         ///< %x1 denotes a text frame
@@ -54,7 +57,7 @@ typedef struct {
 	int socket;	
 } client_t;
 
-
+extern client_t webserverclients[NBCLIENT];
 
 // public:
 // init some data

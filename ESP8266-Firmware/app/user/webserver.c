@@ -599,9 +599,12 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			device = getDeviceSettings();
 			if (device != NULL)
 			{
-				device->autostart = strcmp(id,"true")?0:1;
-//				printf("autostart: %s, num:%d\n",id,device->autostart);
-				saveDeviceSettings(device);
+				if (device->autostart != strcmp(id,"true")?0:1)
+				{
+					device->autostart = strcmp(id,"true")?0:1;
+//					printf("autostart: %s, num:%d\n",id,device->autostart);
+					saveDeviceSettings(device);
+				}
 				infree(device);	
 			}			
 		}
@@ -721,7 +724,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		device = getDeviceSettings();
 		device1 = getDeviceSettings1();
 		uint8_t a,b,c,d;
-				
+		changed = false;		
 		if(data_size > 0) {
 			char* valid = getParameterFromResponse("valid=", data, data_size);
 			if(valid != NULL) if (strcmp(valid,"1")==0) val = true;
@@ -741,6 +744,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* adhcp = getParameterFromResponse("dhcp=", data, data_size);
 // printf("rec:%s\nwifi received  valid:%s,val:%d, ssid:%s, pasw:%s, aip:%s, amsk:%s, agw:%s, adhcp:%s, aua:%s \n",data,valid,val,ssid,pasw,aip,amsk,agw,adhcp,aua);
 			if (val) {
+				changed = true;
 				ip_addr_t valu;
 				ipaddr_aton(aip, &valu);
 				memcpy(device->ipAddr,&valu,sizeof(uint32_t));
@@ -758,9 +762,12 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			{
 				if (aua==NULL) {aua= inmalloc(strlen("Karadio/1.3")+1); strcpy(aua,"Karadio/1.3");}
 			}	
-			if (aua!=NULL) strcpy(device->ua,aua);
-			saveDeviceSettings(device);	
-			saveDeviceSettings1(device1);				
+			if (aua!=NULL) {strcpy(device->ua,aua);changed = true;}
+			if (changed)
+			{
+				saveDeviceSettings(device);	
+				saveDeviceSettings1(device1);
+			}			
 			uint8_t *macaddr = inmalloc(10*sizeof(uint8_t));
 			char* macstr = inmalloc(20*sizeof(char));
 			wifi_get_macaddr ( 0, macaddr );			

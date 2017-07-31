@@ -75,11 +75,13 @@ sys.led: Display the led indication status\n\
 sys.tzo(\"xx\"): Set the timezone offset of your country.\n\
 sys.tzo: Display the timezone offset\n\
 sys.date: Send a ntp request and Display the current locale time\n\
-: Format ISO-8601 local time   https://www.w3.org/TR/NOTE-datetime%c"};
+: Format ISO-8601 local time   https://www.w3.org/TR/NOTE-datetime%c\n"\
+};
 
 const char stritHELP3[] STORE_ATTR ICACHE_RODATA_ATTR = {" \
 : YYYY-MM-DDThh:mm:ssTZD (eg 2017-07-16T19:20:30+01:00)\n\
-sys.adc: Display the adc value\n\n\
+sys.adc: Display the adc value\n\
+sys.version: Display the release and Revision of KaraDio\n\
 ///////\n\
   Other\n\
 ///////\n\
@@ -549,7 +551,7 @@ ICACHE_FLASH_ATTR void clientUart(char* s)
 		device->uartspeed= speed;
 		saveDeviceSettings(device);	
 	}
-	kprintf(PSTR("\n%sUART= %d# on next reset\n"),msgcli,device->uartspeed);	
+	kprintf(PSTR("\n%sUART= %d# on next reset\n"),msgsys,device->uartspeed);	
 	free(device);
 }
 ICACHE_FLASH_ATTR void clientVol(char *s)

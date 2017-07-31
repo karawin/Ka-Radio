@@ -85,4 +85,4 @@
  ../include/extram.h ../include/ntp.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/time.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/time.h \
- ../include/telnet.h ../include/interface.h
+ ../include/telnet.h ../include/servers.h ../include/interface.h

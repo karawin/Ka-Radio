@@ -19,7 +19,7 @@ const char strtWELCOME[] STORE_ATTR ICACHE_RODATA_ATTR ={"Karadio telnet\n> "};
 
 int telnetclients[NBCLIENTT];
 //set of socket descriptors
-fd_set readfds;
+fd_set readfdst;
 // reception buffer
 char brec[256];
 char *obrec;
@@ -279,10 +279,10 @@ ICACHE_FLASH_ATTR void telnetTask(void* pvParams) {
 			{
 				
 				//clear the socket set
-				FD_ZERO(&readfds);;
+				FD_ZERO(&readfdst);;
 				
 				//add server_sock to set
-				FD_SET(server_sock, &readfds);
+				FD_SET(server_sock, &readfdst);
 				max_sd = server_sock;
 				
          				
@@ -293,7 +293,7 @@ ICACHE_FLASH_ATTR void telnetTask(void* pvParams) {
 					//if valid socket descriptor then add to read list
 					if(sd != -1)
 					{	
-						FD_SET( sd , &readfds);   
+						FD_SET( sd , &readfdst);   
 //						printf("SD_set %d, max_sd: %d\n",sd,max_sd);
 						//highest file descriptor number, need it for the select function
 						max_sd = sd > max_sd ? sd : max_sd;
@@ -303,7 +303,7 @@ ICACHE_FLASH_ATTR void telnetTask(void* pvParams) {
 
 
 				//wait for an activity on one of the sockets , 
-				activity = select( max_sd + 1 , &readfds , NULL , NULL ,  &timeout);
+				activity = select( max_sd + 1 , &readfdst , NULL , NULL ,  &timeout);
 //				if (activity != 0) printf ("Activity %d, max_fd: %d\n",activity,max_sd);
     
 				if ((activity < 0) && (errno!=EINTR) && (errno!=0)) 
@@ -315,9 +315,9 @@ ICACHE_FLASH_ATTR void telnetTask(void* pvParams) {
 				if (activity == 0)	{continue;}	
 
 				//If something happened on the master socket , then its an incoming connection
-				if (FD_ISSET(server_sock, &readfds)) 
+				if (FD_ISSET(server_sock, &readfdst)) 
 				{
-					FD_CLR(server_sock , &readfds);  				
+					FD_CLR(server_sock , &readfdst);  				
 					if ((client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &sin_size)) < 0) 
 					{
 						printf (strtSOCKET,"accept",errno);
@@ -338,9 +338,9 @@ ICACHE_FLASH_ATTR void telnetTask(void* pvParams) {
 				{
 					sd = telnetclients[i];
               
-					if ((sd!=-1) &&(FD_ISSET( sd , &readfds))) 
+					if ((sd!=-1) &&(FD_ISSET( sd , &readfdst))) 
 					{
-						FD_CLR(sd , &readfds);  
+						FD_CLR(sd , &readfdst);  
 						ret =telnetRead(sd);
 						//printf("Call telnetRead i: %d, socket: %d, ret: %d\n" ,i, sd,ret);  
 						if (ret == 0) 
