@@ -496,7 +496,7 @@ ICACHE_FLASH_ATTR void clientInfo()
 
 
 
-ICACHE_FLASH_ATTR void clientI2S(char* s)
+ICACHE_FLASH_ATTR void sysI2S(char* s)
 {
     char *t = strstr(s, parslashquote);
 	struct device_settings *device;
@@ -522,7 +522,7 @@ ICACHE_FLASH_ATTR void clientI2S(char* s)
 	kprintf(PSTR("\n##I2S speed: %d, 0=48kHz, 1=96kHz, 2=192kHz#\n"),speed);
 	free(device);
 }
-ICACHE_FLASH_ATTR void clientUart(char* s)
+ICACHE_FLASH_ATTR void sysUart(char* s)
 {
 	bool empty = false;
 	char *t ;
@@ -715,13 +715,13 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 	} else
 	if(startsWith ("sys.", tmp))
 	{
-			 if(startsWith (  "i2s",tmp+4)) 	clientI2S(tmp);
+			 if(startsWith (  "i2s",tmp+4)) 	sysI2S(tmp);
 		else if(strcmp(tmp+4, "adc") == 0) 		readAdc();
-		else if(startsWith (  "uart",tmp+4)) 	clientUart(tmp);
+		else if(startsWith (  "uart",tmp+4)) 	sysUart(tmp);
 		else if(strcmp(tmp+4, "erase") == 0) 	eeEraseAll();
 		else if(strcmp(tmp+4, "heap") == 0) 	heapSize();
 		else if(strcmp(tmp+4, "boot") == 0) 	system_restart();
-		else if(strcmp(tmp+4, "update") == 0) update_firmware();
+		else if(strcmp(tmp+4, "update") == 0) 	update_firmware();
 		else if(startsWith (  "patch",tmp+4)) 	syspatch(tmp);
 		else if(startsWith (  "led",tmp+4)) 	sysled(tmp);
 		else if(strcmp(tmp+4, "date") == 0) 	ntp_print_time();
