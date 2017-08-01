@@ -2,8 +2,13 @@
 
 ### Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ## Basic informations<BR/>
-### Release 1.4.1 - Built on 2017/07/28
+### Release 1.4.2 - Built on 2017/08/01
 New:<br/>
+Unable to make the Espressif RTOS SDK 1.5.0-dev working, so I fed up.<br/>
+- This 1.4.2 is able to play every 320Kb/s stations.<br/>
+- New command: sys.version : Display the current Release and Revision.<br/>
+- As always, more free ram memories. The websocket and telnet tasks are now one task for both.<br/>
+- The web interface loading speed is improved.<br/>
 - A telnet server multi clients on port 23. It is the same interface as the uart one. So the low level management can be done via the network and it offer a complete interface for remote addons.<br/>
 - A deep modification of the memory management. More free room.<br/>
 - new commands: help and sys.adc.<br/>
@@ -13,6 +18,11 @@ New:<br/>
 <br/>
 Bugs resolved:<br/>
 - a problem on the web interface close resolved.<br/>
+A lot!<br/>
+1.4.1 crashed on stations reload and some other occasions.<br/>
+Improved: the second AP connection.<br/>
+Improved: low bitrate stations meta decoding.<br/>
+cli.list modified. Now for a complete listing, each line begins with CLI.LISTNUM to avoid interference with addons.<br/>
 <br/>
 ### Release 1.3.4 - Built on 2017/07/11
 Bugs removed:<br/>
