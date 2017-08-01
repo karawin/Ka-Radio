@@ -233,7 +233,7 @@
  *         for the event. This is the default.
 */
 #define TCP_MSS                         1460
-//#define TCP_MSS                         1085
+//#define TCP_MSS                         536
 
 /**
  * TCP_WND: The size of a TCP window.  This must be at least

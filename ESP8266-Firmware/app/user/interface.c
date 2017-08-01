@@ -433,13 +433,14 @@ ICACHE_FLASH_ATTR void clientPlay(char *s)
 const char strilLIST[] STORE_ATTR ICACHE_RODATA_ATTR = {"##CLI.LIST#%c"};
 const char strilINFOND[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTINFO#: %3d: not defined\n"};
 const char strilINFO[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTINFO#: %3d: %s, %s:%d%s\n"};
-const char strilDINFO[] STORE_ATTR ICACHE_RODATA_ATTR = {"\n#CLI.LIST#%d"};
+const char strilINFO1[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTNUM#: %3d: %s, %s:%d%s\n"};
+const char strilDINFO[] STORE_ATTR ICACHE_RODATA_ATTR = {"\n#CLI.LIST#%c"};
 
 
 ICACHE_FLASH_ATTR void clientList(char *s)
 {
 	struct shoutcast_info* si;
-	uint8_t i = 0,j = 255;
+	uint16_t i = 0,j = 255;
 	bool onlyOne = false;
 	
 	char *t = strstr(s, parslashquote);
@@ -463,10 +464,11 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 		{
 			vTaskDelay(1);
 			si = getStation(i);
+			
 			if ((si == NULL) || (si->port ==0))
 			{
-				kprintf(strilINFOND,i);
-				if (si != NULL) {free(si);si = NULL;}
+				//kprintf(strilINFOND,i);
+				if (si != NULL) {free(si);}
 				continue;
 			}
 
@@ -474,7 +476,10 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 			{
 				if(si->port !=0)
 				{	
-					kprintf(strilINFO,i,si->name,si->domain,si->port,si->file);	
+					if (onlyOne)
+						kprintf(strilINFO,i,si->name,si->domain,si->port,si->file);	
+					else
+						kprintf(strilINFO1,i,si->name,si->domain,si->port,si->file);
 				}
 				free(si);
 			}	

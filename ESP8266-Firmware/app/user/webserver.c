@@ -148,6 +148,7 @@ ICACHE_FLASH_ATTR char* getParameter(char* sep,char* param, char* data, uint16_t
 			if (p_end==p) return NULL;
 			char* t = inmalloc(p_end-p + 1);
 			if (t == NULL) { printf(PSTR("getParameterF fails%c"),0x0d); return NULL;}
+//printf("getParameter malloc of %d  for %s\n",p_end-p + 1,param);
 			int i;
 			for(i=0; i<(p_end-p + 1); i++) t[i] = 0;
 			strncpy(t, p, p_end-p);
@@ -166,7 +167,9 @@ ICACHE_FLASH_ATTR char* getParameterFromComment(char* param, char* data, uint16_
 ICACHE_FLASH_ATTR void respOk(int conn)
 {
 		char resp[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 2\r\n\r\nOK";
+//printf("respOk\n");
 		write(conn, resp, strlen(resp));
+//printf("respOk exit\n");
 }
 
 ICACHE_FLASH_ATTR void clientSetOvol(int8_t ovol)
@@ -501,6 +504,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 					if ((buf == NULL)||(fmt == NULL))
 					{	
 						printf(strsMALLOC1,"getStation");
+						//printf("getStation\n");
 						respOk(conn);
 						infree(buf);
 						infree(fmt);
@@ -530,10 +534,10 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 //			printf("data:%s\n",data);
 			char* nb = getParameterFromResponse("nb=", data, data_size);
 			uint16_t unb,uid = 0;
-//			printf("nb init:%s\n",nb);
+//printf("nb init:%s\n",nb);
 			if (nb) {unb = atoi(nb); infree(nb);}
 			else unb = 1;
-//			printf("unb init:%d\n",unb);
+//printf("unb init:%d\n",unb);
 			char* id; char* url; char* file; char* name; char* port; char* ovol;
 			struct shoutcast_info *si =  inmalloc(sizeof(struct shoutcast_info)*unb);
 			struct shoutcast_info *nsi ;
@@ -584,7 +588,8 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			}
 //printf("save station: %d, unb:%d, addr:%x\n",uid,unb,si);
 			saveMultiStation(si, uid,unb);
-			infree (si);
+//printf("save station return: %d, unb:%d, addr:%x\n",uid,unb,si);
+			infree (si);		
 		}
 	} else if(strcmp(name, "/play") == 0) {
 		if(data_size > 4) {
@@ -675,6 +680,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		char* fmt=malloc(strlen (strsICY));
 		if ((buf == NULL) || (fmt == NULL))
 		{	
+			//printf("post icy\n");
 			printf(strsMALLOC1,"post icy");
 			infree(buf);
 			infree(fmt);
@@ -788,6 +794,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* fmt=malloc(strlen (strsWIFI)+1);
 			if ((buf == NULL) || (fmt == NULL))
 			{	
+				//printf("post wifi\n");
 				printf(strsMALLOC1,"post wifi");
 				respOk(conn);
 				infree(buf);
@@ -895,7 +902,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 		}
 	} else if( (c = strstr(buf, "POST ")) != NULL) {
 // a post request		
-//		printf("POST socket: %d\n",conn);
+//	printf("POST socket: %d  buflen: %d\n",conn,buflen);
 		char fname[32];
 		uint8_t i;
 		for(i=0; i<32; i++) fname[i] = 0;
@@ -903,12 +910,12 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 		char* c_end = strstr(c, " ");
 		if(c_end == NULL) return true;
 		uint8_t len = c_end-c;
-		if(len > 32) return;
+		if(len > 32) return true;
 		strncpy(fname, c, len);
 //		printf("Name: %s\n", fname);
 		// DATA
 		char* d_start = strstr(buf, "\r\n\r\n");
-//		printf("dstart:%s\n",buf);
+//	printf("dstart:%s\n",d_start);
 		if(d_start > 0) {
 			d_start += 4;
 			uint16_t len = buflen - (d_start-buf);
@@ -1013,7 +1020,12 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 			} while (bend == NULL);
 			result = httpServerHandleConnection(client_sock, buf, recbytes);
 			if (reclen == 2*RECLEN)
-				buf = realloc(buf,RECLEN);
+			{
+				reclen = RECLEN;
+				buf = realloc(buf,reclen);
+				vTaskDelay(10);	
+			}
+			//if (buf == NULL) printf("WARNING\n");
 			memset(buf,0,reclen);
 			if (!result) 
 			{
@@ -1056,7 +1068,7 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
 	os_timer_disarm(&wakeTimer);
 	os_timer_setfn(&sleepTimer, sleepCallback, NULL);
 	os_timer_setfn(&wakeTimer, wakeCallback, NULL);
-	int stack = 360; //320
+	int stack = 400; //320
 	
 	while (1) {
         bzero(&server_addr, sizeof(struct sockaddr_in));
@@ -1086,46 +1098,37 @@ ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
             }
 
             sin_size = sizeof(client_addr);
-            while(1) {				
+            while(1) 
+			{				
                 if ((client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &sin_size)) < 0) {
 					printf (PSTR("WebServer Socket fails Accept errno: %d\n"),errno);
 					vTaskDelay(10);					
                 } else
 				{
 					while (1) 
-					{	
-						if (xPortGetFreeHeapSize( ) < 3000)
-						{
-							vTaskDelay(150);	
-//							printf ("Heap size low mem: %d\n",xPortGetFreeHeapSize( ));
-/*							if (xPortGetFreeHeapSize( ) < 3000)
-							{
-								printf ("Low memory %d\n",xPortGetFreeHeapSize( ));					
-								write(client_sock, lowmemory, strlen(lowmemory));
-								close (client_sock);
-								break;							
-							}
-*/							
-						} 
+					{
 //						printf ("Heap size server: %d\n",xPortGetFreeHeapSize( ));
 //						printf ("Accept socket %d\n",client_sock);
 						if (xSemaphoreTake(semclient,400))
-						{ 
+						{ 											
 							while (xTaskCreate( serverclientTask,
-							"t10",
-							stack,
-							(void *) client_sock,
-							3, 
-							NULL ) != pdPASS) 
-							{
-								printf(PSTR("Client task fails%c"),0x0d);
-								xSemaphoreGive(semclient);
-								write(client_sock, lowmemory, strlen(lowmemory));
-								close (client_sock);
-								break;	
-							}							
-							break; // ok, exit while
-						} else {vTaskDelay(200); printf(PSTR("Server busy. Retrying...%c"),0x0d);}
+								"t10",
+								stack,
+								(void *) client_sock,
+								5, 
+								NULL ) != pdPASS) 
+							{								
+									vTaskDelay(200);
+							}	
+							vTaskDelay(4);							
+							xSemaphoreGive(semclient);	
+							break; // while 1
+						}
+						else  // xSemaphoreTake fails
+						{
+							vTaskDelay(200); 
+							printf(PSTR("Server busy. Retrying...%c"),0x0d);
+						}
 					}
 				}	
 				

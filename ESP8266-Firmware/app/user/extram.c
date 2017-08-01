@@ -14,6 +14,7 @@ void extramInit() {
 	gpio16_output_conf();
 	gpio16_output_set(1);
 	externram = false;
+	spi_clock(HSPI, 4, 10); //2MHz
 	extramWrite(16, 0, testram);
 	extramRead(16, 0, test);
 	if (memcmp(test,testram,16) == 0) 

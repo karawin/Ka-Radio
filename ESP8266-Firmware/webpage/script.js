@@ -298,7 +298,8 @@ function full(){
 }
 	
 function icyResp(arr) {			
-			document.getElementById('curst').innerHTML = arr["curst"].replace(/\\/g,"");			
+			document.getElementById('curst').innerHTML = arr["curst"].replace(/\\/g,"");
+			document.getElementById("stationsSelect").selectedIndex = document.getElementById('curst').innerHTML; 	
 			if ((arr["descr"] =="")||(!document.getElementById('Full').checked))
 				document.getElementById('ldescr').style.display = "none";
 			else 	document.getElementById('ldescr').style.display = "inline-block";

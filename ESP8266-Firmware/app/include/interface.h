@@ -6,8 +6,8 @@
 #define MAXDATAT	 256
 
 
-#define RELEASE "1.4.1"
-#define REVISION "4"
+#define RELEASE "1.4.2"
+#define REVISION "2"
 
 
 extern unsigned short adcdiv;	

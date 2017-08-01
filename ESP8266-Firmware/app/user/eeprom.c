@@ -111,7 +111,7 @@ ICACHE_FLASH_ATTR void eeGetData1(int address, void* buffer, int size) { // addr
 	eeGetDatax(EEPROM_START1,address,buffer,size);
 }
 
-ICACHE_FLASH_ATTR void eeSetDatax(uint32_t eeprom,int address, void* buffer, int size) { // address, size in BYTES !!!!
+ICACHE_FLASH_ATTR bool eeSetDatax(uint32_t eeprom,int address, void* buffer, int size) { // address, size in BYTES !!!!
 	uint8_t* inbuf = buffer;
 int result;
 uint32_t* eebuf= malloc(4096);
@@ -147,14 +147,19 @@ uint16_t i = 0;
 //printf("set2 startaddr: %x, size:%x, maxsize: %x, sector: %x, eebuf: %x\n",startaddr,size,maxsize,sector,eebuf);
 	}
 	free (eebuf);
-	} else {printf(streMSG,"eebuf");/*heapSize();*/}
+	} else 
+	{
+		printf(streMSG,"eebuf");/*heapSize();*/
+		return false;
+	}
+	return true;
 }
 
-ICACHE_FLASH_ATTR void eeSetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
-	eeSetDatax(EEPROM_START, address, buffer, size);
+ICACHE_FLASH_ATTR bool eeSetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
+	return eeSetDatax(EEPROM_START, address, buffer, size);
 }
-ICACHE_FLASH_ATTR void eeSetData1(int address, void* buffer, int size) { // address, size in BYTES !!!!
-	eeSetDatax(EEPROM_START1, address, buffer, size);
+ICACHE_FLASH_ATTR bool  eeSetData1(int address, void* buffer, int size) { // address, size in BYTES !!!!
+	return eeSetDatax(EEPROM_START1, address, buffer, size);
 }
 
 ICACHE_FLASH_ATTR void eeSetClear(int address,uint8_t* eebuf) { // address, size in BYTES !!!!
@@ -243,13 +248,15 @@ ICACHE_FLASH_ATTR void eeEraseStations() {
 }
 
 ICACHE_FLASH_ATTR void saveStation(struct shoutcast_info *station, uint16_t position) {
+	uint32_t i = 0;
 	if (position > NBSTATIONS-1) {printf(saveStationPos,position); return;}
-	eeSetData((position+1)*256, station, 256);
+	while (!eeSetData((position+1)*256, station, 256)) {kprintf("Retrying\n");vTaskDelay (100) ;i++; if (i == 10) return;}
 }
 ICACHE_FLASH_ATTR void saveMultiStation(struct shoutcast_info *station, uint16_t position, uint8_t number) {
+	uint32_t i = 0;
 	while ((position +number-1) > NBSTATIONS-1) {printf(saveStationPos,position+number-1); number--; }
 	if (number <= 0) return;
-	eeSetData((position+1)*256, station, number*256);
+	while (!eeSetData((position+1)*256, station, number*256)) {kprintf("Retrying\n");vTaskDelay (100) ;i++; if (i == 10) return;}
 }
 
 /*ICACHE_FLASH_ATTR struct shoutcast_info* getOldStation(uint8_t position) {
@@ -311,6 +318,15 @@ ICACHE_FLASH_ATTR void saveDeviceSettings1(struct device_settings1 *settings) {
 
 
 
+ICACHE_FLASH_ATTR struct device_settings* getDeviceSettingsSilent() {
+	uint16_t size = 256;
+	uint8_t* buffer = malloc(size);
+	if(buffer) {	
+		eeGetData(0, buffer, size);
+		return (struct device_settings*)buffer;
+	} 
+	return NULL;
+}
 
 ICACHE_FLASH_ATTR struct device_settings* getDeviceSettings() {
 	uint16_t size = 256;

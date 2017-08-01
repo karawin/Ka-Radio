@@ -151,7 +151,7 @@
  *      memp_malloc() or memp_free() is called (useful but slow!)
  */
 #ifndef MEMP_OVERFLOW_CHECK
-#define MEMP_OVERFLOW_CHECK             1
+#define MEMP_OVERFLOW_CHECK             0
 #endif
 
 /**
@@ -920,7 +920,7 @@
  * (2 * TCP_MSS) for things to work well
  */
 #ifndef TCP_WND
-#define TCP_WND                         (6 * TCP_MSS)
+#define TCP_WND                         (2 * TCP_MSS)
 #endif 
 
 /**
@@ -1050,7 +1050,7 @@
  * TCP_MSS/4: Try to create 4 fragments or less per TCP packet.
  */
 #ifndef TCP_OVERSIZE
-#define TCP_OVERSIZE                   TCP_MSS/4 // jpc  TCP_MSS
+#define TCP_OVERSIZE                   TCP_MSS 
 #endif
 
 /**
@@ -1065,7 +1065,15 @@
  * explicit window update
  */
 #ifndef TCP_WND_UPDATE_THRESHOLD
-#define TCP_WND_UPDATE_THRESHOLD   (TCP_WND / 4)
+//#define TCP_WND_UPDATE_THRESHOLD   (TCP_WND / 4)
+//jpc
+//#define TCP_WND_UPDATE_THRESHOLD   LWIP_MIN((TCP_WND / 4), (TCP_MSS * 4))
+#define TCP_WND_UPDATE_THRESHOLD (TCP_MSS )
+//#if (TCP_WND < (TCP_MSS * 4)) && (TCP_WND >= (TCP_MSS * 2))
+//#define TCP_WND_UPDATE_THRESHOLD (TCP_MSS * 2)
+//#else
+//#define TCP_WND_UPDATE_THRESHOLD (TCP_WND / 4)
+//#endif 
 #endif
 
 /**

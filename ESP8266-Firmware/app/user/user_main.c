@@ -123,7 +123,7 @@ struct device_settings *device;
 		{
 			// save volume if changed
 			FlashVolume = 0;
-			device = getDeviceSettings();
+			device = getDeviceSettingsSilent();
 			if (device != NULL)
 			{	
 				if (device->vol != clientIvol)
@@ -270,11 +270,11 @@ void uartInterfaceTask(void *pvParameters) {
 				printf(striSTA2,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));		
 				ap++;
 			}
-			else i = 6; // go to SOFTAP_MODE
+			else i = 10; // go to SOFTAP_MODE
 		}
 		i++;
 	
-		if (i >= 6)
+		if (i >= 10)
 		{
 					printf(PSTR("%c"),0x0d);
 //					smartconfig_stop();
@@ -513,17 +513,17 @@ void user_init(void)
     flash_size_map size_map = system_get_flash_size_map();
 	printf (PSTR("size_map: %d\n"),size_map);
 	
-	xTaskCreate(testtask, "t0", 130, NULL, 1, &pxCreatedTask); // DEBUG/TEST 130
+	xTaskCreate(testtask, "t0", 140, NULL, 1, &pxCreatedTask); // DEBUG/TEST 130
 	printf(striTASK,"t0",pxCreatedTask);
 	xTaskCreate(uartInterfaceTask, "t1", 360, NULL, 2, &pxCreatedTask); // 350
 	printf(striTASK, "t1",pxCreatedTask);
 	xTaskCreate(vsTask, "t4", 230, NULL,5, &pxCreatedTask); //380 230
 	printf(striTASK,"t4",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 350, NULL, 5, &pxCreatedTask); // 340
+	xTaskCreate(clientTask, "t3", 360, NULL, 5, &pxCreatedTask); // 340
 	printf(striTASK,"t3",pxCreatedTask);
-	xTaskCreate(serverTask, "t2", 230, NULL, 4, &pxCreatedTask); //230
+	xTaskCreate(serverTask, "t2", 240, NULL, 4, &pxCreatedTask); //230
 	printf(striTASK,"t2",pxCreatedTask);
-	xTaskCreate(serversTask, "t5", 300, NULL, 3, &pxCreatedTask); //380
+	xTaskCreate(serversTask, "t5", 330, NULL, 4, &pxCreatedTask); //380
 	printf(striTASK,"t5",pxCreatedTask);
 
 	printf (striHEAP,xPortGetFreeHeapSize( ));

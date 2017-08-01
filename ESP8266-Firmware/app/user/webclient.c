@@ -1043,8 +1043,8 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				do
 				{
 					bytes_read = recvfrom(sockfd, bufrec,RECEIVE, 0, NULL, NULL);	
-if ( bytes_read < 0 )						
-printf("Client socket: %d  read: %d  errno:%d ",sockfd, bytes_read,errno);	
+//if ( bytes_read < 0 )						
+//printf("Client socket: %d  read: %d  errno:%d ",sockfd, bytes_read,errno);	
 //if (bytes_read < 1000 )  
 //printf("Rec:%d\n",bytes_read);
 					
@@ -1060,6 +1060,8 @@ printf("Client socket: %d  read: %d  errno:%d ",sockfd, bytes_read,errno);
 			{
 				printf(strcSOCKET,"connect", errno);
 				clientSaveOneHeader("Invalid address",15,METANAME);	
+				wsHeaders();
+				vTaskDelay(1);
 				clientDisconnect(PSTR("Invalid")); 
 				close(sockfd);
 				continue;
@@ -1090,8 +1092,10 @@ printf("Client socket: %d  read: %d  errno:%d ",sockfd, bytes_read,errno);
 						//						
 					else if ((!playing)&&(once == 0)) {  // nothing received
 							clientSaveOneHeader(notfound, 9,METANAME);
-							clientDisconnect(PSTR("not found")); 
 							wsHeaders();
+							vTaskDelay(1);
+							clientDisconnect(PSTR("not found")); 
+							
 					}	
 					else{  //playing & once=1 and no more received stream
 						while (!getBufferEmpty()) vTaskDelay(100);
