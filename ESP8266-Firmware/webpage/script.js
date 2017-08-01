@@ -299,7 +299,16 @@ function full(){
 	
 function icyResp(arr) {			
 			document.getElementById('curst').innerHTML = arr["curst"].replace(/\\/g,"");
-			document.getElementById("stationsSelect").selectedIndex = document.getElementById('curst').innerHTML; 	
+			select = document.getElementById('stationsSelect');
+			opt = select.options;
+			for (i=0; i< maxStation;i++)
+			{
+				id = opt[i].value.split(":");
+				id = id[0];
+				if (id == document.getElementById('curst').innerHTML) break;
+			}
+			if (i == maxStation) i = 0;
+			select.selectedIndex = i;				
 			if ((arr["descr"] =="")||(!document.getElementById('Full').checked))
 				document.getElementById('ldescr').style.display = "none";
 			else 	document.getElementById('ldescr').style.display = "inline-block";
