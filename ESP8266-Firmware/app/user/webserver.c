@@ -8,12 +8,13 @@
 #include "interface.h"
 //#include "fileserver.h"
 
+xSemaphoreHandle semfile = NULL ;
 
 const char lowmemory[] = { "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nlow memory\n"};
 
 const char strsMALLOC[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer inmalloc fails for %d\n"};
 const char strsMALLOC1[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer %s malloc fails\n"};
-//const char strsSOCKET[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer Socket fails %s errno: %d\n"};
+const char strsSOCKET[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer Socket fails %s errno: %d\n"};
 const char strsID[] STORE_ATTR ICACHE_RODATA_ATTR = {"getstation, no id or Wrong id %d\n"};
 const char strsRAUTO[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"rauto\":\"%c\"}"};
 const char strsICY[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"curst\":\"%s\",\"descr\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\",\"meta\":\"%s\",\"vol\":\"%s\",\"treb\":\"%s\",\"bass\":\"%s\",\"tfreq\":\"%s\",\"bfreq\":\"%s\",\"spac\":\"%s\",\"auto\":\"%c\"}"};
@@ -25,11 +26,11 @@ char strsROK[] = {"HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\n
 
 
 
-xSemaphoreHandle semclient = NULL ;
+//xSemaphoreHandle semclient = NULL ;
 
-LOCAL os_timer_t sleepTimer;
+os_timer_t sleepTimer;
 uint32_t sleepDelay;
-LOCAL os_timer_t wakeTimer;
+os_timer_t wakeTimer;
 uint32_t wakeDelay;
 int8_t clientOvol = 0;
 uint8_t clientIvol = 0;
@@ -64,7 +65,7 @@ ICACHE_FLASH_ATTR struct servFile* findFile(char* name)
 
 ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 {
-#define PART 2096
+#define PART 2048
 	int length;
 	int progress,part,gpart;
 	char buf[100];
@@ -97,9 +98,9 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 			gpart /=2;
 			con = (char*)inmalloc((gpart)*sizeof(char));
 			vTaskDelay(2);
-		} while ((con == NULL)&&(gpart >=32));
+		} while ((con == NULL)&&(gpart >=64));
 		
-		if ((con == NULL)||(gpart <32))
+		if ((con == NULL)||(gpart <64))
 		{
 				sprintf(buf, "HTTP/1.1 500 Internal Server Error\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n", (f!=NULL ? f->type : "text/plain"), 0);
 				write(conn, buf, strlen(buf));
@@ -107,28 +108,33 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 				infree(con);
 				return ;
 		}	
-//		printf("serveFile socket:%d,  %s. Length: %d  sliced in %d\n",conn,name,length,gpart);		
-		sprintf(buf, strsROK, (f!=NULL ? f->type : "text/plain"), length);
-		write(conn, buf, strlen(buf));
-		progress = length;
-		part = gpart;
-		if (progress <= part) part = progress;
-
-		while (progress > 0) {
-//			printf("serveFile socket:%d,  read at %x len: %d\n",conn,content,part);	
-			flashRead(con, (uint32_t)content, part);
-			write(conn, con, part);
-			content += part;
-			progress -= part;
+		
+		if (xSemaphoreTake(semfile,400))
+		{		
+//			printf("serveFile socket:%d,  %s. Length: %d  sliced in %d\n",conn,name,length,gpart);		
+			sprintf(buf, strsROK, (f!=NULL ? f->type : "text/plain"), length);
+			write(conn, buf, strlen(buf));
+			progress = length;
+			part = gpart;
 			if (progress <= part) part = progress;
-			//vTaskDelay(1);
-		} 
-
+			while (progress > 0) 
+			{
+//				printf("serveFile socket:%d,  read at %x len: %d\n",conn,content,part);	
+				flashRead(con, (uint32_t)content, part);
+				write(conn, con, part);
+				content += part;
+				progress -= part;
+				if (progress <= part) part = progress;
+				//vTaskDelay(1);
+			} 
+			xSemaphoreGive(semfile);	
+		} else printf(PSTR("semfile fails%c"),0x0D);
 		infree(con);
+//		vTaskDelay(1);
 	}
 	else
 	{
-		printf("serveFile socket:%d, fail errno %d\n",conn,errno);
+		printf(PSTR("serveFile: socket:%d, Null length\n"),conn);
 		sprintf(buf, strsROK, (f!=NULL ? f->type : "text/plain"), 0);
 		write(conn, buf, strlen(buf));
 	}
@@ -139,6 +145,7 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 
 
 ICACHE_FLASH_ATTR char* getParameter(char* sep,char* param, char* data, uint16_t data_length) {
+	if ((data == NULL) || (param == NULL))return NULL;
 	char* p = strstr(data, param);
 	if(p != NULL) {
 		p += strlen(param);
@@ -164,11 +171,17 @@ ICACHE_FLASH_ATTR char* getParameterFromComment(char* param, char* data, uint16_
 	return getParameter("\"",param,data, data_length) ;
 }
 
-ICACHE_FLASH_ATTR void respOk(int conn)
+ICACHE_FLASH_ATTR void respOk(int conn,char* message)
 {
-		char resp[] = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 2\r\n\r\nOK";
+		char resp[]= "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %0d\r\n\r\n%s";
 //printf("respOk\n");
-		write(conn, resp, strlen(resp));
+		char* fresp = inmalloc(strlen(resp)+strlen(message)+2);
+		if (fresp!=NULL)
+		{
+			sprintf(fresp,resp,strlen(message),message);
+			write(conn, fresp, strlen(fresp));
+			infree(fresp);
+		}			
 //printf("respOk exit\n");
 }
 
@@ -316,7 +329,7 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 	else if (strstr(payload,"stopWake")!= NULL){stopWake();}
 	//monitor
 	else if (strstr(payload,"monitor")!= NULL){wsMonitor();}
-	else if (strstr(payload,"upgrade")!= NULL){update_firmware();}
+	else if (strstr(payload,"upgrade")!= NULL){update_firmware("new");}
 	else if (strstr(payload,"theme")!= NULL){theme();}
 }
 
@@ -505,7 +518,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 					{	
 						printf(strsMALLOC1,"getStation");
 						//printf("getStation\n");
-						respOk(conn);
+						respOk(conn,"OK");
 						infree(buf);
 						infree(fmt);
 					}
@@ -543,7 +556,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			struct shoutcast_info *nsi ;
 			if (si == NULL) {
 				printf(strsMALLOC1,"setStation");
-				respOk(conn);
+				respOk(conn,"ok");
 				return;
 			}
 			char* bsi = (char*)si;
@@ -604,10 +617,17 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			device = getDeviceSettings();
 			if (device != NULL)
 			{
-				if (device->autostart != strcmp(id,"true")?0:1)
+				if ((strcmp(id,"true"))&&(device->autostart==1))
 				{
-					device->autostart = strcmp(id,"true")?0:1;
-//					printf("autostart: %s, num:%d\n",id,device->autostart);
+					device->autostart = 0;
+//printf("autostart: %s, num:%d\n",id,device->autostart);
+					saveDeviceSettings(device);
+				}
+				else
+				if ((strcmp(id,"false"))&&(device->autostart==0))
+				{
+					device->autostart = 1;
+//printf("autostart: %s, num:%d\n",id,device->autostart);
 					saveDeviceSettings(device);
 				}
 				infree(device);	
@@ -618,7 +638,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		if (buf == NULL)
 		{	
 			printf(strsMALLOC1,"post rauto");
-			respOk(conn);
+			respOk(conn,"ok");
 		}
 		else {			
 			device = getDeviceSettings();
@@ -684,7 +704,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			printf(strsMALLOC1,"post icy");
 			infree(buf);
 			infree(fmt);
-			respOk(conn);
+			respOk(conn,"ok");
 		}
 		else 
 		{	
@@ -714,9 +734,10 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			vol,treble,bass,tfreq,bfreq,spac,
 			vauto );
 //			printf("test: len fmt:%d %d\n%s\nfmt: %s",strlen(strsICY),strlen(fmt),buf,fmt);
-			free(fmt);
+			infree(fmt);
 			write(conn, buf, strlen(buf));
 			infree(buf);
+			wsMonitor();
 			
 		}		
 		return;
@@ -727,11 +748,11 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		char tmpip[16],tmpmsk[16],tmpgw[16];
 		struct device_settings *device;
 		struct device_settings1 *device1;
-		device = getDeviceSettings();
-		device1 = getDeviceSettings1();
 		uint8_t a,b,c,d;
 		changed = false;		
 		if(data_size > 0) {
+			device = getDeviceSettings();
+			device1 = getDeviceSettings1();
 			char* valid = getParameterFromResponse("valid=", data, data_size);
 			if(valid != NULL) if (strcmp(valid,"1")==0) val = true;
 			char* ssid = getParameterFromResponse("ssid=", data, data_size);
@@ -766,12 +787,20 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			}
 			if (strlen(device->ua)==0)
 			{
-				if (aua==NULL) {aua= inmalloc(strlen("Karadio/1.3")+1); strcpy(aua,"Karadio/1.3");}
+				if (aua==NULL) {aua= inmalloc(12); strcpy(aua,"Karadio/1.5");}
 			}	
-			if (aua!=NULL) {strcpy(device->ua,aua);changed = true;}
+			if (aua!=NULL) 
+			{
+				if (strcmp(device->ua,aua) != 0)
+				{
+					strcpy(device->ua,aua);
+					changed = true;
+				}
+			}
 			if (changed)
 			{
 				saveDeviceSettings(device);	
+//printf("WServer saveDeviceSettings\n");
 				saveDeviceSettings1(device1);
 			}			
 			uint8_t *macaddr = inmalloc(10*sizeof(uint8_t));
@@ -796,7 +825,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			{	
 				//printf("post wifi\n");
 				printf(strsMALLOC1,"post wifi");
-				respOk(conn);
+				respOk(conn,"ok");
 				infree(buf);
 				infree(fmt);
 			}
@@ -806,7 +835,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				sprintf(buf, fmt,
 				json_length,
 				device->ssid,device->pass,device->ssid2,device1->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp,macstr);
-//				printf(PSTR("wifi Buf len:%d\n%s\nfmt:%s\n"),strlen(buf),buf,fmt);
+//printf(PSTR("wifi Buf len:%d\n%s\nfmt:%s\n"),strlen(buf),buf,fmt);
 				write(conn, buf, strlen(buf));
 				infree(buf);
 				infree(fmt);
@@ -815,19 +844,19 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			infree(aip);infree(amsk);infree(agw);infree(aua);
 			infree(valid); infree(adhcp); infree(macaddr); 
 			infree(macstr);
-		}	
-		infree(device);
-		infree(device1);
-		if (val){
-			vTaskDelay(200);		
-			system_restart_enhance(SYS_BOOT_NORMAL_BIN, system_get_userbin_addr());	
+			infree(device);
+			infree(device1);
+			if (val){
+				vTaskDelay(100);		
+				system_restart_enhance(SYS_BOOT_NORMAL_BIN, system_get_userbin_addr());	
+			}	
 		}	
 		return;
 	} else if(strcmp(name, "/clear") == 0)	
 	{
 		eeEraseStations();	//clear all stations
 	}
-	respOk(conn);
+	respOk(conn,"OK");
 }
 
 ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t buflen) {
@@ -854,7 +883,8 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			*(c_end-1) = 0;
 			c_end = strstr(c,"?");
 //			
-// command api, 		
+// web command api,
+/////////////////// 		
 			if(c_end != NULL) // commands api
 			{
 				char* param;
@@ -888,11 +918,39 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 					clientParsePlaylist(param);clientConnectOnce();
 					infree(param);
 				}
-				
-				respOk(conn); // response OK to the origin
+// version command				
+				param = strstr(c,"version") ;
+				if (param != NULL) {
+					char* vr = malloc(30);
+					if (vr != NULL)
+					{
+						sprintf(vr,"Release: %s, Revision: %s\n",RELEASE,REVISION);
+						respOk(conn,vr); 
+						infree(vr);
+						return true;
+					}
+				}
+// infos command				
+				param = strstr(c,"infos") ;
+				if (param != NULL) {
+					char* vr = webInfo();
+					respOk(conn,vr); 
+					infree(vr);
+					return true;
+				}		
+// list command	 ?list=1 to list the name of the station 1			
+				param = getParameterFromResponse("list=", c, strlen(c)) ;
+				if ((param != NULL)&&(atoi(param)>=0)&&(atoi(param)<=254))
+				{
+					char* vr = webList(atoi(param));
+					respOk(conn,vr); 
+					infree(vr);
+					return true;
+				}				
+				respOk(conn,""); // response OK to the origin
 			}
-			else // file
-// file get			
+			else 
+// file GET		
 			{
 				if(strlen(c) > 32) return true;
 //				printf("GET file  socket:%d file:%s\n",conn,c);
@@ -940,22 +998,28 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
     char *buf = (char *)inmalloc(reclen);
 	bool result = true;
 
+	
+	if (buf == NULL)
+	{
+		vTaskDelay(100);
+		buf = (char *)inmalloc(reclen); // second chance
+	}
 //	printf("Client entry  socket:%x  reclen:%d\n",client_sock,reclen);
 	if (buf != NULL)
 	{
 		memset(buf,0,reclen);
 		if (setsockopt (client_sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
-			printf(PSTR("WebServer Socket fails setsockopt errno: %d\n"),errno);
+			printf(strsSOCKET,"setsockopt",errno);
 			
 		while (((recbytes = read(client_sock , buf, reclen)) > 0)) 
 		{ // For now we assume max. reclen bytes for request with 2*reclen extention if needed
 			if (recbytes < 0) {
 				if (errno != EAGAIN )
 				{
-					printf(PSTR("WebServer Socket fails client_sock errno: %d\n"),errno);
+					printf(strsSOCKET,"client_sock",errno);
 					vTaskDelay(10);	
 					break;
-				} else printf(PSTR("WebServer Socket fails try again errno: %d\n"),errno);
+				} else printf(strsSOCKET,"try again",errno);
 			}	
 			char* bend = NULL;
 			do {
@@ -972,11 +1036,11 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 						{
 //							printf("cl: %d, rec:%d\n",cl,recbytes);
 							buf = realloc(buf,(2*RECLEN) );
-							if (buf == NULL) { printf(PSTR("WebServer Socket fails realloc errno: %d\n"),errno);   break;}
+							if (buf == NULL) { printf(strsSOCKET,"realloc",errno);   break;}
 							reclen = 2*RECLEN;
 							bend = strstr(buf, "\r\n\r\n")+4;
 						}
-						vTaskDelay(3);
+						vTaskDelay(1);
 						if ((bend - buf +cl)> recbytes)
 						{	
 //							printf ("Server: try receive more:%d bytes. reclen = %d, must be %d\n", recbytes,reclen,bend - buf +cl);
@@ -986,10 +1050,10 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 							if (recb < 0) {
 								if (errno != EAGAIN )
 								{
-									printf(PSTR("WebServer Socket fails read errno: %d\n"),errno);
+									printf(strsSOCKET,"read",errno);
 									vTaskDelay(10);	
 									break;
-								} else printf(PSTR("WebServer Socket fails try again errno: %d\n"),errno);
+								} else printf(strsSOCKET,"Try again",errno);
 							}
 							recbytes += recb;
 						}
@@ -1002,18 +1066,18 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 					{
 //						printf ("Server: try receive more for end:%d bytes\n", recbytes);
 						buf = realloc(buf,(2*RECLEN) +1);
-						if (buf == NULL) {printf(PSTR("WebServer Socket fails realloc errno: %d\n"),errno);break;}
+						if (buf == NULL) {printf(strsSOCKET,"Realloc",errno);break;}
 						reclen = 2*RECLEN;
 					}	
-					while(((recb= read(client_sock , buf+recbytes, reclen-recbytes))==0))vTaskDelay(1);
+					while(((recb= read(client_sock , buf+recbytes, reclen-recbytes))==0)) vTaskDelay(1);
 //					printf ("Server: received more for end now: %d bytes\n", recbytes+recb);
 					if (recb < 0) {
 						if (errno != EAGAIN )
 						{
-							printf(PSTR("WebServer Socket fails read errno: %d\n"),errno);
+							printf(strsSOCKET,"read",errno);
 							vTaskDelay(10);	
 							break;
-						} else printf(PSTR("WebServer Socket fails try again errno: %d\n"),errno);				
+						} else printf(strsSOCKET,"Try again",errno);				
 					}
 					recbytes += recb;
 				} //until "\r\n\r\n"
@@ -1033,7 +1097,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 			}	
 		}
 		infree(buf);
-	} else  printf(strsMALLOC1,"socket");
+	} else  printf(strsMALLOC1,"buf");
 	if (result)
 	{
 		int err;
@@ -1056,86 +1120,4 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 	vTaskDelete( NULL );	
 }	
 
-// main server task. Create a child per request.
-ICACHE_FLASH_ATTR void serverTask(void *pvParams) {
-	struct sockaddr_in server_addr, client_addr;
-	int server_sock, client_sock;
-	socklen_t sin_size;
-//	portBASE_TYPE uxHighWaterMark;
-    semclient = xSemaphoreCreateCounting(3,3); 
-//	websocketinit();
-	os_timer_disarm(&sleepTimer);
-	os_timer_disarm(&wakeTimer);
-	os_timer_setfn(&sleepTimer, sleepCallback, NULL);
-	os_timer_setfn(&wakeTimer, wakeCallback, NULL);
-	int stack = 400; //320
-	
-	while (1) {
-        bzero(&server_addr, sizeof(struct sockaddr_in));
-        server_addr.sin_family = AF_INET;
-        server_addr.sin_addr.s_addr = INADDR_ANY;
-        server_addr.sin_port = htons(80);
 
-        do {		
-            if (-1 == (server_sock = socket(AF_INET, SOCK_STREAM, 0))) {
-				printf (PSTR("WebServer Socket fails create errno: %d\n"), errno);
-				vTaskDelay(5);	
-                break;
-            }
-
-            if (-1 == bind(server_sock, (struct sockaddr *)(&server_addr), sizeof(struct sockaddr))) {
-				printf (PSTR("WebServer Socket fails bind errno: %d\n"), errno);
-				close(server_sock);
-				vTaskDelay(10);	
-                break;
-            }
-
-            if (-1 == listen(server_sock, 5)) {
-				printf (PSTR("WebServer Socket fails listen errno: %d\n"),errno);
-				close(server_sock);
-				vTaskDelay(10);	
-                break;
-            }
-
-            sin_size = sizeof(client_addr);
-            while(1) 
-			{				
-                if ((client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &sin_size)) < 0) {
-					printf (PSTR("WebServer Socket fails Accept errno: %d\n"),errno);
-					vTaskDelay(10);					
-                } else
-				{
-					while (1) 
-					{
-//						printf ("Heap size server: %d\n",xPortGetFreeHeapSize( ));
-//						printf ("Accept socket %d\n",client_sock);
-						if (xSemaphoreTake(semclient,400))
-						{ 											
-							while (xTaskCreate( serverclientTask,
-								"t10",
-								stack,
-								(void *) client_sock,
-								5, 
-								NULL ) != pdPASS) 
-							{								
-									vTaskDelay(200);
-							}	
-							vTaskDelay(4);							
-							xSemaphoreGive(semclient);	
-							break; // while 1
-						}
-						else  // xSemaphoreTake fails
-						{
-							vTaskDelay(200); 
-							printf(PSTR("Server busy. Retrying...%c"),0x0d);
-						}
-					}
-				}	
-				
-/*				uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-				printf(PSTR("watermark serverTask: %x  %d\n"),uxHighWaterMark,uxHighWaterMark);
-*/				
-			}
-        } while (0);
-    }
-}

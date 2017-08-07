@@ -6,14 +6,18 @@
 #define MAXDATAT	 256
 
 
-#define RELEASE "1.4.2"
-#define REVISION "3"
+#define RELEASE "1.5"
+#define REVISION "0"
 
+// uncomment for an ESP07 and generate with genallmap2.sh
+//#define ESP07
 
 extern unsigned short adcdiv;	
 void switchCommand(void );
 void checkCommand(int size, char* s);
 void wifiConnectMem();
+char* webInfo();
+char* webList(int id);
 
 
 #define kprintf(fmt, ...) do {    \

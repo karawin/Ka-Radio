@@ -65,6 +65,7 @@ sys.i2s(\"x\"): Change and record the I2S clock speed of the vs1053 GPIO5 MCLK f
 sys.erase: erase all recorded configuration and stations.\n\
 sys.heap: show the ram heap size\n\
 sys.update: start an OTA (On The Air) update of the software\n\
+sys.prerelease: start an OTA of the next prerelease\n\
 sys.boot: reboot the webradio.\n\
 sys.patch(\"x\"): Change the status of the vs1053 patch at power on.\n\
 0 = Patch will not be loaded, 1 or up = Patch will be loaded (default) at power On \n\
@@ -72,13 +73,14 @@ sys.patch: Display the vs1053 patch status\n\
 sys.led(\"x\"): Change the led indication:\n\
 0 = Led is in Play mode (lighted when a station is playing), 1 or up = Led is in Blink mode (default)\n\
 sys.led: Display the led indication status\n\
-sys.tzo(\"xx\"): Set the timezone offset of your country.\n\
-sys.tzo: Display the timezone offset\n\
-sys.date: Send a ntp request and Display the current locale time\n\
-: Format ISO-8601 local time   https://www.w3.org/TR/NOTE-datetime%c\n"\
+sys.version: Display the Release and Revision numbers\n\
+sys.tzo(\"xx\"): Set the timezone offset of your country.%c"\
 };
 
 const char stritHELP3[] STORE_ATTR ICACHE_RODATA_ATTR = {" \
+sys.tzo: Display the timezone offset\n\
+sys.date: Send a ntp request and Display the current locale time\n\
+: Format ISO-8601 local time   https://www.w3.org/TR/NOTE-datetime\n\
 : YYYY-MM-DDThh:mm:ssTZD (eg 2017-07-16T19:20:30+01:00)\n\
 sys.adc: Display the adc value\n\
 sys.version: Display the release and Revision of KaraDio\n\
@@ -90,7 +92,7 @@ help: this command\n\
 #INFO:\"\"#\n\
 \n\
 A command error display:\n\
-##CMD_ERROR#\n%c"}; 
+##CMD_ERROR#\n\r%c"}; 
 uint16_t currentStation = 0;
 
 //extern uint16_t currentStation;
@@ -491,15 +493,49 @@ ICACHE_FLASH_ATTR void clientInfo()
 {
 	struct shoutcast_info* si;
 	si = getStation(currentStation);
-	ntp_print_time();
-	clientSetName(si->name,currentStation);
-	clientPrintHeaders();
-	clientVol("");
-	clientPrintState();
-	free(si);
+	if (si != NULL)
+	{
+		ntp_print_time();
+		clientSetName(si->name,currentStation);
+		clientPrintHeaders();
+		clientVol("");
+		clientPrintState();
+		free(si);
+	}
 }
 
+ICACHE_FLASH_ATTR char* webInfo()
+{
+	struct shoutcast_info* si;
+	si = getStation(currentStation);
+	char* resp = malloc(1024);
+	if (si != NULL)
+	{
+		if (resp != NULL)
+		{
+			sprintf(resp,"vol: %d\nnum: %d\nstn: %s\ntit: %s\nsts: %d\n",getVolume(),currentStation,si->name,getMeta(),getState());
+		}
+		free(si);
+	}
+	return resp;
 
+}
+ICACHE_FLASH_ATTR char* webList(int id)
+{
+	struct shoutcast_info* si;
+	si = getStation(id);
+	char* resp = malloc(1024);
+	if (si != NULL)
+	{
+		if (resp != NULL)
+		{
+			sprintf(resp,"%s\n",si->name);
+		}
+		free(si);
+	}
+	return resp;
+
+}
 
 ICACHE_FLASH_ATTR void sysI2S(char* s)
 {
@@ -726,7 +762,8 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 		else if(strcmp(tmp+4, "erase") == 0) 	eeEraseAll();
 		else if(strcmp(tmp+4, "heap") == 0) 	heapSize();
 		else if(strcmp(tmp+4, "boot") == 0) 	system_restart();
-		else if(strcmp(tmp+4, "update") == 0) 	update_firmware();
+		else if(strcmp(tmp+4, "update") == 0) 	update_firmware("new");
+		else if(strcmp(tmp+4, "prerelease") == 0) 	update_firmware("prv");
 		else if(startsWith (  "patch",tmp+4)) 	syspatch(tmp);
 		else if(startsWith (  "led",tmp+4)) 	sysled(tmp);
 		else if(strcmp(tmp+4, "date") == 0) 	ntp_print_time();
@@ -740,8 +777,11 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 		if(strcmp(tmp, "help") == 0)
 		{
 			kprintfl(stritHELP0,0x0d);
+			vTaskDelay(1);
 			kprintfl(stritHELP1,0x0d);
+			vTaskDelay(1);
 			kprintfl(stritHELP2,0x0d);
+			vTaskDelay(1);
 			kprintfl(stritHELP3,0x0d);
 		}
 		else printInfo(tmp);

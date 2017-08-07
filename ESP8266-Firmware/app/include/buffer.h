@@ -8,6 +8,7 @@
 
 // Comment line below if you don't want to use external SRAM
 //#define USE_EXTERNAL_SRAM 1
+#define BIGMEMORY 131072
 
 extern bool externram;
 extern uint32_t BUFFER_SIZE;

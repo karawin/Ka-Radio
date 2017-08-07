@@ -635,6 +635,15 @@ function abortStation() {
 	document.getElementById('editStationDiv').style.display = "none";
 //	setMainHeight("tab-content2");
 }
+function eraseStation() {
+	document.getElementById('editStationDiv').style.display = "block";	
+			document.getElementById('add_url').value = "";
+			document.getElementById('add_name').value = "";
+			document.getElementById('add_path').value = "";
+			document.getElementById('add_port').value = "80";
+			document.getElementById('ovol').value = 0;
+			document.getElementById('add_URL').value = ""
+}
 function editStation(id) {
 	var arr; 
 	document.getElementById('editStationDiv').style.display = "block";	

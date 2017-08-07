@@ -22,8 +22,11 @@ int telnetclients[NBCLIENTT];
 fd_set readfdst;
 // reception buffer
 char brec[256];
+char iac[3];
+bool inIac = false; // if in negociation
 char *obrec;
 uint16_t irec;
+uint8_t iiac;
 
 ///////////////////////
 // init some data
@@ -36,6 +39,7 @@ void telnetinit(void)
 	}
 	memset(brec,0,sizeof(brec));
 	irec = 0;
+	iiac = 0;
 	obrec = malloc(2);
 }
 
@@ -89,6 +93,7 @@ int32_t recbytes = 0;
 			char * fmt = malloc(strlen(strtWELCOME)+1);
 			flashRead(fmt,strtWELCOME,strlen(strtWELCOME));
 //			printf("telnet write accept\n");
+//			write(tsocket, NONEG,3);// no negociation
 			write(tsocket, fmt, strlen(strtWELCOME));  // reply to accept	
 			free(fmt);
 			return true;
@@ -117,11 +122,14 @@ void telnetWrite(uint32_t lenb,const char *fmt, ...)
 	{
 		len = strlen(fmt);
 		lfmt = (char *)malloc(len+1);
-		flashRead( lfmt, fmt, len );
-		lfmt[len] = 0; // if aligned, trunkate
-//		printf("lfmt: %s\n",lfmt);
-		rlen = vsprintf(buf,lfmt, ap);
-		free (lfmt);
+		if (lfmt!=NULL)
+		{
+			flashRead( lfmt, fmt, len );
+			lfmt[len] = 0; // if aligned, trunkate
+//			printf("lfmt: %s\n",lfmt);
+			rlen = vsprintf(buf,lfmt, ap);
+			free (lfmt);
+		}
 	}	
 	else 
 	{
@@ -138,7 +146,23 @@ void telnetWrite(uint32_t lenb,const char *fmt, ...)
 		
 	free (buf);
 
-}	
+}
+
+ICACHE_FLASH_ATTR int telnetNego(int tsocket)
+{
+	const uint8_t NONEG[2] = {0xFF,0xFC}; // WON't
+
+	if (iiac == 2)
+	{
+	// refuse all
+		if (iac[0] == 251) { write(tsocket,NONEG,2);write(tsocket,iac+1,1);}
+	}
+	else
+	{
+		if (iac[0] == 246) write(tsocket,"\n>",2);  // are you there
+	}
+}
+	
 ICACHE_FLASH_ATTR int telnetCommand(int tsocket)
 {
 	if (irec == 0) return;
@@ -147,7 +171,7 @@ ICACHE_FLASH_ATTR int telnetCommand(int tsocket)
 	write(tsocket,"\n> ",1);
 //	printf("%s\n",brec);
 	obrec = realloc(obrec,strlen(brec)+1);
-	strcpy(obrec,brec);
+	strcpy(obrec,brec); // save old command
 	checkCommand(irec, brec);
 	write(tsocket,"> ",2);
 	irec = 0;
@@ -186,6 +210,8 @@ ICACHE_FLASH_ATTR int telnetRead(int tsocket)
 		{
 			for (i = 0;i< recbytes;i++)
 			{
+//				printf("%x ",buf[i]);
+				if (!inIac)
 				switch(buf[i]){
 				case '\r':
 				case '\n':
@@ -211,9 +237,22 @@ ICACHE_FLASH_ATTR int telnetRead(int tsocket)
 						i =recbytes; // exit for
 					}
 					break;
+				case 0xff: // iac
+					inIac = true;
+				break;
 				default:
 					brec[irec++] = buf[i];
 					if (irec == sizeof(brec)) irec = 0;	
+				}
+				else // in iac
+				{
+					iac[iiac++] = buf[i];
+					if (iiac == 2)
+					{	
+						telnetNego(tsocket);
+						inIac = false;
+						iiac = 0;
+					}
 				}
 			}	
 			free(buf);	
@@ -224,147 +263,3 @@ ICACHE_FLASH_ATTR int telnetRead(int tsocket)
 
 
 
-ICACHE_FLASH_ATTR void telnetTask(void* pvParams) {
-	struct sockaddr_in server_addr, client_addr;
-	int server_sock, client_sock;
-	socklen_t sin_size;
-	portBASE_TYPE uxHighWaterMark;
-	
-
-	struct timeval timeout;      
-    timeout.tv_sec = 2; // bug *1000 for seconds
-    timeout.tv_usec = 0;	
-	int max_sd;
-	int activity;
-	int	ret, sd;	
-	
-	
-/*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf(PSTR("watermark wstask %d\n"),uxHighWaterMark);
-	
-*/
-
-	int i;
-	telnetinit();
-	while(1)
-	{
-        bzero(&server_addr, sizeof(struct sockaddr_in));
-        server_addr.sin_family = AF_INET;
-        server_addr.sin_addr.s_addr = INADDR_ANY;
-        server_addr.sin_port = htons(23);
-
-        do {		
-            if (-1 == (server_sock = socket(AF_INET, SOCK_STREAM, 0))) {
-				printf (strtSOCKET,"create", errno);
-				vTaskDelay(5);	
-                break;
-            }
-
-            if (-1 == bind(server_sock, (struct sockaddr *)(&server_addr), sizeof(struct sockaddr))) {
-				printf (strtSOCKET,"Bind", errno);
-				close(server_sock);
-				vTaskDelay(10);	
-                break;
-            }
-
-            if (-1 == listen(server_sock, 5)) {
-				printf (strtSOCKET,"Listen",errno);
-				close(server_sock);
-				vTaskDelay(10);	
-                break;
-            }
-
-            sin_size = sizeof(client_addr);	
-			while (1)  //main loop
-			{
-				
-				//clear the socket set
-				FD_ZERO(&readfdst);;
-				
-				//add server_sock to set
-				FD_SET(server_sock, &readfdst);
-				max_sd = server_sock;
-				
-         				
-				//add child sockets to set
-				for (i = 0;i<NBCLIENTT;i++) 
-				{
-					sd = telnetclients[i];
-					//if valid socket descriptor then add to read list
-					if(sd != -1)
-					{	
-						FD_SET( sd , &readfdst);   
-//						printf("SD_set %d, max_sd: %d\n",sd,max_sd);
-						//highest file descriptor number, need it for the select function
-						max_sd = sd > max_sd ? sd : max_sd;
-					}				
-				}	
-//				printf("ws call select. Max sd: %d\n",max_sd);
-
-
-				//wait for an activity on one of the sockets , 
-				activity = select( max_sd + 1 , &readfdst , NULL , NULL ,  &timeout);
-//				if (activity != 0) printf ("Activity %d, max_fd: %d\n",activity,max_sd);
-    
-				if ((activity < 0) && (errno!=EINTR) && (errno!=0)) 
-				{
-					printf(strtSOCKET,"select",errno);
-					vTaskDelay(100);
-					continue;
-				}	
-				if (activity == 0)	{continue;}	
-
-				//If something happened on the master socket , then its an incoming connection
-				if (FD_ISSET(server_sock, &readfdst)) 
-				{
-					FD_CLR(server_sock , &readfdst);  				
-					if ((client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &sin_size)) < 0) 
-					{
-						printf (strtSOCKET,"accept",errno);
-						close(client_sock);
-						vTaskDelay(50);					
-					} else
-					{
-						if (!telnetAccept(client_sock))
-						{
-							printf (strtSOCKET,"Accept1n",errno);
-							close(client_sock);
-							vTaskDelay(50);	
-						}
-					}
-				} 	
-				
-				for (i = 0; i < NBCLIENTT; i++) 
-				{
-					sd = telnetclients[i];
-              
-					if ((sd!=-1) &&(FD_ISSET( sd , &readfdst))) 
-					{
-						FD_CLR(sd , &readfdst);  
-						ret =telnetRead(sd);
-						//printf("Call telnetRead i: %d, socket: %d, ret: %d\n" ,i, sd,ret);  
-						if (ret == 0) 
-						{
-							telnetremoveclient(sd);						
-//							printf(strtSOCKET,"Clear",errno); 
-						}
-						if (--activity ==0) break;;
-					}
-					vTaskDelay(1);
-				} 
-			}			
-
-		} while (0);		
-/*			uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-			printf(PSTR("watermark middle wsTask: %d\n"),uxHighWaterMark);
-					
-*/
-	} 
-
-//	printf("telnet task exit\n");
-/*
-	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf(PSTR("watermark end wsTask: %x  %d\n"),uxHighWaterMark,uxHighWaterMark);
-*/	
-	vTaskDelete( NULL );	
-}

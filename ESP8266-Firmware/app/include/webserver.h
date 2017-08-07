@@ -25,8 +25,21 @@
 #include "interface.h"
 #include "websocket.h"
 
-void serverTask(void *pvParams);
+extern os_timer_t sleepTimer;
+extern uint32_t sleepDelay;
+extern os_timer_t wakeTimer;
+extern uint32_t wakeDelay;
+extern xSemaphoreHandle semclient;
+extern xSemaphoreHandle semfile;
+
+//void serverTask(void *pvParams);
 extern int8_t clientOvol ;
 extern uint8_t clientIvol ;
+void sleepCallback(void *pArg);
+void wakeCallback(void *pArg);
+void startSleep(uint32_t delay);
+void stopSleep();
+void stopWake();
+void serverclientTask(void *pvParams);
 
 #endif

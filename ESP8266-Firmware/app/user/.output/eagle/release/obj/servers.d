@@ -78,4 +78,7 @@
  ../../include/lwip/lwip/netdb.h ../../include/ssl/ssl_crypto.h \
  ../../include/ssl/ssl_config.h ../../include/ssl/ssl_bigint_impl.h \
  ../../include/ssl/ssl_bigint.h ../include/cencode_inc.h \
+ ../include/websocket.h ../include/webserver.h ../include/webclient.h \
+ ../include/vs1053.h ../../include/espressif/esp_timer.h \
+ ../include/flash.h ../include/eeprom.h ../include/interface.h \
  ../include/websocket.h ../include/interface.h

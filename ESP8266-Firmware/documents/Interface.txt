@@ -1,7 +1,18 @@
 HTML interface for the Wifi Webradio
 ____________________________________
 Any browser or wget can be used to send basic commands to the webradio.
+A command format is http://yourip/?command[&command]
+If a command return some informations, it must be the last of the list or alone.
+
 Commands are:
+version			: return 'Release: x.x, Revision: x'
+infos			: return 
+				'vol: 46						the current volume
+				num: 240						the current station number
+				stn: Hotmix 80					the name of the current station
+				tit: BANANARAMA - Venus '		the title of the son playing
+				sts: 1							the state of the player: 0 stopped, 1: playing
+list=xxx		: return the name of the station xxx (0 to 254)				
 stop			: stop playing the current station.
 start			: start playing the current station.
 play=xxx		: with xxx from 0 to 254  play the station xxx
@@ -12,7 +23,7 @@ Example: http://192.168.1.253/?instant="http://api.voicerss.org/?f=32khz_16bit_s
 the url must begin with http:// or https:// and be surrounded by " and no space char allowed.
 
 Volume may be combined with other command.
-Example: 192.168.1.253/?volume=50&play=128
+Example: 192.168.1.253/?volume=50&play=128&infos
 
 Reminder: the url without parameter is the full web interface.
 
@@ -138,6 +149,7 @@ sys.i2s("x")	: Change and record the I2S clock speed of the vs1053 GPIO5 MCLK fo
 sys.erase		: erase all recorded configuration and stations.
 sys.heap		: show the ram heap size
 sys.update		: start an OTA (On The Air) update of the software
+sys.prerelease	: start an OTA of the prerelease for test purpose.
 sys.boot		: reboot the webradio.
 sys.patch("x")	: Change the status of the vs1053 patch at power on. 
 				  0 = Patch will not be loaded, 1 or up = Patch will be loaded (default) at power On
@@ -150,12 +162,16 @@ sys.tzo			: Display the timezone offset
 sys.date		: Send a ntp request and Display the current locale time
 				: Format ISO-8601 local time   https://www.w3.org/TR/NOTE-datetime
 				: YYYY-MM-DDThh:mm:ssTZD (eg 2017-07-16T19:20:30+01:00)
+sys.adc			: Read the current value of the adc input.
+sys.log			: Do nothing. Used for debug of the addon.				
 
 ///////
 //Other
 ///////
 <enter> will display 
 #INFO:""#
+
+help			: list the available commands.
 
 A command error display:
 ##CMD_ERROR#

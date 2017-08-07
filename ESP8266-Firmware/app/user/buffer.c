@@ -26,7 +26,7 @@ ICACHE_FLASH_ATTR void initBuffer()
 //		 BUFFER_SIZE = 16000;
 		 buffer = malloc(BUFFER_SIZE);
 	 } else{
-		 BUFFER_SIZE = 131072;
+		 BUFFER_SIZE = BIGMEMORY;
 	 }	 	 
 }
 ICACHE_FLASH_ATTR uint32_t getBufferFree() {

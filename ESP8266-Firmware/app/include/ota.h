@@ -3,5 +3,5 @@
 */
 #ifndef OTA_H
 #define OTA_H
-
+void update_firmware(char* fname);
 #endif

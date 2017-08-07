@@ -76,7 +76,10 @@ void incfree(void *p,char* from)
 
 
 
-
+ICACHE_FLASH_ATTR bool getState()
+{
+	 return playing;
+}
 
 ICACHE_FLASH_ATTR void clientPrintState()
 {
@@ -104,19 +107,20 @@ ICACHE_FLASH_ATTR uint8_t clientIsConnected() {
 }
 
 // for debug only
-/*
+
 ICACHE_FLASH_ATTR void dump(uint8_t* from, uint32_t len )
 {
 	uint32_t i = 0;
 	uint8_t* addr ;
 	addr =  from;
 	for (i;i<len;i+=16){
-		os_printf("\n%x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x ",addr,addr[0],addr[1],addr[2],addr[3],addr[4],addr[5],addr[6],addr[7],addr[8],addr[9],addr[10],addr[11],addr[12],addr[13],addr[14],addr[15]);
+		os_printf("\n%x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x    \t\
+		%c %c %c %c %c %c %c %c %c %c %c %c %c %c %c",addr,addr[0],addr[1],addr[2],addr[3],addr[4],addr[5],addr[6],addr[7],addr[8],addr[9],addr[10],addr[11],addr[12],addr[13],addr[14],addr[15],addr[0],addr[1],addr[2],addr[3],addr[4],addr[5],addr[6],addr[7],addr[8],addr[9],addr[10],addr[11],addr[12],addr[13],addr[14],addr[15]);
 		addr+=16;
 	}	
 	os_printf("\n");
 }
-*/
+
 ICACHE_FLASH_ATTR struct icyHeader* clientGetHeader()
 {	
 	return &header;
@@ -242,7 +246,15 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 
 ICACHE_FLASH_ATTR bool clientPrintMeta()
 {
-	kprintf(PSTR("##CLI.META#: %s\n"),header.members.mArr[METADATA]); 
+	if (header.members.mArr[METADATA] != NULL)
+		kprintf(PSTR("##CLI.META#: %s\n"),header.members.mArr[METADATA]);
+	else
+		kprintf(PSTR("##CLI.META#:%c"), 0x0D);
+}
+
+ICACHE_FLASH_ATTR char* getMeta()
+{
+	return header.members.mArr[METADATA];
 }
 
 ICACHE_FLASH_ATTR void removePartOfString(char* origine, char* remove)
@@ -267,9 +279,16 @@ ICACHE_FLASH_ATTR void removePartOfString(char* origine, char* remove)
 ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 {
 		char* t_end = NULL;
-		char* t ;
+		char* t ,*tt;
 		bool found = false;
-		if (len > 256) return;
+		if ((len == 0)||(s==NULL)) printf("clientSaveMetadata:  len:%d\n",len); 
+		if ((len > 256) ||(s == NULL) || (len == 0))
+		{
+			if (header.members.mArr[METADATA] != NULL)
+			incfree(header.members.mArr[METADATA],"metad");
+			header.members.mArr[METADATA] = NULL;
+			return;
+		}
 		t = s;
 		len = strlen(t);
 //os_printf("clientSaveMetadata:  len:%d   char:%s\n",len,s);
@@ -309,43 +328,61 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 		{
 			if (len >=2) len-=2; 
 		}
+
+//printf("clientSaveMetadata0:  len:%d   char:%s\n",strlen(t),t);
+
+// see if it is !=
+		tt = NULL;
+		if (t != NULL) 
+		{ 
+			tt = incmalloc((len+3)*sizeof(char));
+			if (tt != NULL)
+			{
+				strcpy(tt,t);
+				tt = stringify(tt,len); 
+			}
+		}
+		if  ((header.members.mArr[METADATA] == NULL)||((header.members.mArr[METADATA] != NULL)&&(t!= NULL)&&(strcmp(tt,header.members.mArr[METADATA]) != 0)))
+		{
 		
-//os_printf("clientSaveMetadata0:  len:%d   char:%s\n",strlen(t),t);
-		if (header.members.mArr[METADATA] != NULL)
-			incfree(header.members.mArr[METADATA],"metad");
-		header.members.mArr[METADATA] = (char*)incmalloc((len+3)*sizeof(char));
-		if(header.members.mArr[METADATA] == NULL) 
+			if (header.members.mArr[METADATA] != NULL)
+				incfree(header.members.mArr[METADATA],"metad");
+			header.members.mArr[METADATA] = (char*)incmalloc((len+3)*sizeof(char));
+			if(header.members.mArr[METADATA] == NULL) 
 			{	printf(strcMALLOC1);
+				incfree(tt,"");
 				return;
 			}
 
-		strcpy(header.members.mArr[METADATA], t);
-//		dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
-		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],len);
-//		dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
+			strcpy(header.members.mArr[METADATA], t);
+//			dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
+			header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],len);
+//			dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
 
-		clientPrintMeta(); 
-		while ((header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == ' ')||
-			(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\r')||
-		(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\n')
-		)
-		{
-			header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] = 0; // avoid blank at end
-		}	
+			clientPrintMeta(); 
+			while ((header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == ' ')||
+				(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\r')||
+			(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\n')
+			)
+			{
+				header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] = 0; // avoid blank at end
+			}	
 
 // send station name if no metadata
-		if (strlen(header.members.mArr[METADATA])!=0)			
-			t_end = header.members.mArr[METADATA];
-		else	
-			t_end = (header.members.single.name ==NULL)?"":header.members.single.name;
+			if (strlen(header.members.mArr[METADATA])!=0)			
+				t_end = header.members.mArr[METADATA];
+			else	
+				t_end = (header.members.single.name ==NULL)?"":header.members.single.name;
 		
-		char* title = incmalloc(strlen(t_end)+15);
-		if (title != NULL)
-		{
-			sprintf(title,"{\"meta\":\"%s\"}",t_end); 
-			websocketbroadcast(title, strlen(title));
-			incfree(title,"title");
-		} else printf(strcMALLOC1,"Title"); 
+			char* title = incmalloc(strlen(t_end)+15);
+			if (title != NULL)
+			{
+				sprintf(title,"{\"meta\":\"%s\"}",t_end); 
+				websocketbroadcast(title, strlen(title));
+				incfree(title,"title");
+			} else printf(strcMALLOC1,"Title"); 
+		}
+		incfree(tt,"");
 }	
 
 // websocket: next station
@@ -546,6 +583,7 @@ ICACHE_FLASH_ATTR void clientSetName(char* name,uint16_t index)
 {
 	kprintf(PSTR("##CLI.NAMESET#: %d %s\n"),index,name);
 }
+
 ICACHE_FLASH_ATTR void clientSetURL(char* url)
 {
 	int l = strlen(url)+1;
@@ -613,7 +651,7 @@ ICACHE_FLASH_ATTR void clientDisconnect(const char* from)
 	lfrom[strlen(from)] = 0;
 	xSemaphoreGive(sDisconnect);
 	kprintf(CLISTOP,lfrom);
-	free(lfrom);
+	incfree(lfrom,"disc");
 	if (!ledStatus) gpio2_output_set(1);
 	vTaskDelay(10);
 //	clearHeaders();
@@ -672,6 +710,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 		if (t1 != NULL) { // moved to a new address
 			if( strcmp(t1,"Found")||strcmp(t1,"Temporarily")||strcmp(t1,"Moved"))
 			{
+//printf("Len=%d,\n %s\n",len,pdata);
 				kprintf(PSTR("Header: Moved%c"),0x0d);
 				clientDisconnect(PSTR("C_HEADER"));
 				clientParsePlaylist(pdata);
@@ -828,97 +867,121 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 // meta data computing
 		if (rest <0) 
 		{
-//	printf("Negative len= %d, metad= %d  rest= %d   pdata= %x :\"%s\"\n",len,metad,rest,pdata,pdata);
+//printf("Negative enter len= %d, metad= %d  rest= %d   pdata= %x :\"%s\"\n",len,metad,rest,pdata,pdata);
 			if (len>-rest)
-				*(pdata+len-rest) = 0; //truncated
+//				*(pdata+len-rest) = 0; //truncated
+				*(pdata-rest) = 0; //truncated
 			else
 				*(pdata+len) = 0; //truncated
 			strcat(metadata,pdata);
-			metad = header.members.single.metaint ;
+//			metad = header.members.single.metaint ;
 			if (len>-rest)
 			{
+//printf("Negaposi   len= %d, metad= %d  rest= %d   pdata= %x :\"%s\"\n",len,metad,rest,pdata,pdata);
 				clientSaveMetadata(metadata,strlen(metadata));
+				metad = header.members.single.metaint ;
 				pdata -= rest;	
 				len += rest;
 				rest = 0;
 			}
 			else
 			{
+//printf("Negative   len= %d, metad= %d  rest= %d   pdata= %x :\"%s\"\n",len,metad,rest,pdata,pdata);
 				pdata += len;
 				rest += len;
 				len = 0;
+//printf("Negatafter len= %d, metad= %d  rest= %d   pdata= %x :\"%s\"\n",len,metad,rest,pdata,pdata);
 			}			
-//	printf("Negative len out = %d, pdata: %x,metad= %d  rest= %d \n",len,pdata,metad,rest);
+//printf("Negative len out = %d, pdata: %x,metad= %d  rest= %d \n",len,pdata,metad,rest);
 
 		}
 		inpdata = pdata;
 		clen = len;
 		if((header.members.single.metaint != 0)&&(clen > metad)) 
 		{
-//	os_printf("metain len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );
+//printf("metain len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );
 			int jj = 0;
 			while ((clen > metad)&&(header.members.single.metaint != 0)) // in buffer
 			{
+//printf("metainb len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );
 				jj++;
-				l = inpdata[metad]*16;
+				l = inpdata[metad]*16;	//new meta length
 				rest = clen - metad  -l -1;
-/*	if (l !=0)
-	os_printf("mt len:%d, clen:%d, metad:%d ,&l:%x, l:%d, rest:%d, str: %s\n",len,clen,metad,inpdata+metad, l,rest,inpdata+metad+1 );
-	else
-	os_printf("mt len:%d, clen:%d, metad:%d,&l:%x, l:%d, rest:%d\n",len,clen,metad,inpdata+metad, l,rest );
-	if (l > 200) dump(inpdata,len);
+/*				
+if (l !=0){
+	printf("metain len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );
+	printf("mt len:%d, clen:%d, metad:%d ,&l:%x, l:%d, rest:%d, str: %s\n",len,clen,metad,inpdata+metad, l,rest,inpdata+metad+1 );
+}
+//else
+//	printf("mt len:%d, clen:%d, metad:%d,&l:%x, l:%d, rest:%d\n",len,clen,metad,inpdata+metad, l,rest );
+if (l > 80) dump(inpdata,len);
 */	
 				if (l !=0)
 				{
 					if (rest <0)
 					{
 						*(inpdata+clen) = 0; //truncated
-//	printf("mtlen len:%d, clen:%d, metad:%d, l:%d, inpdata:%x,  rest:%d\n",len,clen,metad, l,inpdata,rest );				
+//printf("mtlen len:%d, clen:%d, metad:%d, l:%d, inpdata:%x,  rest:%d\n",len,clen,metad, l,inpdata,rest );				
 						
 						if (metadata != NULL) incfree(metadata,"meta"); 
 						metadata = incmalloc(l+1);	
 						strcpy(metadata,inpdata+metad+1);
 					}
 					else clientSaveMetadata(inpdata+metad+1,l);
-				}				
-				while(getBufferFree() < metad)	vTaskDelay(10);
-				if (metad >0) bufferWrite(inpdata, metad); 
+				}	
+				if (metad >0)
+				{		
+//if (getBufferFree() < metad) printf("metaout wait metad: %d, bufferfree: %d\n",metad,getBufferFree());			
+					while(getBufferFree() < metad)	 // wait some room
+						vTaskDelay(20);
+					bufferWrite(inpdata, metad); 
+				}
 				metad  = header.members.single.metaint;
 				inpdata = inpdata+clen-rest;
+//if (rest <0) printf("mt1 len:%d, clen:%d, metad:%d, l:%d, inpdata:%x,  rest:%d\n",len,clen,metad, l,inpdata,rest );
 				clen = rest;				
-//	printf("mt1 len:%d, clen:%d, metad:%d, l:%d, inpdata:%x,  rest:%d\n",len,clen,metad, l,inpdata,rest );
 				if (rest <0) {clen = 0; break;}
-			}	// while
-//	os_printf("\nmetaout len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );			
+			}	// while in buffer
 			if (rest >=0)
 			{	
 				metad = header.members.single.metaint - rest ; //until next
-				while(getBufferFree() < rest) 
-				{					
-					vTaskDelay(10);// 
+				if (rest >0)
+				{
+//if (getBufferFree() < rest) printf("metaout wait rest: %d, bufferfree: %d\n",rest,getBufferFree());
+					while(getBufferFree() < rest)						
+						vTaskDelay(20);// 
+					bufferWrite(inpdata, rest); 
 				}
-				if (rest >0) bufferWrite(inpdata, rest); 
 				rest = 0;
-			}		
+			}	
+//printf("metaout len:%d, clen:%d, metad:%d, l:%d, inpdata:%x, rest:%d\n",len,clen,metad, l,inpdata,rest );						
 		} else 
 		{		
 			if (header.members.single.metaint != 0) metad -= len;
-//	os_printf("out len = %d, metad = %d  metaint= %d, rest:%d\n",len,metad,header.members.single.metaint,rest);
-			while(getBufferFree() < len) 
-				{vTaskDelay(10); }
-			if (len >0) bufferWrite(pdata+rest, len);	
+//printf("out len = %d, metad = %d  metaint= %d, rest:%d\n",len,metad,header.members.single.metaint,rest);
+			if (len >0) 
+			{
+//printf("metaout wait len: %d\n",len);					
+				while(getBufferFree() < len) 
+						vTaskDelay(20); 
+				bufferWrite(pdata+rest, len);
+			}			
 		}
 // ---------------			
-	if ((!playing )&& ((getBufferFree() < (BUFFER_SIZE/2)) ||(once ==1)) ) {
-			volume = VS1053_GetVolume();
-			VS1053_SetVolume(0);
-			playing=1;
-			if (once == 0)vTaskDelay(30);
-			VS1053_SetVolume(volume);
-			kprintf(CLIPLAY,0x0d,0x0a);
-			if (!ledStatus) gpio2_output_set(0);
-		}	
-    }
+		if (!playing )
+		{
+			if ( (getBufferFree() < (BUFFER_SIZE == BIGMEMORY)?(7*BIGMEMORY/10):(BUFFER_SIZE/2)) ||(once ==1)) 
+			{
+				volume = VS1053_GetVolume();
+				VS1053_SetVolume(0);
+				playing=1;
+				if (once == 0)vTaskDelay(30);
+				VS1053_SetVolume(volume);
+				kprintf(CLIPLAY,0x0d,0x0a);
+				if (!ledStatus) gpio2_output_set(0);
+			}	
+		}
+	}
 }
 
 #define VSTASKBUF	1024
@@ -948,7 +1011,7 @@ IRAM_ATTR void vsTask(void *pvParams) {
 			{
 				s += VS1053_SendMusicBytes(b+s, size-s);	
 			}
-			vTaskDelay(1);					
+			vTaskDelay(2);	
 		} else 
 		{
 			vTaskDelay(30);		
@@ -971,19 +1034,22 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 	struct sockaddr_in dest;
 	uint8_t *bufrec;
 	
-	vTaskDelay(100);	
+	vTaskDelay(300);	
 
 	bufrec = incmalloc(RECEIVE+10);
 	useragent = incmalloc(50);
 	
 	device = getDeviceSettings();
-	strcpy(useragent,device->ua);
-	if (strlen(useragent) == 0) 
+	if (device != NULL)
 	{
-		strcpy(useragent,"Karadio/1.3");
-		strcpy(device->ua,"Karadio/1.3");
-	}	
-	free(device);
+		strcpy(useragent,device->ua);
+		if (strlen(useragent) == 0) 
+		{
+			strcpy(useragent,"Karadio/1.3");
+			strcpy(device->ua,"Karadio/1.3");
+		}	
+		free(device);
+	}
 	
 
 	//	portBASE_TYPE uxHighWaterMark;
@@ -1052,7 +1118,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 					{
 							clientReceiveCallback(sockfd,bufrec, bytes_read);
 					}	
-					
+					vTaskDelay(1);
 					if(xSemaphoreTake(sDisconnect, 0)){ clearHeaders(); break;	}
 				}
 				while ( bytes_read > 0 );
@@ -1114,7 +1180,8 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				VS1053_SetVolume(0);
 				VS1053_flush_cancel(2);
 				playing = 0;
-				vTaskDelay(20);	// stop without click
+				bufferReset();
+				vTaskDelay(40);	// stop without click
 				//VS1053_LowPower();
 				VS1053_SetVolume(volume);
 			}	

@@ -10,6 +10,9 @@
 *******************************************************************************/
 //#include "version.h"
 //#include "user_config.h"
+#define PROGMEM  __attribute__((section(".irom.text")))
+#define STORE_ATTR __attribute__((aligned(4)))
+#define PSTR(s) (__extension__({ static const char __c[] STORE_ATTR __attribute__((section(".irom.text"))) = {s}; &__c[0];}))
 
 #include "esp_common.h"
 #include "lwip/mem.h"
@@ -88,7 +91,7 @@ BOOL upgrade_data_load(char *pusrdata, unsigned short length)
     if (totallength == 0 && (ptr = (char *)strstr(pusrdata, "\r\n\r\n")) != NULL &&
             (ptr = (char *)strstr(pusrdata, "Content-Length")) != NULL) {
 
- //       os_printf("\n pusrdata %s\n",pusrdata);
+ //       printf("\n pusrdata %s\n",pusrdata);
 
         ptr = (char *)strstr(pusrdata, "Content-Length: ");
         if (ptr != NULL) {
@@ -101,10 +104,10 @@ BOOL upgrade_data_load(char *pusrdata, unsigned short length)
                 if((ptmp2 - ptr)<=32)
                      memcpy(lengthbuffer, ptr, ptmp2 - ptr);
                 else
-                     os_printf("ERR1:arr_overflow,%u,%d\n",__LINE__,(ptmp2 - ptr));
+                     printf(PSTR("ERR1:arr_overflow,%u,%d\n"),__LINE__,(ptmp2 - ptr));
                 
                 sumlength = atoi(lengthbuffer);
-                os_printf("userbin sumlength:%d \n",sumlength);
+                printf(PSTR("userbin sumlength:%d \n"),sumlength);
                 
                 ptr = (char *)strstr(pusrdata, "\r\n\r\n");
                 length -= ptr - pusrdata;
@@ -116,19 +119,19 @@ BOOL upgrade_data_load(char *pusrdata, unsigned short length)
                  *to close the connection, and start upgrade again.  
                  */
                 if(FALSE==flash_erased){
-//					os_printf("userbin sumlength:%d  flash:%d\n",sumlength,flash_erased);
+//					printf("userbin sumlength:%d  flash:%d\n",sumlength,flash_erased);
                     flash_erased=system_upgrade(ptr + 4, sumlength);
-					os_printf("userbin sumlength:%d  flash:%d\n",sumlength,flash_erased);
+					printf(PSTR("userbin sumlength:%d  flash:%d\n"),sumlength,flash_erased);
                     return flash_erased;
                 }else{
                     system_upgrade(ptr + 4, length);
                 }
             } else {
-                os_printf("ERROR:Get sumlength failed\n");
+                printf(PSTR("ERROR:Get sumlength failed%c"),0x0d);
                 return false;
             }
         } else {
-            os_printf("ERROR:Get Content-Length failed\n");
+            printf(PSTR("ERROR:Get Content-Length failed%c"),0x0d);
             return false;
         }
         
@@ -138,15 +141,15 @@ BOOL upgrade_data_load(char *pusrdata, unsigned short length)
             totallength += length;
             
             if(totallength > sumlength){
-                os_printf("strip the 400 error mesg\n");
+                printf("strip the 400 error mesg%c",0x0d);
                 length =length -(totallength- sumlength);
             }
             
-//            os_printf(">>>recv %dB, %dB left\n",totallength,sumlength-totallength);
+//            printf(">>>recv %dB, %dB left\n",totallength,sumlength-totallength);
             system_upgrade(pusrdata, length);
             
         } else {
-            os_printf("server response with something else,check it!\n");
+            printf(PSTR("server response with something else,check it!%c"),0x0d);
             return false;
         }
     }
@@ -241,13 +244,13 @@ static void   display_session_id(SSL *ssl)
     int sess_id_size = ssl_get_session_id_size(ssl);
 
     if (sess_id_size > 0) {
-        printf("-----BEGIN SSL SESSION PARAMETERS-----\n");
+        printf(PSTR("-----BEGIN SSL SESSION PARAMETERS-----%c"),0x0d);
 
         for (i = 0; i < sess_id_size; i++) {
             printf("%02x", session_id[i]);
         }
 
-        printf("\n-----END SSL SESSION PARAMETERS-----\n");
+        printf(PSTR("\n-----END SSL SESSION PARAMETERS-----%c"),0x0d);
     }
 }
 
@@ -260,23 +263,23 @@ static void   display_cipher(SSL *ssl)
 
     switch (ssl_get_cipher_id(ssl)) {
         case SSL_AES128_SHA:
-            printf("AES128-SHA");
+            printf(PSTR("AES128-SHA%c"),0x0d);
             break;
 
         case SSL_AES256_SHA:
-            printf("AES256-SHA");
+            printf(PSTR("AES256-SHA%c"),0x0d);
             break;
 
         case SSL_RC4_128_SHA:
-            printf("RC4-SHA");
+            printf(PSTR("RC4-SHA%c"),0x0d);
             break;
 
         case SSL_RC4_128_MD5:
-            printf("RC4-MD5");
+            printf(PSTR("RC4-MD5%c"),0x0d);
             break;
 
         default:
-            printf("Unknown - %d", ssl_get_cipher_id(ssl));
+            printf(PSTR("Unknown - %d%c"),0x0d, ssl_get_cipher_id(ssl));
             break;
     }
 
@@ -318,7 +321,7 @@ void upgrade_ssl_task(void *pvParameters)
         if (-1 == sta_socket) {
             close(sta_socket);
             vTaskDelay(1000 / portTICK_RATE_MS);
-            os_printf("socket fail !\r\n");
+            printf("socket fail !\r\n");
             continue;
         }
 
@@ -327,7 +330,7 @@ void upgrade_ssl_task(void *pvParameters)
         if(0 != connect(sta_socket,(struct sockaddr *)(&server->sockaddrin),sizeof(struct sockaddr))) {
             close(sta_socket);
             vTaskDelay(1000 / portTICK_RATE_MS);
-            os_printf("connect fail!\r\n");
+            printf(PSTR("connect fail!\r%c"),0x0d);
             continue;
         }
 
@@ -347,7 +350,7 @@ void upgrade_ssl_task(void *pvParameters)
         cert = (char **)calloc(1, sizeof(char *)*cert_size);
 
         if ((ssl_ctx= ssl_ctx_new(options, SSL_DEFAULT_CLNT_SESS)) == NULL) {
-            printf("Error: Client context is invalid\n");
+            printf(PSTR("Error: Client context is invalid%c"),0x0d);
             close(sta_socket);
             continue;
         }
@@ -356,13 +359,13 @@ void upgrade_ssl_task(void *pvParameters)
 
         for (i = 0; i < cert_index; i++) {
             if (ssl_obj_load(ssl_ctx, SSL_OBJ_X509_CERT, cert[i], NULL)){
-                printf("Certificate '%s' is undefined.\n", cert[i]);
+                printf(PSTR("Certificate '%s' is undefined.\n"), cert[i]);
             }
         }
         
         for (i = 0; i < ca_cert_index; i++) {
             if (ssl_obj_load(ssl_ctx, SSL_OBJ_X509_CACERT, ca_cert[i], NULL)){
-                printf("Certificate '%s' is undefined.\n", ca_cert[i]);
+                printf(PSTR("Certificate '%s' is undefined.\n"), ca_cert[i]);
             }
         }
 
@@ -377,7 +380,7 @@ void upgrade_ssl_task(void *pvParameters)
         }
         
         if(ssl_handshake_status(ssl) != SSL_OK){
-            printf("client handshake fail.\n");
+            printf(PSTR("client handshake fail.%c"),0x0d);
             ssl_free(ssl);
             ssl_ctx_free(ssl_ctx);
             close(sta_socket);
@@ -388,7 +391,7 @@ void upgrade_ssl_task(void *pvParameters)
         if (!quiet) {
             const char *common_name = ssl_get_cert_dn(ssl,SSL_X509_CERT_COMMON_NAME);
             if (common_name) {
-                printf("Common Name:\t\t\t%s\n", common_name);
+                printf(PSTR("Common Name:\t\t\t%s\n"), common_name);
             }
             display_session_id(ssl);
             display_cipher(ssl);
@@ -406,10 +409,10 @@ void upgrade_ssl_task(void *pvParameters)
             ssl_ctx_free(ssl_ctx);
             close(sta_socket);
             vTaskDelay(1000 / portTICK_RATE_MS);
-            os_printf("send fail\n");
+            printf("send fail\n");
             continue;
         }
-        os_printf("Request send success\n");
+        printf(PSTR("Request send success%c"),0x0d);
 
         while((recbytes = ssl_read(ssl, &read_buf)) >= 0) {
 
@@ -423,25 +426,25 @@ void upgrade_ssl_task(void *pvParameters)
                 ssl_ctx_free(ssl_ctx);
                 close(sta_socket);
                 vTaskDelay(2000 / portTICK_RATE_MS);
-                printf("bigger than UPGRADE_DATA_SEG_LEN\n");
+                printf(PSTR("bigger than UPGRADE_DATA_SEG_LEN%c"),0x0d);
             }
 
             if((recbytes)<=1460)
                 memcpy(precv_buf,read_buf,recbytes);
             else
-                os_printf("ERR2:arr_overflow,%u,%d\n",__LINE__,recbytes);
+                printf(PSTR("ERR2:arr_overflow,%u,%d\n"),__LINE__,recbytes);
 
             if(FALSE==flash_erased){
                 ssl_free(ssl);
                 ssl_ctx_free(ssl_ctx);
                 close(sta_socket);
-                os_printf("pre erase flash!\n");
+                printf(PSTR("pre erase flash!%c"),0x0d);
                 upgrade_data_load(precv_buf,recbytes);
                 break;
             }
             
             if(false == upgrade_data_load(read_buf,recbytes)) {
-                os_printf("upgrade data error!\n");
+                printf(PSTR("upgrade data error!%c"),0x0d);
                 ssl_free(ssl);
                 ssl_ctx_free(ssl_ctx);
                 close(sta_socket);
@@ -452,18 +455,18 @@ void upgrade_ssl_task(void *pvParameters)
             /*this two length data should be equal, if totallength is bigger, 
              *maybe data wrong or server send extra info, drop it anyway*/
             if(totallength >= sumlength) {
-                os_printf("upgrade data load finish.\n");
+                printf(PSTR("upgrade data load finish.%c"),0x0d);
                 ssl_free(ssl);
                 ssl_ctx_free(ssl_ctx);
                 close(sta_socket);
                 goto finish;
             }
-            os_printf("upgrade_task %d word left\n",uxTaskGetStackHighWaterMark(NULL));
+            printf(PSTR("upgrade_task %d word left\n"),uxTaskGetStackHighWaterMark(NULL));
             
         }
         
         if(recbytes < 0) {
-            os_printf("ERROR:read data fail! recbytes %d\r\n",recbytes);
+            printf(PSTR("ERROR:read data fail! recbytes %d\r\n"),recbytes);
             ssl_free(ssl);
             ssl_ctx_free(ssl_ctx);
             close(sta_socket);
@@ -471,7 +474,7 @@ void upgrade_ssl_task(void *pvParameters)
             vTaskDelay(1000 / portTICK_RATE_MS);
         }
         
-        os_printf("upgrade_task %d word left\n",uxTaskGetStackHighWaterMark(NULL));
+        printf(PSTR("upgrade_task %d word left\n"),uxTaskGetStackHighWaterMark(NULL));
         
         totallength =0;
         sumlength = 0;
@@ -481,7 +484,7 @@ finish:
 
 	if(upgrade_crc_check(system_get_fw_start_sec(),sumlength) != 0)
 	{
-		printf("upgrade crc check failed !\n");
+		printf(PSTR("upgrade crc check failed !%c"),0x0d);
 		server->upgrade_flag = false;
         system_upgrade_flag_set(UPGRADE_FLAG_IDLE);	
 	}
@@ -505,7 +508,7 @@ finish:
     
     upgrade_deinit();
     
-    os_printf("\n Exit upgrade task.\n");
+    printf(PSTR("\n Exit upgrade task.\n"));
     if (server->check_cb != NULL) {
         server->check_cb(server);
     }
@@ -533,12 +536,12 @@ void upgrade_task(void *pvParameters)
     flash_erased=FALSE;
     precv_buf = (char*)malloc(UPGRADE_DATA_SEG_LEN);
     if(NULL == precv_buf){
-        os_printf("upgrade_task,memory exhausted, check it\n");
+        printf(PSTR("upgrade_task,memory exhausted, check it%c"),0x0d);
     }
     
     while (retry_count++ < UPGRADE_RETRY_TIMES) {
 		
-		if (giveup) {os_printf("giveup !\r\n");break;}
+		if (giveup) {printf(PSTR("giveup !\r%c"),0x0d);break;}
         
         wifi_get_ip_info(STATION_IF, &ipconfig);
 
@@ -552,7 +555,7 @@ void upgrade_task(void *pvParameters)
         if (-1 == sta_socket) {
             close(sta_socket);
             vTaskDelay(1000 / portTICK_RATE_MS);
-            os_printf("socket fail !\r\n");
+            printf(PSTR("socket fail !\r%c"),0x0d);
             continue;
         }
 
@@ -562,10 +565,10 @@ void upgrade_task(void *pvParameters)
         if(0 != connect(sta_socket,(struct sockaddr *)(&server->sockaddrin),sizeof(struct sockaddr))) {
             close(sta_socket);
             vTaskDelay(1000 / portTICK_RATE_MS);
-            os_printf("connect fail!\r\n");
+            printf(PSTR("connect fail!\r%c"),0x0d);
             continue;
         }
-        os_printf("Connect ok!\n");
+        printf(PSTR("Connect ok!%c"),0x0d);
 
         system_upgrade_init();
         system_upgrade_flag_set(UPGRADE_FLAG_START);
@@ -573,17 +576,17 @@ void upgrade_task(void *pvParameters)
         if(write(sta_socket,server->url,strlen(server->url)) < 0) {
             close(sta_socket);
             vTaskDelay(1000 / portTICK_RATE_MS);
-            os_printf("send fail\n");
+            printf(PSTR("send fail%c"),0x0d);
             continue;
         }
-        os_printf("Request send success\n");
+        printf(PSTR("Request send success%c"),0x0d);
 
         while((recbytes = read(sta_socket, precv_buf, UPGRADE_DATA_SEG_LEN)) > 0) {
             if(FALSE==flash_erased){
 					close(sta_socket);
-					os_printf("pre erase flash!\n");
+					printf(PSTR("pre erase flash!%c"),0x0d);
 					if(false == upgrade_data_load(precv_buf,recbytes)){
-					os_printf("upgrade data error!\n");
+					printf(PSTR("upgrade data error!%c"),0x0d);
 					close(sta_socket);
 					flash_erased=FALSE;
 					vTaskDelay(1000 / portTICK_RATE_MS);
@@ -594,7 +597,7 @@ void upgrade_task(void *pvParameters)
             }
             
             if(false == upgrade_data_load(precv_buf,recbytes)) {
-                os_printf("upgrade data error!\n");
+                printf(PSTR("upgrade data error!%c"),0x0d);
                 close(sta_socket);
                 flash_erased=FALSE;
                 vTaskDelay(1000 / portTICK_RATE_MS);
@@ -603,12 +606,12 @@ void upgrade_task(void *pvParameters)
             /*this two length data should be equal, if totallength is bigger, 
              *maybe data wrong or server send extra info, drop it anyway*/
             if(totallength >= sumlength) {
-                os_printf("upgrade data load finish.\n");
+                printf(PSTR("upgrade data load finish.%c"),0x0d);
                 close(sta_socket);
                 goto finish;
             }
 
-//            os_printf("upgrade_task %d word left\n",uxTaskGetStackHighWaterMark(NULL));
+//            printf("upgrade_task %d word left\n",uxTaskGetStackHighWaterMark(NULL));
             
         }
         
@@ -616,7 +619,7 @@ void upgrade_task(void *pvParameters)
             close(sta_socket);
             flash_erased=FALSE;
             vTaskDelay(1000 / portTICK_RATE_MS);
-            os_printf("ERROR:read data fail!\r\n");
+            printf(PSTR("ERROR:read data fail!\r%c"),0x0d);
         }
 
         totallength =0;
@@ -629,7 +632,7 @@ finish:
 
 	if(upgrade_crc_check(system_get_fw_start_sec(),sumlength) != 0)
 	{
-		printf("upgrade crc check failed !\n");
+		printf(PSTR("upgrade crc check failed !%c"),0x0d);
 		server->upgrade_flag = false;
         system_upgrade_flag_set(UPGRADE_FLAG_IDLE);	
 	}
@@ -654,7 +657,7 @@ finish:
     
     upgrade_deinit();
     
-    os_printf("\n Exit upgrade task.\n");
+    printf(PSTR("\n Exit upgrade task.%c"),0x0d);
     if (server->check_cb != NULL) {
         server->check_cb(server);
     }
@@ -690,7 +693,7 @@ upgrade_check(struct upgrade_server_info *server)
     
     upgrade_deinit();
     
-    os_printf("\n upgrade fail,exit.\n");
+    printf(PSTR("\n upgrade fail,exit.%c"),0x0d);
 //    if (server->check_cb != NULL) {
 //        server->check_cb(server);
 //    }

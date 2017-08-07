@@ -155,7 +155,7 @@ ifneq ($(app),0)
 	    endif
 	  endif
 	endif
-	BIN_NAME = user$(app).$(flash).$(boot).$(size_map)
+	BIN_NAME = user$(app).$(flash).$(NAME).$(size_map)
 endif
 else
     app = 0
@@ -290,6 +290,7 @@ else
             endif
         endif
     endif
+	
 
 	@mv eagle.app.flash.bin ../bin/upgrade/$(BIN_NAME).bin
 	@rm eagle.app.v6.*

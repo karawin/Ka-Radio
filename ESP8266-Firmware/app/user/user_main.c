@@ -123,15 +123,20 @@ struct device_settings *device;
 		{
 			// save volume if changed
 			FlashVolume = 0;
-			device = getDeviceSettingsSilent();
-			if (device != NULL)
-			{	
-				if (device->vol != clientIvol)
-				{ 
-					device->vol = clientIvol;
-					saveDeviceSettings(device);
+			if (xPortGetFreeHeapSize( ) > 4096) // don't worry it will be done later
+			{
+				device = getDeviceSettingsSilent();
+				if (device != NULL)
+				{	
+					if (device->vol != clientIvol)
+						if (xPortGetFreeHeapSize( ) > 4096)
+						{ 
+//printf("save vol %d\n",clientIvol);
+							device->vol = clientIvol;
+							saveDeviceSettings(device);
+						}
+					free(device);	
 				}
-				free(device);	
 			}
 		}
 	}		
@@ -309,25 +314,6 @@ void uartInterfaceTask(void *pvParameters) {
 //	strcpy(device->pass,config->password);
 	saveDeviceSettings(device);	
 
-//autostart	
-	kprintf(PSTR("autostart: playing:%d, currentstation:%d\n"),device->autostart,device->currentstation);
-	currentStation = device->currentstation;
-	VS1053_I2SRate(device->i2sspeed);
-	clientIvol = device->vol;
-
-	if (device->autostart ==1)
-	{	
-		vTaskDelay(10); 
-		playStationInt(device->currentstation);
-	}
-//
-	ledStatus = ((device->options & T_LED)== 0);
-//
-	
-	free(info);
-	free(device);
-	free(device1);
-	free(config);
 	
 	
 	// set modem sleep per default
@@ -351,6 +337,28 @@ void uartInterfaceTask(void *pvParameters) {
 	kprintf(PSTR("ADC Div: %d from adc: %d\n"),adcdiv,ap);
 	FlashOn = 190;FlashOff = 10;
 	initLed(); // start the timer for led. This will kill the ttest task to free memory
+	
+	
+	
+//autostart	
+	kprintf(PSTR("autostart: playing:%d, currentstation:%d\n"),device->autostart,device->currentstation);
+	currentStation = device->currentstation;
+	VS1053_I2SRate(device->i2sspeed);
+	clientIvol = device->vol;
+
+	if (device->autostart ==1)
+	{	
+		vTaskDelay(10); 
+		playStationInt(device->currentstation);
+	}
+//
+	ledStatus = ((device->options & T_LED)== 0);
+//
+	
+	free(info);
+	free(device);
+	free(device1);
+	free(config);
 	
 
 	
@@ -515,16 +523,14 @@ void user_init(void)
 	
 	xTaskCreate(testtask, "t0", 140, NULL, 1, &pxCreatedTask); // DEBUG/TEST 130
 	printf(striTASK,"t0",pxCreatedTask);
-	xTaskCreate(uartInterfaceTask, "t1", 360, NULL, 2, &pxCreatedTask); // 350
+	xTaskCreate(uartInterfaceTask, "t1", 370, NULL, 2, &pxCreatedTask); // 350
 	printf(striTASK, "t1",pxCreatedTask);
-	xTaskCreate(vsTask, "t4", 230, NULL,5, &pxCreatedTask); //380 230
-	printf(striTASK,"t4",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 360, NULL, 5, &pxCreatedTask); // 340
-	printf(striTASK,"t3",pxCreatedTask);
-	xTaskCreate(serverTask, "t2", 240, NULL, 4, &pxCreatedTask); //230
+	xTaskCreate(vsTask, "t2", 230, NULL,5, &pxCreatedTask); //380 230
 	printf(striTASK,"t2",pxCreatedTask);
-	xTaskCreate(serversTask, "t5", 330, NULL, 4, &pxCreatedTask); //380
-	printf(striTASK,"t5",pxCreatedTask);
+	xTaskCreate(clientTask, "t3", 370, NULL, 5, &pxCreatedTask); // 340
+	printf(striTASK,"t3",pxCreatedTask);
+	xTaskCreate(serversTask, "t4", 350, NULL, 4, &pxCreatedTask); //380
+	printf(striTASK,"t4",pxCreatedTask);
 
 	printf (striHEAP,xPortGetFreeHeapSize( ));
 }

@@ -85,15 +85,15 @@ void user_esp_upgrade_rsp(void *arg)
  * Parameters   : none
  * Returns      : none
 *******************************************************************************/
-void update_firmware(void)
+void update_firmware(char* fname)
 {
-    kprintf(PSTR("update  firmware\r%c"),0x0d);
+    kprintf(PSTR("update  firmware \r%c"),0x0d);
     uint8 current_id = system_upgrade_userbin_check();
 //    kprintf(PSTR("current id %d\n"), current_id);
 	clientDisconnect(PSTR("Update"));
 	char* client_url = "karadio.karawin.fr";
 
-#define bin_url  "user%d.4096.new.4.bin"
+#define bin_url  "user%d.4096.%s.4.bin"
 
     struct upgrade_server_info *server = NULL;
     server = (struct upgrade_server_info *)malloc(sizeof(struct upgrade_server_info));
@@ -111,15 +111,17 @@ void update_firmware(void)
     if (current_id == 0) {
 		 current_id = 2;
 	} else current_id = 1;
-    sprintf(server->url, "GET /"bin_url" HTTP/1.0\r\nHost: %s:80\r\n"pheadbuffer"",current_id, client_url);
-//   os_printf("http_req : %s\n", server->url);
+
+    sprintf(server->url, "GET /"bin_url" HTTP/1.0\r\nHost: %s:80\r\n"pheadbuffer"",current_id,fname, client_url);
+//printf("http_req : %s\n", server->url);
 	
 	struct hostent *serv ;
 	serv =(struct hostent*)gethostbyname(client_url);
     server->sockaddrin.sin_family = AF_INET;
     server->sockaddrin.sin_port   = htons(80);
     server->sockaddrin.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr*)(serv-> h_addr_list[0]))); // remote server ip
-//	os_printf("distant ip: %x   ADDR:%s\n",server->sockaddrin.sin_addr.s_addr,inet_ntoa(*(struct in_addr*)(serv-> h_addr_list[0])));
+//printf("distant ip: %x   ADDR:%s\n",server->sockaddrin.sin_addr.s_addr,inet_ntoa(*(struct in_addr*)(serv-> h_addr_list[0])));
+
     if (system_upgrade_start(server) == false) {
         kprintf(PSTR("upgrade error%c"),0x0d);
     }

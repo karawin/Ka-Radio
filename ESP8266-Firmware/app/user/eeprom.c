@@ -13,9 +13,15 @@
 /*#define EEPROM_START	0x3F0000 // Last 64k of flash (32Mbits or 4 MBytes)
 #define EEPROM_SIZE		0xBFFF	 // until xC000 (48k) espressif take the end
 #define NBSTATIONS		192*/
+#ifdef ESP07
+#define EEPROM_OLDSTART	0x0F0000 // Last 64k of flash (8Mbits or 1 MBytes)
+#define EEPROM_START	0x0E0000 // Last 128k of flash (8Mbits or 1 MBytes)
+#define EEPROM_START1	0x0D0000 // Last 128k of flash (8Mbits or 1 MBytes)
+#else
 #define EEPROM_OLDSTART	0x3F0000 // Last 64k of flash (32Mbits or 4 MBytes)
 #define EEPROM_START	0x3E0000 // Last 128k of flash (32Mbits or 4 MBytes)
 #define EEPROM_START1	0x3D0000 // Last 128k of flash (32Mbits or 4 MBytes)
+#endif
 #define EEPROM_SIZE		0xFFFF	 // until xffff , 
 #define NBOLDSTATIONS	192
 #define NBSTATIONS		255
@@ -300,10 +306,12 @@ ICACHE_FLASH_ATTR struct shoutcast_info* getStation(uint8_t position) {
 
 ICACHE_FLASH_ATTR void saveDeviceSettings(struct device_settings *settings) {
 	if (settings == NULL) { printf(streSETDEVICE,0);return;}
+//printf("saveDeviceSettings\n");
 	eeSetData(0, settings, 256);
 }
 ICACHE_FLASH_ATTR void saveDeviceSettings1(struct device_settings1 *settings) {
 	if (settings == NULL) { printf(streSETDEVICE,1);return;}
+//printf("saveDeviceSettings1\n");
 	eeSetData1(0, settings, 256);
 }
 

@@ -20,6 +20,7 @@
 //#include "osapi.h"
 #include <math.h>
 #include "interface.h"
+extern uint8_t clientIvol ;
 
 	int vsVersion ; // the version of the chip
 //	SS_VER is 0 for VS1001, 1 for VS1011, 2 for VS1002, 3 for VS1003, 4 for VS1053 and VS8053, 5 for VS1033, 7 for VS1103, and 6 for VS1063.
@@ -296,6 +297,7 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 		}
 		Delay(300);
 		printf("volume: %d\n",device->vol);
+		clientIvol = device->vol;
 		VS1053_SetVolume( device->vol);	
 		VS1053_SetTreble(device->treble);
 		VS1053_SetBass(device->bass);

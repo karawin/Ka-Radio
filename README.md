@@ -2,6 +2,25 @@
 
 ### Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ## Basic informations<BR/>
+###Release 1.5- Built on 2017/08/07
+New:
+    <ul>
+		<li>Deeply tuned and optimized</li></br>
+		<li>Added: a button erase on the station edit</li></br>
+		<li>Little change of the menu labels.</li></br>
+		<li>If the same meta is repeated in the stream, it is filtered</li></br>
+		<li>telnet server now accepts the negociation.</li></br>
+		<li>Only one task for all servers: websocket, web interface and telnet.</li><br>
+		<li>Optimized threshold to start playing.It depends now of the size of the reception buffer.</li></br>
+		<li>New web command: version, infos and list. See the interface.txt file on setting menu.</li><br>
+    </ul>
+    <p></br>Bugs resolved: (Thanks Kim)</p>
+    <ul>
+		<li>autoplay was broken</li><br>
+		<li>monitor doesn't always start well.</li></br>
+		<li>A bug in meta for low stream stations removed.</li><br>
+    </ul>
+
 ### Release 1.4.2 - Built on 2017/08/01
 New:<br/>
 Unable to make the Espressif RTOS SDK 1.5.0-dev working, so I fed up.<br/>
