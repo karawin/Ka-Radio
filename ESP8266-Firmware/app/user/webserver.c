@@ -931,9 +931,9 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 					}
 				}
 // infos command				
-				param = strstr(c,"infos") ;
+				param = strstr(c,"infos") ;				
 				if (param != NULL) {
-					char* vr = webInfo();
+					char* vr = webInfo();	
 					respOk(conn,vr); 
 					infree(vr);
 					return true;

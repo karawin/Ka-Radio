@@ -7,7 +7,7 @@
 
 
 #define RELEASE "1.5"
-#define REVISION "0"
+#define REVISION "2"
 
 // uncomment for an ESP07 and generate with genallmap2.sh
 //#define ESP07

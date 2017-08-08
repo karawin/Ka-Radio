@@ -31,7 +31,7 @@ uint8_t volume = 0;
 uint8_t playing = 0;
 
 char notfound[]={"Not Found"};
-
+char parEmty[] = {" "};
 const char CLIPLAY[] STORE_ATTR ICACHE_RODATA_ATTR = {"##CLI.PLAYING#%c%c"};
 const char CLISTOP[] STORE_ATTR ICACHE_RODATA_ATTR = {"##CLI.STOPPED# from %s\n"};
 
@@ -254,7 +254,7 @@ ICACHE_FLASH_ATTR bool clientPrintMeta()
 
 ICACHE_FLASH_ATTR char* getMeta()
 {
-	return header.members.mArr[METADATA];
+	return (header.members.mArr[METADATA] == NULL)?parEmty:header.members.mArr[METADATA];
 }
 
 ICACHE_FLASH_ATTR void removePartOfString(char* origine, char* remove)

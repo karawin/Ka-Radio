@@ -512,7 +512,7 @@ ICACHE_FLASH_ATTR char* webInfo()
 	if (si != NULL)
 	{
 		if (resp != NULL)
-		{
+		{	
 			sprintf(resp,"vol: %d\nnum: %d\nstn: %s\ntit: %s\nsts: %d\n",getVolume(),currentStation,si->name,getMeta(),getState());
 		}
 		free(si);
