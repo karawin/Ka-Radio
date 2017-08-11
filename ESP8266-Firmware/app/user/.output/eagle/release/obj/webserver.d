@@ -84,4 +84,5 @@
  ../include/serv-fs.h ../include/../../webpage/index \
  ../include/../../webpage/style ../include/../../webpage/style1 \
  ../include/../../webpage/script ../include/../../webpage/logo \
- ../include/../../webpage/favicon ../include/interface.h
+ ../include/../../webpage/favicon ../include/interface.h \
+ ../include/servers.h

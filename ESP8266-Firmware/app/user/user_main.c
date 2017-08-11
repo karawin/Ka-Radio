@@ -529,7 +529,7 @@ void user_init(void)
 	printf(striTASK,"t2",pxCreatedTask);
 	xTaskCreate(clientTask, "t3", 370, NULL, 5, &pxCreatedTask); // 340
 	printf(striTASK,"t3",pxCreatedTask);
-	xTaskCreate(serversTask, "t4", 350, NULL, 4, &pxCreatedTask); //380
+	xTaskCreate(serversTask, "t4", 360, NULL, 4, &pxCreatedTask); //380
 	printf(striTASK,"t4",pxCreatedTask);
 
 	printf (striHEAP,xPortGetFreeHeapSize( ));

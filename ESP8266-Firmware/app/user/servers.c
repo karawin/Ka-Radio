@@ -19,14 +19,17 @@ const char strsWSOCK[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer Socket fails 
 fd_set readfds;
 xSemaphoreHandle semclient = NULL ;
 
+
+
 ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 	//telnet
 	struct sockaddr_in tenetserver_addr, tenetclient_addr;
 	int telnetServer_sock, telnetClient_sock;
+	int server_sock;
 	socklen_t telnetSin_size;
 	//web
 	struct sockaddr_in server_addr, client_addr;
-	int server_sock, client_sock;
+	int  client_sock;
 	socklen_t sin_size;
 	os_timer_disarm(&sleepTimer);
 	os_timer_disarm(&wakeTimer);
@@ -34,15 +37,15 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 	os_timer_setfn(&wakeTimer, wakeCallback, NULL);
 	int stack = 400; //320
 	semclient = xSemaphoreCreateCounting(2,2); 
-	semfile = xSemaphoreCreateCounting(2,2); 
+	semfile = xSemaphoreCreateCounting(1,1); 
 	
 //	portBASE_TYPE uxHighWaterMark;
 	
 
-/*	struct timeval timeout;      
-    timeout.tv_sec = 2; // bug *1000 for seconds
+	struct timeval timeout;      
+    timeout.tv_sec = 0; // bug *1000 for seconds
     timeout.tv_usec = 0;
-*/	
+	
 	int max_sd;
 	int activity;
 	int	ret, sd;	
@@ -87,6 +90,8 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 ////////////////////////		
 // telnet socket init end
 ////////////////////////
+
+
 ////////////////////////
 // webserver socket init
 ////////////////////////
@@ -123,14 +128,16 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 			//clear the socket set
 			FD_ZERO(&readfds);;
 			
-			//add telnetServer_sock to set (telnet)
-			FD_SET(telnetServer_sock, &readfds);
-			max_sd = telnetServer_sock;
-
 			//add server_sock to set (webserver)
 			FD_SET(server_sock, &readfds);
-			max_sd = server_sock > max_sd ? server_sock : max_sd;  
+			max_sd = server_sock ;  
 				
+
+			//add telnetServer_sock to set (telnet)
+			FD_SET(telnetServer_sock, &readfds);
+			max_sd = telnetServer_sock > max_sd ? telnetServer_sock : max_sd;  
+
+
 			//add child sockets to set (wssocket)
 			for (i = 0;i<NBCLIENT;i++) 
 			{
@@ -162,7 +169,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 //			printf("ws call select. Max sd: %d\n",max_sd);
 
 			//wait for an activity on one of the sockets , 
-			activity = select( max_sd + 1 , &readfds , NULL , NULL ,  NULL);
+			activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
 //			if (activity != 0) printf ("Activity %d, max_fd: %d\n",activity,max_sd);
    
 			if ((activity < 0) && (errno!=EINTR) && (errno!=0)) 
@@ -171,30 +178,13 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 				vTaskDelay(100);
 				continue;
 			}	
-			if (activity == 0)	{continue;}	
-//If something happened on the master telnet socket , then its an incoming connection
-			if (FD_ISSET(telnetServer_sock, &readfds)) 
-			{
-				FD_CLR(telnetServer_sock , &readfds);  				
-				if ((telnetClient_sock = accept(telnetServer_sock, (struct sockaddr *) &tenetclient_addr, &telnetSin_size)) < 0) 
-				{
-					printf (strsTELNET,"accept",errno);
-					close(telnetClient_sock);
-					vTaskDelay(50);					
-				} else
-				{
-					if (!telnetAccept(telnetClient_sock))
-					{
-						printf (strsTELNET,"Accept1n",errno);
-						close(telnetClient_sock);
-						vTaskDelay(50);	
-					}
-				}
-			} 	
+			if (activity == 0)	{vTaskDelay(10);continue;}	
+	
 //If something happened on the master webserver socket , then its an incoming connection
 			if (FD_ISSET(server_sock, &readfds)) 
 			{	
-				FD_CLR(server_sock , &readfds);  
+				FD_CLR(server_sock , &readfds); 
+//printf(PSTR("Server web accept.%c"),0x0d);				
 				if ((client_sock = accept(server_sock, (struct sockaddr *) &client_addr, &sin_size)) < 0) {
 						printf (strsWSOCK,"accept",errno);
 						vTaskDelay(10);					
@@ -214,6 +204,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 								NULL ) != pdPASS) 
 							{								
 								vTaskDelay(200);
+//printf(PSTR("Server low mem. Retrying...%c"),0x0d);
 							}	
 							vTaskDelay(4);							
 							xSemaphoreGive(semclient);	
@@ -228,6 +219,26 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 				}					
 			}
 			
+			
+//If something happened on the master telnet socket , then its an incoming connection
+			if (FD_ISSET(telnetServer_sock, &readfds)) 
+			{
+				FD_CLR(telnetServer_sock , &readfds);  				
+				if ((telnetClient_sock = accept(telnetServer_sock, (struct sockaddr *) &tenetclient_addr, &telnetSin_size)) < 0) 
+				{
+					printf (strsTELNET,"accept",errno);
+					close(telnetClient_sock);
+					vTaskDelay(50);					
+				} else
+				{
+					if (!telnetAccept(telnetClient_sock))
+					{
+						printf (strsTELNET,"Accept1n",errno);
+						close(telnetClient_sock);
+						vTaskDelay(50);	
+					}
+				}
+			} 			
 						
 // telnet sockets				
 			for (i = 0; i < NBCLIENTT; i++) 
@@ -244,7 +255,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 						telnetremoveclient(sd);						
 //						printf(strsTELNET,"Clear",errno); 
 					}
-					if (--activity ==0) break;
+//					if (--activity ==0) break;
 				}
 //				vTaskDelay(1);
 			} 
@@ -265,7 +276,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 						websocketremoveclient(sd);						
 						//printf("Clear i: %d, socket: %d, errno: %d\n" ,i, sd,errno); 
 					}
-					if (--activity ==0) break;
+//					if (--activity ==0) break;
 				}
 			}    				
 			

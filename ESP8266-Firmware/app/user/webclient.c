@@ -487,8 +487,10 @@ ICACHE_FLASH_ATTR void clearHeaders()
 	for(header_num=0; header_num<ICY_HEADER_COUNT; header_num++) {
 		if(header_num != METAINT) 
 			if(header.members.mArr[header_num] != NULL) {
-			header.members.mArr[header_num][0] = 0;				
-		}
+				incfree(header.members.mArr[header_num],"header" );
+//				header.members.mArr[header_num][0] = 0;				
+				header.members.mArr[header_num] = NULL;				
+			}
 	}
 	header.members.mArr[METAINT] = 0;
 	wsHeaders();
@@ -496,6 +498,7 @@ ICACHE_FLASH_ATTR void clearHeaders()
 	
 ICACHE_FLASH_ATTR bool clientPrintOneHeader(uint8_t header_num)
 {
+	if (header.members.mArr[header_num] != NULL)
 	kprintf(PSTR("##CLI.ICY%d#: %s\n"),header_num,header.members.mArr[header_num]);
 }
 
@@ -1177,10 +1180,10 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			if (playing)  // stop clean
 			{		
 				volume = VS1053_GetVolume();
+				bufferReset();
 				VS1053_SetVolume(0);
 				VS1053_flush_cancel(2);
 				playing = 0;
-				bufferReset();
 				vTaskDelay(40);	// stop without click
 				//VS1053_LowPower();
 				VS1053_SetVolume(volume);

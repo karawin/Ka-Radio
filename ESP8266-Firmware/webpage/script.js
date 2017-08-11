@@ -5,6 +5,7 @@ var auto,intervalid , timeid, websocket,urlmonitor , e, playing = false, curtab 
 const karadio = "Karadio";
 
 function openwebsocket(){	
+	autoplay(); //to force the server socket to accept and open the web server client.
 	websocket = new WebSocket("ws://"+window.location.host+"/");
 	console.log("url:"+"ws://"+window.location.host+"/");
 
@@ -30,6 +31,7 @@ function openwebsocket(){
 		window.clearInterval(window.timerID);
 		window.timerID=0;}
 		refresh();
+		
 	}
 	websocket.onclose = function (event) {
 		console.log("onclose code: "+event.code);
@@ -380,10 +382,10 @@ function refresh() {
 		}
 	}
 	try{	
-		websocket.send("monitor");
 		xhr.open("POST","icy",false);
 		xhr.setRequestHeader(content,cjson);
 		xhr.send();
+		websocket.send("monitor");
 	} catch(e){console.log("error"+e);}
 }
 // change the theme
@@ -754,7 +756,23 @@ function checkhistory()
 	 xhr.onload = function() {
 		document.getElementById('History').innerHTML = xhr.responseText;	
     }
-	xhr.open("GET","http://KaraDio.karawin.fr/history.php", false);
+	xhr.open("GET","http://KaraDio.karawin.fr/history1.php", false);
+	try{
+		xhr.send(null );
+	}catch(e){;}
+	setMainHeight(curtab);	
+}
+function checkinfos()
+{
+    if (window.XDomainRequest) {
+        xhr = new XDomainRequest(); 
+    } else if (window.XMLHttpRequest) {
+        xhr = new XMLHttpRequest(); 
+    }
+	 xhr.onload = function() {
+		document.getElementById('Infos').innerHTML = xhr.responseText;	
+    }
+	xhr.open("GET","http://KaraDio.karawin.fr/infos.php", false);
 	try{
 		xhr.send(null );
 	}catch(e){;}
@@ -774,7 +792,8 @@ function checkversion()
 	try{
 		xhr.send(null );
 	}catch(e){;}
-	checkhistory();
+	checkinfos();
+	//checkhistory();
 }
 
 // refresh the stations list by reading a file
