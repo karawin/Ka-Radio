@@ -322,7 +322,16 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 		if (found)
 		{	
 			t_end = strstr(t_end,"'");
-			if (t_end !=NULL)	 *t_end = 0;
+			if (t_end !=NULL)
+			*t_end = 0;
+		
+			if (t!=NULL)
+			{
+				t_end = strstr(t,"||");
+				if (t_end !=NULL)
+				*t_end = 0;
+			}	
+			
 		}
 		else
 		{
@@ -591,7 +600,6 @@ ICACHE_FLASH_ATTR void clientSetURL(char* url)
 {
 	int l = strlen(url)+1;
 	if (url[0] == 0xff) return; // wrong url
-
 	strcpy(clientURL, url);
 	kprintf(PSTR("##CLI.URLSET#: %s\n"),clientURL);
 }
@@ -973,12 +981,13 @@ if (l > 80) dump(inpdata,len);
 // ---------------			
 		if (!playing )
 		{
-			if ( (getBufferFree() < (BUFFER_SIZE == BIGMEMORY)?(7*BIGMEMORY/10):(BUFFER_SIZE/2)) ||(once ==1)) 
+//printf("test memory: %d  on size %d\n",	(BUFFER_SIZE == BIGMEMORY)?(7*BIGMEMORY/10):(BUFFER_SIZE/2),BUFFER_SIZE);		
+			if ( (getBufferFree() < ((BUFFER_SIZE == BIGMEMORY)?(7*BIGMEMORY/10):(BUFFER_SIZE/2))) ||(once ==1)) 
 			{
 				volume = VS1053_GetVolume();
 				VS1053_SetVolume(0);
 				playing=1;
-				if (once == 0)vTaskDelay(30);
+				if (once == 0)vTaskDelay(20);
 				VS1053_SetVolume(volume);
 				kprintf(CLIPLAY,0x0d,0x0a);
 				if (!ledStatus) gpio2_output_set(0);

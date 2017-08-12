@@ -11,7 +11,8 @@
 xSemaphoreHandle semfile = NULL ;
 
 const char lowmemory[] = { "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nlow memory\n"};
-char strsROK[] = {"HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n"};
+char strsROK[] =  {"HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n%s"};
+
 
 const char strsMALLOC[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer inmalloc fails for %d\n"};
 const char strsMALLOC1[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer %s malloc fails\n"};
@@ -66,13 +67,15 @@ ICACHE_FLASH_ATTR struct servFile* findFile(char* name)
 
 ICACHE_FLASH_ATTR void respOk(int conn,char* message)
 {
+//printf("respOk conn: %d\n",conn);
 	char rempty[] = {""};
-//printf("respOk\n");
 	if (message == NULL) message = rempty;
+//printf("respOk msg: %s\n",message);
 	char* fresp = inmalloc(strlen(strsROK)+strlen(message)+15);
 	if (fresp!=NULL)
 	{
 		sprintf(fresp,strsROK,"text/plain",strlen(message),message);
+//printf("respOk: %s\n",fresp);
 		write(conn, fresp, strlen(fresp));
 		infree(fresp);
 	}			
@@ -91,7 +94,7 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 
 	int length;
 	int progress,part,gpart;
-	char buf[100];
+	char buf[110];
 	char *content;
 	if (strcmp(name,"/style.css") == 0)
 	{
@@ -122,7 +125,7 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 		{				
 			do {
 				gpart /=2;
-				con = (char*)inmalloc((gpart)*sizeof(char));
+				con = (char*)inmalloc((gpart)*sizeof(char)+1);
 				vTaskDelay(5);
 			} while ((con == NULL)&&(gpart >=LIMIT));
 		
@@ -132,18 +135,21 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 				write(conn, buf, strlen(buf));
 				printf(PSTR("WebServer serveFile malloc fails%c"),0x0d);
 				infree(con);
+				xSemaphoreGive(semfile);
 				return ;
 			}	
 		
-//			printf("serveFile socket:%d,  %s. Length: %d  sliced in %d\n",conn,name,length,gpart);		
-			sprintf(buf, strsROK, (f!=NULL ? f->type : "text/plain"), length);
+//printf("serveFile socket:%d,  %s. Length: %d  sliced in %d\n",conn,name,length,gpart);		
+//			char strsfROK[] = {"HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n"};
+			sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n", (f!=NULL ? f->type : "text/plain"), length);
+//printf("serveFile send %d bytes\n%s\n",strlen(buf),buf);		
 			write(conn, buf, strlen(buf));
 			progress = length;
 			part = gpart;
 			if (progress <= part) part = progress;
 			while (progress > 0) 
 			{
-//				printf("serveFile socket:%d,  read at %x len: %d\n",conn,content,part);	
+//printf("serveFile socket:%d,  read at %x len: %d\n",conn,content,part);	
 				flashRead(con, (uint32_t)content, part);
 				write(conn, con, part);
 				content += part;
@@ -216,7 +222,7 @@ ICACHE_FLASH_ATTR void setOffsetVolume(void) {
 		}
 		if (uvol > 254) uvol = 254;
 		if (uvol <=0) uvol = 1;
-//		printf("setOffsetVol: %d\n",clientOvol);
+//printf("setOffsetVol: %d\n",clientOvol);
 		VS1053_SetVolume(uvol);
 }
 
@@ -225,10 +231,10 @@ ICACHE_FLASH_ATTR void setVolume(char* vol) {
 		struct device_settings *device;
 //		uint16_t ivol = atoi(vol);
 		clientIvol = atoi(vol);
-		uint16_t uvol = atoi(vol);
+		int16_t uvol = atoi(vol);
 		uvol += clientOvol;
 		if (uvol > 254) uvol = 254;
-		if (uvol <0) uvol = 0;
+		if (uvol <0) uvol = 1;
 		if(vol) {
 //			printf("setVol: \"%s + %d, uvol: %d, clientIvol:%d\"\n",vol,clientOvol,uvol,clientIvol);
 			VS1053_SetVolume(uvol);
@@ -370,7 +376,7 @@ ICACHE_FLASH_ATTR void playStationInt(int sid) {
 			for (i = 0;i<100;i++)
 			{
 				if (clientIsConnected()) break;
-				vTaskDelay(4);
+				vTaskDelay(5);
 			}
 	}
 	infree(si);
@@ -649,7 +655,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		if (buf == NULL)
 		{	
 			printf(strsMALLOC1,"post rauto");
-			respOk(conn,NULL);
+			respOk(conn,"nok");
 		}
 		else {			
 			device = getDeviceSettings();

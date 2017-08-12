@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#define stack  400 //320
+
+
 const char strsTELNET[] STORE_ATTR ICACHE_RODATA_ATTR = {"Servers Telnet Socket fails %s errno: %d\n"};
 const char strsWEB[] STORE_ATTR ICACHE_RODATA_ATTR = {"Servers Web Socket fails %s errno: %d\n"};
 const char strsWSOCK[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer Socket fails %s errno: %d\n"};
@@ -35,7 +38,6 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 	os_timer_disarm(&wakeTimer);
 	os_timer_setfn(&sleepTimer, sleepCallback, NULL);
 	os_timer_setfn(&wakeTimer, wakeCallback, NULL);
-	int stack = 400; //320
 	semclient = xSemaphoreCreateCounting(2,2); 
 	semfile = xSemaphoreCreateCounting(1,1); 
 	
