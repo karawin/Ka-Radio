@@ -75,7 +75,7 @@
 * Especially useful with MEM_LIBC_MALLOC but handle with care regarding execution
 * speed and usage from interrupts!
 */
-#define MEMP_MEM_MALLOC                 1
+#define MEMP_MEM_MALLOC                1
 
 /**
  * MEM_ALIGNMENT: should be set to the alignment of the CPU
@@ -240,7 +240,7 @@
  * (2 * TCP_MSS) for things to work well
  */
 
-#define TCP_WND                        (6*TCP_MSS) //(*(volatile uint32*)0x600011F0)
+#define TCP_WND                        (5*TCP_MSS) //(*(volatile uint32*)0x600011F0)
 
 /**
  * TCP_MAXRTX: Maximum number of retransmissions of data segments.

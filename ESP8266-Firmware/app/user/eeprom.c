@@ -1,5 +1,6 @@
 #include "eeprom.h"
 #include "flash.h"
+#include "spi.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include "spi_flash.h"
@@ -121,44 +122,40 @@ ICACHE_FLASH_ATTR bool eeSetDatax(uint32_t eeprom,int address, void* buffer, int
 	uint8_t* inbuf = buffer;
 int result;
 uint32_t* eebuf= malloc(4096);
+vTaskDelay(1); 
 uint16_t i = 0;
-	while (eebuf == NULL) 
-	{
-//		clientDisconnect(PSTR("eebuf"));
-		if (++i > 3) break;
-		vTaskDelay(50); 
-		eebuf= malloc(4096); // last chance
-	}	
-
-	if (eebuf != NULL)
-	{
+if (eebuf != NULL)
+{
 	while(1) {
-		uint32_t sector = (eeprom + address) & 0xFFF000;
-		spi_flash_read(sector, (uint32 *)eebuf, 4096);
-		spi_flash_erase_sector(sector >> 12);
 		
+		uint32_t sector = (eeprom + address) & 0xFFF000;
 		uint8_t* eebuf8 = (uint8_t*)eebuf;
 		uint16_t startaddr = address & 0xFFF;
 		uint16_t maxsize = 4096 - startaddr;
-		
 //printf("set1 startaddr: %x, size:%x, maxsize: %x, sector: %x, eebuf: %x\n",startaddr,size,maxsize,sector,eebuf);
+//		spi_clock(HSPI, 4, 10); //2MHz
+//		WRITE_PERI_REG(0x60000914, 0x73); //WDT clear
+		spi_flash_read(sector, (uint32 *)eebuf, 4096);
+		vTaskDelay(1);
+		spi_flash_erase_sector(sector >> 12);		
+		
+//printf("set2 startaddr: %x, size:%x, maxsize: %x, sector: %x, eebuf: %x\n",startaddr,size,maxsize,sector,eebuf);
 		for(i=0; (i<size && i<maxsize); i++) eebuf8[i+startaddr] = inbuf[i];
 		result = spi_flash_write(sector, (uint32 *)eebuf, 4096);
 //printf("set3 startaddr: %x, size:%x, maxsize: %x, result:%x, sector: %x, eebuf: %x\n",startaddr,size,maxsize,result,sector,eebuf);
-		if(maxsize >= size) break;
-		
+		if(maxsize >= size) break;		
 		address += i;
 		inbuf += i;
 		size -= i;
 //printf("set2 startaddr: %x, size:%x, maxsize: %x, sector: %x, eebuf: %x\n",startaddr,size,maxsize,sector,eebuf);
 	}
 	free (eebuf);
-	} else 
-	{
-		printf(streMSG,"eebuf");/*heapSize();*/
-		return false;
-	}
-	return true;
+} else 
+{
+	printf(streMSG,"eebuf");/*heapSize();*/
+	return false;
+}
+return true;
 }
 
 ICACHE_FLASH_ATTR bool eeSetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
@@ -170,6 +167,8 @@ ICACHE_FLASH_ATTR bool  eeSetData1(int address, void* buffer, int size) { // add
 
 ICACHE_FLASH_ATTR void eeSetClear(int address,uint8_t* eebuf) { // address, size in BYTES !!!!
 		int i;
+		spi_clock(HSPI, 4, 10); //2MHz
+		WRITE_PERI_REG(0x60000914, 0x73); //WDT clear
 		uint32_t sector = (EEPROM_START + address) & 0xFFF000;
 		spi_flash_erase_sector(sector >> 12);
 		for(i=0; i<4096; i++) eebuf[i] = 0;	
@@ -178,6 +177,8 @@ ICACHE_FLASH_ATTR void eeSetClear(int address,uint8_t* eebuf) { // address, size
 
 ICACHE_FLASH_ATTR void eeSetClear1(int address,uint8_t* eebuf) { // address, size in BYTES !!!!
 		int i;
+		spi_clock(HSPI, 4, 10); //2MHz
+		WRITE_PERI_REG(0x60000914, 0x73); //WDT clear
 		uint32_t sector = (EEPROM_START1 + address) & 0xFFF000;
 		spi_flash_erase_sector(sector >> 12);
 		for(i=0; i<4096; i++) eebuf[i] = 0;	
@@ -256,13 +257,27 @@ ICACHE_FLASH_ATTR void eeEraseStations() {
 ICACHE_FLASH_ATTR void saveStation(struct shoutcast_info *station, uint16_t position) {
 	uint32_t i = 0;
 	if (position > NBSTATIONS-1) {printf(saveStationPos,position); return;}
-	while (!eeSetData((position+1)*256, station, 256)) {kprintf("Retrying\n");vTaskDelay (100) ;i++; if (i == 10) return;}
+	while (!eeSetData((position+1)*256, station, 256)) 
+	{
+		kprintf(PSTR("Retrying %d on saveStation\n"),i+1);
+		vTaskDelay ((i+1)*20+200) ;
+		i++; 
+		if (i == 2) {clientDisconnect(PSTR("saveStation low Memory")); vTaskDelay (300) ;} // stop the player
+		if (i == 10) return;
+	}
 }
 ICACHE_FLASH_ATTR void saveMultiStation(struct shoutcast_info *station, uint16_t position, uint8_t number) {
 	uint32_t i = 0;
 	while ((position +number-1) > NBSTATIONS-1) {printf(saveStationPos,position+number-1); number--; }
 	if (number <= 0) return;
-	while (!eeSetData((position+1)*256, station, number*256)) {kprintf("Retrying\n");vTaskDelay (100) ;i++; if (i == 10) return;}
+	while (!eeSetData((position+1)*256, station, number*256))
+	{		
+		kprintf(PSTR("Retrying %d on SaveMultiStation for %d stations\n"),i+1,number);
+		vTaskDelay ((i+1)*20+300) ;
+		i++; 
+		if (i == 3) {clientDisconnect(PSTR("saveMultiStation low Memory")); vTaskDelay (300) ;}
+		if (i == 10) return;
+	}
 }
 
 /*ICACHE_FLASH_ATTR struct shoutcast_info* getOldStation(uint8_t position) {

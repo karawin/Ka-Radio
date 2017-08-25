@@ -98,7 +98,7 @@ uint32_t decodeHttpMessage (char * inputMessage, char * outputMessage)
 {
 	const char str1[98] = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ";
 	const char s[3] = "\r\n";
-	const char str2[5] = "\r\n\r\n";
+//	const char str2[5] = "\r\n\r\n";
 	char *tokens[12];
 	uint32_t index = 1;
 	uint32_t i;
@@ -130,12 +130,13 @@ uint32_t decodeHttpMessage (char * inputMessage, char * outputMessage)
 	websocketacceptKey(key,encodedSha1);
 	//Fill Output Buffer
 	encodedLength = strlen(encodedSha1);
-	outputLength = encodedLength + strlen(str1) + strlen(str2);
+	outputLength = encodedLength + strlen(str1) + 2*strlen(s);
 //	printf("ws decode entry4 outputMessage: %x\n",outputMessage);
 	
 	strcpy(outputMessage,str1);
 	strcat(outputMessage,encodedSha1);
-	strcat(outputMessage,str2);
+	strcat(outputMessage,s);
+	strcat(outputMessage,s);
 	//Add extra /n/r at the end
 //	printf("ws decode HTTP: %x \"%s\"\n",outputMessage,outputMessage);
 	return outputLength;

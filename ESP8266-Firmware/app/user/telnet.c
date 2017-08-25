@@ -90,8 +90,9 @@ int32_t recbytes = 0;
 
 	if ((!istelnet(tsocket ))&&(telnetnewclient(tsocket))) 
 	{
-			char * fmt = malloc(strlen(strtWELCOME)+1);
+			char * fmt = malloc(strlen(strtWELCOME)+16);
 			flashRead(fmt,strtWELCOME,strlen(strtWELCOME));
+			fmt[strlen(strtWELCOME)] = 0;
 //			printf("telnet write accept\n");
 //			write(tsocket, NONEG,3);// no negociation
 			write(tsocket, fmt, strlen(strtWELCOME));  // reply to accept	
@@ -121,7 +122,7 @@ void telnetWrite(uint32_t lenb,const char *fmt, ...)
 	if (fmt> (char*)0x40100000)  // in flash
 	{
 		len = strlen(fmt);
-		lfmt = (char *)malloc(len+1);
+		lfmt = (char *)malloc(len+16);
 		if (lfmt!=NULL)
 		{
 			flashRead( lfmt, fmt, len );

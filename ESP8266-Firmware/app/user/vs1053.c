@@ -54,9 +54,9 @@ ICACHE_FLASH_ATTR void VS1053_HW_init(){
 
 ICACHE_FLASH_ATTR void VS1053_SPI_SpeedUp()
 {
-//	spi_clock(HSPI, 4, 2); //10MHz
+	spi_clock(HSPI, 4, 2); //10MHz
 //	spi_clock(HSPI, 4, 3); //6.66MHz
-	spi_clock(HSPI, 3, 3); //8.88MHz
+//	spi_clock(HSPI, 3, 3); //8.88MHz
 }
 
 ICACHE_FLASH_ATTR void VS1053_SPI_SpeedDown() {
@@ -285,7 +285,7 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	
 
 	device = getDeviceSettings();
-	printf("device: %x\n",device);
+	printf(PSTR("device: %x\n"),device);
 	if (device != NULL)
 	{	
 // plugin patch
@@ -296,7 +296,7 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 			VS1053_Admix(false);
 		}
 		Delay(300);
-		printf("volume: %d\n",device->vol);
+		printf(PSTR("volume: %d\n"),device->vol);
 		clientIvol = device->vol;
 		VS1053_SetVolume( device->vol);	
 		VS1053_SetTreble(device->treble);

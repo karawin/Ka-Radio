@@ -141,7 +141,7 @@ BOOL upgrade_data_load(char *pusrdata, unsigned short length)
             totallength += length;
             
             if(totallength > sumlength){
-                printf("strip the 400 error mesg%c",0x0d);
+                printf(PSTR("strip the 400 error mesg%c"),0x0d);
                 length =length -(totallength- sumlength);
             }
             

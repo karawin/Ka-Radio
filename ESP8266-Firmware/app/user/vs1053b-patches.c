@@ -470,7 +470,7 @@ void ICACHE_FLASH_ATTR  LoadUserCode( const unsigned short* plugin,uint16_t size
   unsigned short* iplugin;
   int ssize = size;
   size *= sizeof(plugin[0]);
-  iplugin = (unsigned short*)malloc(size+2);
+  iplugin = (unsigned short*)malloc(size+16);
   if (iplugin == NULL) 
   {
 	   kprintf(PSTR("malloc fails for plugin%c"),0x0d);

@@ -44,18 +44,18 @@
 //Accept-Encoding: gzip,deflate,sdch\r\n\
 //\r\n"
 
-#define pheadbuffer "Connection: keep-alive\r\n\
-Cache-Control: no-cache\r\n\
-User-Agent: Karadio 1.3 \r\n\
-Accept: */*\r\n\
-Accept-Encoding: gzip,deflate,sdch\r\n\
-\r\n"
+#define pheadbuffer "Connection: keep-alive\r\nCache-Control: no-cache\r\nUser-Agent: Karadio 1.5 \r\nAccept: */*\r\nAccept-Encoding: gzip,deflate,sdch\r\n\r\n"
 
 #define pheadbuffer1 "Connection: close\r\n\
 Accept: */*\r\n\
 Accept-Encoding: gzip,deflate,sdch\r\n\
 Cache-Control: no-cache\r\n\
 \r\n"
+
+const char strupd[] STORE_ATTR ICACHE_RODATA_ATTR = {\
+"GET /user%d.4096.%s.4.bin HTTP/1.0\r\nHost: karadio.karawin.fr:80\r\n\
+Connection: keep-alive\r\nCache-Control: no-cache\r\nUser-Agent: Karadio 1.5 \r\n\
+Accept: */*\r\nAccept-Encoding: gzip,deflate,sdch\r\n\r\n"};
 
 /******************************************************************************
  * FunctionName : user_esp_upgrade_rsp
@@ -91,10 +91,10 @@ void update_firmware(char* fname)
     uint8 current_id = system_upgrade_userbin_check();
 //    kprintf(PSTR("current id %d\n"), current_id);
 	clientDisconnect(PSTR("Update"));
-	char* client_url = "karadio.karawin.fr";
+//	char* client_url = "karadio.karawin.fr";
 
-#define bin_url  "user%d.4096.%s.4.bin"
-
+//#define bin_url  "user%d.4096.%s.4.bin"
+	
     struct upgrade_server_info *server = NULL;
     server = (struct upgrade_server_info *)malloc(sizeof(struct upgrade_server_info));
     memset(server, 0, sizeof(struct upgrade_server_info));
@@ -112,11 +112,17 @@ void update_firmware(char* fname)
 		 current_id = 2;
 	} else current_id = 1;
 
-    sprintf(server->url, "GET /"bin_url" HTTP/1.0\r\nHost: %s:80\r\n"pheadbuffer"",current_id,fname, client_url);
+	char* fmt = malloc(strlen(strupd)+16);
+	flashRead(fmt,(int)strupd,strlen(strupd));
+	fmt[strlen(strupd)] = 0;
+	sprintf(server->url,fmt ,current_id,fname);
+	free(fmt);
+
+//    sprintf(server->url, "GET /user%d.4096.%s.4.bin HTTP/1.0\r\nHost: %s:80\r\n"pheadbuffer"",current_id,fname, client_url);
 //printf("http_req : %s\n", server->url);
 	
 	struct hostent *serv ;
-	serv =(struct hostent*)gethostbyname(client_url);
+	serv =(struct hostent*)gethostbyname("karadio.karawin.fr");
     server->sockaddrin.sin_family = AF_INET;
     server->sockaddrin.sin_port   = htons(80);
     server->sockaddrin.sin_addr.s_addr = inet_addr(inet_ntoa(*(struct in_addr*)(serv-> h_addr_list[0]))); // remote server ip

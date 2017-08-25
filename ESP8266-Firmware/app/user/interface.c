@@ -101,7 +101,7 @@ extern void playStation(char* id);
 extern void setVolume(char* vol);
 extern void setRelVolume(int8_t vol);
 extern uint16_t getVolume(void);
-extern uint8_t playing;
+
 
 ICACHE_FLASH_ATTR void clientVol(char *s);
 
@@ -677,7 +677,7 @@ ICACHE_FLASH_ATTR void sysled(char* s)
     }	
 	uint8_t value = atoi(t+2);
 	if (value ==0) 
-	{device->options |= T_LED; ledStatus = false; if (playing) gpio2_output_set(0);}
+	{device->options |= T_LED; ledStatus = false; if (getState()) gpio2_output_set(0);}
 	else 
 	{device->options &= NT_LED; ledStatus =true;} // options:0 = ledStatus true = Blink mode
 	

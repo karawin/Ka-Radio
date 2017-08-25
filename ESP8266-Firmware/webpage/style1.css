@@ -12,6 +12,13 @@ html,body {
 	overflow:hidden;
 	margin:0
 }
+#HEADER{
+	z-index:10;
+    position:fixed;
+    top:0px;
+    width:100%;
+    margin:0px auto;
+}
 #HEAD {
 	width:100%;
 	min-height:55px;
@@ -23,7 +30,7 @@ html,body {
 	font-size:22px;
 	line-height:25px;
 	padding-left:20px;
-	box-shadow:0 10px 10px 255 #333
+	box-shadow:5px 5px 8px -2px #494242;
 }
 div.RIGHT {
 	float:right;
@@ -53,62 +60,66 @@ div.LEFT {
 }
 @-webkit-keyframes mymove4 {
 	from {
-		color:#fff
+		color:#fff;
 	}
 	to {
-		color:#FBFAE6
+		color:#FBFAE6;
 	}
 }
 @keyframes mymove4 {
 	from {
-		color:#fff
+		color:#fff;
 	}
 	to {
-		color:#ff0
+		color:#ff0;
 	}
 }
 
-#CONTENT {
-	width:90%;
-	overflow:auto;
+.CONTENT {
+	width:92%;
+	position:relative;
+	top:100px;
+	overflow:hidden;
 	min-height:calc(100% - 70px);
 	margin-left:auto;
 	margin-right:auto;
+	margin-top:auto;
 	padding-left:10px;
 	padding-right:10px;
 	padding-top:30px;
 	background-color:#222222;
-	box-shadow:10px 5px 10px 255 #333,-10px 6px 10px 0 #333
+	box-shadow: 0px 0px 9px 2px #1E1C1C;
+	/*box-shadow:10px 5px 10px 255 #333,-10px 6px 10px 0 #333*/
 }
-#CONTENT h1 {
+.CONTENT h1 {
 	font:18px "Trebuchet MS";
 	color:#f8f8f8;
 	background-color:#666145;
 	padding:4px 4px;
 	width:98%
 }
-#CONTENT p {
+.CONTENT p {
 	font-size:15px;
 	margin-left:10px;
 	margin-top:2px;
 	margin-bottom:5px display:inline-block
 }
-#CONTENT a,a:visited {
+.CONTENT a,a:visited {
 	font-size:15px;
 	color:#AAAAAA;
 	text-decoration:none
 }
-#CONTENT a:hover {
+.CONTENT a:hover {
 	color:#666
 }
-#CONTENT span.bold {
+.CONTENT span.bold {
 	font-weight:900
 }
-#CONTENT form {
+.CONTENT form {
 	font:15px "Trebuchet MS";
 	width:98%
 }
-#CONTENT iframe {
+.CONTENT iframe {
 	height:400px;
 	width:100%
 }
@@ -399,19 +410,23 @@ a.page {
     left: 0;
     top: 0;
     width: 100%; /* Full width */
-    height: 90%; /* Full height */
+    height: 70%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
     background-color: rgb(0,0,0); /* Fallback color */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 .modal-content {
     position: relative;
-    background-color: #222;
+    background-color: #333;
     margin: auto;
     padding: 0;
     border: 1px solid #888;
     width: 80%;
-    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+	height: 90%; 
+   box-shadow: 0 4px 8px 0 #aaa,0 6px 20px 0 rgba(128,128,128,0.19);
+/*
+ box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+box-shadow:10px 5px 10px 255 #333,-10px 6px 10px 0 #333*/
     -webkit-animation-name: animatetop;
     -webkit-animation-duration: 0.4s;
     animation-name: animatetop;
@@ -425,15 +440,6 @@ a.page {
     from {top:-300px; opacity:0}
     to {top:0; opacity:1}
 }
-.modal-header {
-    padding: 2px 16px;
-    background-color: #5cb85c;
-    color: white;
-}
 .modal-body {padding: 2px 16px;}
-.modal-footer {
-    padding: 2px 16px;
-    background-color: #5cb85c;
-    color: white;
-}
+
 

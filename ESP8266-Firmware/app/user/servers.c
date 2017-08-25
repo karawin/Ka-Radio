@@ -22,7 +22,9 @@ const char strsWSOCK[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer Socket fails 
 fd_set readfds;
 xSemaphoreHandle semclient = NULL ;
 
-
+char strsocket[] = {"Socket"};
+char strbind[] = {"Bind"};
+char strlisten[] = {"Listen"};
 
 ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 	//telnet
@@ -72,18 +74,18 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
         tenetserver_addr.sin_port = htons(23);
 		
         if (-1 == (telnetServer_sock = socket(AF_INET, SOCK_STREAM, 0))) {
-			printf (strsTELNET,"create", errno);
+			printf (strsTELNET,strsocket, errno);
 			vTaskDelay(5);	
             break;
         }
         if (-1 == bind(telnetServer_sock, (struct sockaddr *)(&tenetserver_addr), sizeof(struct sockaddr))) {
-			printf (strsTELNET,"Bind", errno);
+			printf (strsTELNET,strbind, errno);
 			close(telnetServer_sock);
 			vTaskDelay(10);	
             break;
         }
         if (-1 == listen(telnetServer_sock, 5)) {
-			printf (strsTELNET,"Listen",errno);
+			printf (strsTELNET,strlisten,errno);
 			close(telnetServer_sock);
 			vTaskDelay(10);	
             break;
@@ -103,18 +105,18 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 		server_addr.sin_port = htons(80);
 
 		if (-1 == (server_sock = socket(AF_INET, SOCK_STREAM, 0))) {
-			printf (strsWSOCK, "socket", errno);
+			printf (strsWSOCK, strsocket, errno);
 			vTaskDelay(5);	
 			break;
 		}
 		if (-1 == bind(server_sock, (struct sockaddr *)(&server_addr), sizeof(struct sockaddr))) {
-			printf (strsWSOCK, "bind",errno);
+			printf (strsWSOCK, strbind,errno);
 			close(server_sock);
 			vTaskDelay(10);	
             break;
 		}
 		if (-1 == listen(server_sock, 5)) {
-			printf (strsWSOCK,"listen",errno);
+			printf (strsWSOCK,strlisten,errno);
 			close(server_sock);
 			vTaskDelay(10);	
 			break;

@@ -10,10 +10,10 @@
 
 xSemaphoreHandle semfile = NULL ;
 
-const char lowmemory[] = { "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nlow memory\n"};
-char strsROK[] =  {"HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n%s"};
+const char strsROK[] STORE_ATTR ICACHE_RODATA_ATTR =  {"HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n%s"};
+const char tryagain[] = {"try again"};
 
-
+const char lowmemory[] STORE_ATTR ICACHE_RODATA_ATTR = { "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nlow memory\n"};
 const char strsMALLOC[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer inmalloc fails for %d\n"};
 const char strsMALLOC1[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer %s malloc fails\n"};
 const char strsSOCKET[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer Socket fails %s errno: %d\n"};
@@ -39,9 +39,16 @@ uint8_t clientIvol = 0;
 void *inmalloc(size_t n)
 {
 	void* ret;
-//	printf ("server Malloc of %d,  Heap size: %d\n",n,xPortGetFreeHeapSize( ));
+//printf ("server Malloc of %d %d,  Heap size: %d\n",n,((n / 32) + 1) * 32,xPortGetFreeHeapSize( ));
 	ret = malloc(n);
-//	if (ret == NULL) printf(strsMALLOC,n);
+/*	if (ret == NULL)//
+	{
+		//printf(strsMALLOC,n);
+		char* test = malloc(10);
+		if (test != NULL) free(test);
+		ret = malloc(n);
+	}	
+*/		
 //	printf ("server Malloc of %x : %d bytes Heap size: %d\n",ret,n,xPortGetFreeHeapSize( ));
 //	if (n <4) printf("Server: incmalloc size:%d\n",n);	
 	return ret;
@@ -67,24 +74,38 @@ ICACHE_FLASH_ATTR struct servFile* findFile(char* name)
 
 ICACHE_FLASH_ATTR void respOk(int conn,char* message)
 {
-//printf("respOk conn: %d\n",conn);
 	char rempty[] = {""};
-	if (message == NULL) message = rempty;
-//printf("respOk msg: %s\n",message);
-	char* fresp = inmalloc(strlen(strsROK)+strlen(message)+15);
-	if (fresp!=NULL)
+	
+	char* fmt= malloc(strlen(strsROK)+16);
+	if (fmt != NULL)
 	{
-		sprintf(fresp,strsROK,"text/plain",strlen(message),message);
-//printf("respOk: %s\n",fresp);
-		write(conn, fresp, strlen(fresp));
-		infree(fresp);
-	}			
+		flashRead(fmt,(int)strsROK,strlen(strsROK));
+		fmt[strlen(strsROK)] = 0;
+		if (message == NULL) message = rempty;
+		char* fresp = inmalloc(strlen(fmt)+strlen(message)+15);
+		if (fresp!=NULL)
+		{
+			sprintf(fresp,fmt,"text/plain",strlen(message),message);
+//printf("ok %s\n",fresp);
+			write(conn, fresp, strlen(fresp));
+			infree(fresp);
+		}		
+		infree(fmt);
+	}	
 //printf("respOk exit\n");
 }
 
 ICACHE_FLASH_ATTR void respKo(int conn)
 {
-			write(conn, lowmemory, strlen(lowmemory));
+	char* fmt= malloc(strlen(lowmemory)+16);
+//printf("ko\n");
+	if (fmt != NULL)
+	{
+		flashRead(fmt,(int)lowmemory,strlen(lowmemory));
+		fmt[strlen(lowmemory)] = 0;
+		write(conn, fmt, strlen(fmt));
+		infree (fmt);
+	}
 }
 
 ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
@@ -94,7 +115,7 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 
 	int length;
 	int progress,part,gpart;
-	char buf[110];
+	char buf[150];
 	char *content;
 	if (strcmp(name,"/style.css") == 0)
 	{
@@ -121,28 +142,29 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 	{
 		char *con = NULL;
 		
-		if (xSemaphoreTake(semfile,500))
+		if (xSemaphoreTake(semfile,1000 ))
 		{				
 			do {
 				gpart /=2;
-				con = (char*)inmalloc((gpart)*sizeof(char)+1);
+				con = (char*)inmalloc((gpart)*sizeof(char));
 				vTaskDelay(5);
 			} while ((con == NULL)&&(gpart >=LIMIT));
 		
 			if ((con == NULL)||(gpart <LIMIT))
 			{
-				sprintf(buf, "HTTP/1.1 500 Internal Server Error\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n", (f!=NULL ? f->type : "text/plain"), 0);
-				write(conn, buf, strlen(buf));
-				printf(PSTR("WebServer serveFile malloc fails%c"),0x0d);
+				//sprintf(buf, "HTTP/1.1 500 Internal Server Error\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n", (f!=NULL ? f->type : "text/plain"), 0);
+				//write(conn, lowmemory, strlen(lowmemory));
+				respKo(conn);
+				printf(PSTR("serveFile malloc fails%c"),0x0d);
 				infree(con);
 				xSemaphoreGive(semfile);
 				return ;
 			}	
 		
 //printf("serveFile socket:%d,  %s. Length: %d  sliced in %d\n",conn,name,length,gpart);		
-//			char strsfROK[] = {"HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n"};
-			sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n", (f!=NULL ? f->type : "text/plain"), length);
-//printf("serveFile send %d bytes\n%s\n",strlen(buf),buf);		
+			sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Encoding: gzip\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n", (f!=NULL ? f->type : "text/plain"), length);
+//printf("serveFile send %d bytes\n%s\n",strlen(buf),buf);	
+			vTaskDelay(1); // why i need it? Don't know. 
 			write(conn, buf, strlen(buf));
 			progress = length;
 			part = gpart;
@@ -160,12 +182,11 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 			xSemaphoreGive(semfile);	
 		} else {respKo(conn); printf(PSTR("semfile fails%c"),0x0D);}
 		infree(con);
-//		vTaskDelay(1);
+		//vTaskDelay(1);
 	}
 	else
 	{
 		respKo(conn);
-		printf(PSTR("semfile fails%c"),0x0D);
 	}
 //	printf("serveFile socket:%d, end\n",conn);
 }
@@ -530,7 +551,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 					sprintf(ibuf, "%d%d", si->ovol,si->port);
 					int json_length = strlen(si->domain) + strlen(si->file) + strlen(si->name) + strlen(ibuf) + 50;
 					buf = inmalloc(json_length + 75);
-					char* fmt=malloc(strlen (strsGSTAT));
+					char* fmt=malloc(strlen (strsGSTAT)+16);
 					if ((buf == NULL)||(fmt == NULL))
 					{	
 						printf(strsMALLOC1,"getStation");
@@ -545,7 +566,6 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 						flashRead(fmt,(int)strsGSTAT,strlen(strsGSTAT));
 						fmt[strlen(strsGSTAT)] = 0;
 						sprintf(buf, fmt,					
-						/*sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: %d\r\n\r\n{\"Name\":\"%s\",\"URL\":\"%s\",\"File\":\"%s\",\"Port\":\"%d\",\"ovol\":\"%d\"}",*/
 						json_length, si->name, si->domain, si->file,si->port,si->ovol);
 //				printf("getStation Buf len:%d : %s\n",strlen(buf),buf);						
 						write(conn, buf, strlen(buf));
@@ -559,18 +579,21 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				infree (id);
 			} 			
 		}
-	} else if(strcmp(name, "/setStation") == 0) {
+	} else if(strcmp(name, "/setStation") == 0) 
+	{
 		if(data_size > 0) {
-//			printf("data:%s\n",data);
+//printf("data:%s\n",data);
 			char* nb = getParameterFromResponse("nb=", data, data_size);
 			uint16_t unb,uid = 0;
 //printf("nb init:%s\n",nb);
+			bool pState = getState();  // remember if we are playing
 			if (nb) {unb = atoi(nb); infree(nb);}
 			else unb = 1;
 //printf("unb init:%d\n",unb);
 			char* id; char* url; char* file; char* name; char* port; char* ovol;
 			struct shoutcast_info *si =  inmalloc(sizeof(struct shoutcast_info)*unb);
 			struct shoutcast_info *nsi ;
+			
 			if (si == NULL) {
 				printf(strsMALLOC1,"setStation");
 				respKo(conn);
@@ -613,13 +636,16 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				infree(file);
 				infree(url);
 				infree(id);
+				
 				data = strstr(data,"&&")+2;
 //				printf("si:%x, nsi:%x, addr:%x\n",si,nsi,data);
 			}
 //printf("save station: %d, unb:%d, addr:%x\n",uid,unb,si);
 			saveMultiStation(si, uid,unb);
 //printf("save station return: %d, unb:%d, addr:%x\n",uid,unb,si);
-			infree (si);		
+			infree (si);	
+			if (pState != getState()) 
+				if (pState) {clientConnect();vTaskDelay(200);}	 //we was playing so start again the play		
 		}
 	} else if(strcmp(name, "/play") == 0) {
 		if(data_size > 4) {
@@ -651,7 +677,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			}			
 		}
 	} else if(strcmp(name, "/rauto") == 0) {
-		char *buf = inmalloc( 95);
+		char *buf = inmalloc( strlen(strsRAUTO)+16);
 		if (buf == NULL)
 		{	
 			printf(strsMALLOC1,"post rauto");
@@ -714,7 +740,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 //		printf("icy start header %x  len:%d vollen:%d vol:%s\n",header,json_length,strlen(vol),vol);
 		
 		char *buf = inmalloc( json_length + 75);
-		char* fmt=malloc(strlen (strsICY));
+		char* fmt=malloc(strlen (strsICY)+16);
 		if ((buf == NULL) || (fmt == NULL))
 		{	
 			//printf("post icy\n");
@@ -837,7 +863,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			sprintf(macstr,MACSTR,MAC2STR(macaddr));
 
 			char *buf = inmalloc( json_length + 95);
-			char* fmt=malloc(strlen (strsWIFI)+1);
+			char* fmt=malloc(strlen (strsWIFI)+16);
 			if ((buf == NULL) || (fmt == NULL))
 			{	
 				//printf("post wifi\n");
@@ -885,7 +911,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 //printf("httpServerHandleConnection  %20c \n",&buf);
 	if( (c = strstr(buf, "GET ")) != NULL)
 	{
-//		printf("GET socket:%d str:\n%s\n",conn,buf);
+//printf("GET socket:%d str:\n%s\n",conn,buf);
 		if( ((d = strstr(buf,"Connection:")) !=NULL)&& ((d = strstr(d," Upgrade")) != NULL))
 		{  // a websocket request
 			websocketAccept(conn,buf,buflen);	
@@ -974,9 +1000,9 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 				if(strlen(c) > 32) {
 					respKo(conn); 
 					return true;}
-//				printf("GET file  socket:%d file:%s\n",conn,c);
+//printf("GET file  socket:%d file:%s\n",conn,c);
 				serveFile(c, conn);
-//				printf("GET end socket:%d file:%s\n",conn,c);
+//printf("GET end socket:%d file:%s\n",conn,c);
 			}
 		}
 	} else if( (c = strstr(buf, "POST ")) != NULL) {
@@ -1040,7 +1066,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 					printf(strsSOCKET,"client_sock",errno);
 					vTaskDelay(10);	
 					break;
-				} else printf(strsSOCKET,"try again",errno);
+				} else printf(strsSOCKET,tryagain,errno);
 			}	
 			char* bend = NULL;
 			do {
@@ -1074,7 +1100,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 									printf(strsSOCKET,"read",errno);
 									vTaskDelay(10);	
 									break;
-								} else printf(strsSOCKET,"Try again",errno);
+								} else printf(strsSOCKET,tryagain,errno);
 							}
 							recbytes += recb;
 						}
@@ -1098,7 +1124,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 							printf(strsSOCKET,"read",errno);
 							vTaskDelay(10);	
 							break;
-						} else printf(strsSOCKET,"Try again",errno);				
+						} else printf(strsSOCKET,tryagain,errno);				
 					}
 					recbytes += recb;
 				} //until "\r\n\r\n"

@@ -9,17 +9,24 @@
 #include "interface.h"
 
 void extramInit() {
-	char test[]=  "FFFFFFFFFFFFFFFF";
-	char testram[]= "0123456789ABCDEF";
+	char test[17]   = {"FFFFFFFF"};
+	char testram[17]= {"01234567"};;
+
 	gpio16_output_conf();
 	gpio16_output_set(1);
 	externram = false;
 	spi_clock(HSPI, 4, 10); //2MHz
-	extramWrite(16, 0, testram);
-	extramRead(16, 0, test);
+	extramWrite(strlen(test), 0, testram);
+	extramRead(strlen(test), 0, test);
 	if (memcmp(test,testram,16) == 0) 
 		externram = true;	
-	printf(PSTR("\n=> extraram state: %d 0x%x %s\n"),externram,test[0],test );
+	//printf(PSTR("\n=> extraram state: %d 0x%x %s\n"),externram,test[0],test );
+	if (externram)
+		printf(PSTR("\nExternal ram detected%c"),0x0d);
+	else
+		printf(PSTR("\nExternal ram not detected%c"),0x0d);
+	
+
 }
 
 uint32_t extramRead(uint32_t size, uint32_t address, uint8_t *buffer) {

@@ -2,8 +2,15 @@
 
 ### Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
 ## Basic informations<BR/>
+###Release 1.6- Built on 2017/08/25
+New:<br/>
+    <ul>
+		<li>Header stays on top of the web page </li></br>
+		<li>gzipped html tranfert. More stable and improved speed</li></br>
+		<li>The page content follows the header size.</li></br>
+    </ul><br/>
 ###Release 1.5- Built on 2017/08/07
-New:
+New:<br/>
     <ul>
 		<li>Deeply tuned and optimized</li></br>
 		<li>Added: a button erase on the station edit</li></br>

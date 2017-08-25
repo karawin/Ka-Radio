@@ -15,7 +15,11 @@ function openwebsocket(){
 		console.log("onmessage:"+event.data);
 		if (arr["meta"] == "") 
 		{ document.getElementById('meta').innerHTML = karadio;setMainHeight(curtab);}
-		if (arr["meta"]) {	document.getElementById('meta').innerHTML = arr["meta"].replace(/\\/g,"");setMainHeight(curtab);}
+		if (arr["meta"]) 
+			{	document.getElementById('meta').innerHTML = arr["meta"].replace(/\\/g,"");
+				//document.getElementById("CONTENT").style.marginTop = document.getElementById('HEADER').clientHeight+"px" ;
+				setMainHeight(curtab);
+			}
 		if (arr["wsvol"]) onRangeVolChange(arr['wsvol'],false); 
 		if (arr["wsicy"]) icyResp(arr["wsicy"]); 
 		if (arr["wssound"]) soundResp(arr["wssound"]); 
@@ -787,6 +791,7 @@ function checkversion()
     }
 	 xhr.onload = function() {
 		document.getElementById('Version').innerHTML = xhr.responseText;	
+		document.getElementById('newrelease').innerHTML = document.getElementById('firmware_last').innerHTML;
     }
 	xhr.open("GET","http://KaraDio.karawin.fr/version.php", false);
 	try{
@@ -1091,13 +1096,29 @@ function getSelIndex() {
 		xhr.setRequestHeader(content,ctype);
 		xhr.send();	
 }	*/
+
 function setMainHeight(name) {
+	intervalid =window.setTimeout(setMainHeightd,2,name );	
+}
+
+function setMainHeightd(name) {
 	var minh = window.innerHeight,
-		h = document.getElementById(name).scrollHeight + 200 ;
+		h = document.getElementById(name).scrollHeight + 2* document.getElementById("HEADER").offsetHeight+50;
 	if(h<minh) h = minh;
 	document.getElementById("MAIN").style.height = h +"px";
+	document.getElementById("MAINCONTENT").style.top = document.getElementById('HEADER').clientHeight+"px" ;
 //	checkwebsocket();
 }
+
+function resizeContent(){
+	if (document.getElementById("MAINCONTENT") != null) 
+	{
+		setMainHeight(curtab);
+		//document.getElementById("MAINCONTENT").style.top = document.getElementById('HEADER').clientHeight+"px" ;
+	}
+}
+window.onresize = resizeContent;
+
 
 function printList()
 {

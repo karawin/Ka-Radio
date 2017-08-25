@@ -58,8 +58,8 @@ struct hostent *server = NULL;
 
 void *incmalloc(size_t n)
 {
-	void* ret;
-//os_printf ("Client malloc of %d,  Heap size: %d\n",n,xPortGetFreeHeapSize( ));
+	void* ret;	
+//printf ("Client malloc of %d %d,  Heap size: %d\n",n,((n / 32) + 1) * 32,xPortGetFreeHeapSize( ));
 	ret = malloc(n);
 	if (ret == NULL) printf(strcMALLOC,n);
 //	if (n <4) os_printf("Client: incmalloc size:%d\n",n);	
@@ -216,6 +216,10 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 					new[j++] =(str)[i] ;
 				} else
 				if (str[i] == '/') {
+					new[j++] = '\\';
+					new[j++] =(str)[i] ;
+				}
+				if (str[i] == '\\') {
 					new[j++] = '\\';
 					new[j++] =(str)[i] ;
 				}
@@ -386,6 +390,7 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 			char* title = incmalloc(strlen(t_end)+15);
 			if (title != NULL)
 			{
+//printf("sprint%d\n",1);
 				sprintf(title,"{\"meta\":\"%s\"}",t_end); 
 				websocketbroadcast(title, strlen(title));
 				incfree(title,"title");
@@ -434,6 +439,7 @@ ICACHE_FLASH_ATTR void wsVol(char* vol)
 	char answer[21];
 	if (vol != NULL)
 	{	
+//printf("sprint%d\n",2);
 		sprintf(answer,"{\"wsvol\":\"%s\"}",vol);
 		websocketbroadcast(answer, strlen(answer));
 	} 
@@ -442,9 +448,10 @@ ICACHE_FLASH_ATTR void wsVol(char* vol)
 ICACHE_FLASH_ATTR void wsMonitor()
 {
 		char answer[300];
-		memset(&answer,0,300);
+		memset(answer,0,300);
 		if ((clientPath[0]!= 0))
 		{
+//printf("sprint%d\n",3);
 			sprintf(answer,"{\"monitor\":\"http://%s:%d%s\"}",clientURL,clientPort,clientPath);
 			websocketbroadcast(answer, strlen(answer));
 		}
@@ -453,7 +460,7 @@ ICACHE_FLASH_ATTR void wsMonitor()
 ICACHE_FLASH_ATTR void wsHeaders()
 {
 	uint8_t header_num;
-	char currentSt[6]; 
+	char currentSt[6]; 	
 	sprintf(currentSt,"%d",currentStation);
 	char* not2;
 	not2 = header.members.single.notice2;
@@ -473,7 +480,7 @@ ICACHE_FLASH_ATTR void wsHeaders()
 		;
 	char* wsh = incmalloc(json_length+1);
 	if (wsh == NULL) {printf(strcMALLOC1,"wsHeader");return;}
-
+//printf("sprint%d\n",5);
 	sprintf(wsh,"{\"wsicy\":{\"curst\":\"%s\",\"descr\":\"%s\",\"meta\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\"}}",
 			currentSt,
 			(header.members.single.description ==NULL)?"":header.members.single.description,
@@ -484,7 +491,7 @@ ICACHE_FLASH_ATTR void wsHeaders()
 			(header.members.single.notice1 ==NULL)?"":header.members.single.notice1,
 			(not2 ==NULL)?"":not2 ,
 			(header.members.single.genre ==NULL)?"":header.members.single.genre); 
-//	os_printf("WSH: len:%d  \"%s\"\n",strlen(wsh),wsh);
+//printf("WSH: len:%d  \"%s\"\n",strlen(wsh),wsh);
 	websocketbroadcast(wsh, strlen(wsh));	
 	incfree (wsh,"wsh");
 }	
@@ -525,18 +532,21 @@ ICACHE_FLASH_ATTR bool clientPrintHeaders()
 
 ICACHE_FLASH_ATTR bool clientSaveOneHeader(char* t, uint16_t len, uint8_t header_num)
 {
+	char* tt;
 	if(header.members.mArr[header_num] != NULL) 
 		incfree(header.members.mArr[header_num],"headernum");
-	header.members.mArr[header_num] = incmalloc((len+1)*sizeof(char));
-	if(header.members.mArr[header_num] == NULL)
+	tt = incmalloc((len+1)*sizeof(char));
+	if(tt == NULL)
 	{
 		printf(strcMALLOC1,"clientSOneH");
 		return false;
 	}	
+	
 	int i;
-	for(i = 0; i<len+1; i++) header.members.mArr[header_num][i] = 0;
-	strncpy(header.members.mArr[header_num], t, len);
-	header.members.mArr[header_num] = stringify(header.members.mArr[header_num],len);
+	for(i = 0; i<len+1; i++) tt[i] = 0;
+	strncpy(tt, t, len);
+//	header.members.mArr[header_num] = stringify(header.members.mArr[header_num],len);
+	header.members.mArr[header_num] = stringify(tt,len); //tt is freed here
 	vTaskDelay(10);
 	clientPrintOneHeader(header_num);
 //	os_printf("header after num:%d addr:0x%x  cont:\"%s\"\n",header_num,header.members.mArr[header_num],header.members.mArr[header_num]);
@@ -657,7 +667,7 @@ ICACHE_FLASH_ATTR void clientSilentDisconnect()
 ICACHE_FLASH_ATTR void clientDisconnect(const char* from)
 {
 	//connect = 0;
-	char* lfrom = malloc(strlen(from)+1);
+	char* lfrom = malloc(strlen(from)+16);
 	flashRead(lfrom,(int)from,strlen(from));
 	lfrom[strlen(from)] = 0;
 	xSemaphoreGive(sDisconnect);
@@ -705,10 +715,10 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 	case C_PLAYLIST:
          if (!clientParsePlaylist(pdata)) //need more
 		  cstatus = C_PLAYLIST1;
-		else {clientDisconnect(PSTR("C_PLAYLIST"));  }
+		else {clientDisconnect(PSTR("C_PLIST"));  }
     break;
 	case C_PLAYLIST1:
-       clientDisconnect(PSTR("C_PLAYLIST1"));	   
+       clientDisconnect(PSTR("C_PLIST1"));	   
         clientParsePlaylist(pdata) ;//more?
 		cstatus = C_PLAYLIST;
 	break;
@@ -723,7 +733,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 			{
 //printf("Len=%d,\n %s\n",len,pdata);
 				kprintf(PSTR("Header: Moved%c"),0x0d);
-				clientDisconnect(PSTR("C_HEADER"));
+				clientDisconnect(PSTR("C_HDER"));
 				clientParsePlaylist(pdata);
 				cstatus = C_PLAYLIST;				
 			}	
@@ -1057,8 +1067,8 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 		strcpy(useragent,device->ua);
 		if (strlen(useragent) == 0) 
 		{
-			strcpy(useragent,"Karadio/1.3");
-			strcpy(device->ua,"Karadio/1.3");
+			strcpy(useragent,"Karadio/1.5");
+			strcpy(device->ua,useragent);
 		}	
 		free(device);
 	}
@@ -1098,17 +1108,19 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				if (t0 != NULL)  // a playlist asked
 				{
 				  cstatus = C_PLAYLIST;
+//printf("sprint%d\n",6);				  
 				  sprintf(bufrec, "GET %s HTTP/1.0\r\nHOST: %s\r\n\r\n", clientPath,clientURL); //ask for the playlist
 			    } 
 				else 
 				{
 //					if ((strcmp(clientPath,"/") ==0)&&(cstatus != C_HEADER0)) clientSetPath("/;");
 					if (strcmp(clientURL,"stream.pcradio.biz") ==0) strcpy(useragent,"pcradio");
+//printf("sprint%d\n",7);					
 					sprintf(bufrec, "GET %s HTTP/1.1\r\nHost: %s\r\nicy-metadata: 1\r\nUser-Agent: %s\r\n\r\n", clientPath,clientURL,useragent); 
 				}
 //printf("st:%d, Client Sent:\n%s\n",cstatus,bufrec);
-				send(sockfd, bufrec, strlen(bufrec), 0);								
 				xSemaphoreTake(sConnected, 0);
+				send(sockfd, bufrec, strlen(bufrec), 0);								
 ///// set timeout
 				if (once == 0)
 					timeout.tv_sec = 10000; // bug *1000 for seconds
