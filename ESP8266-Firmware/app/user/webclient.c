@@ -219,10 +219,11 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 					new[j++] = '\\';
 					new[j++] =(str)[i] ;
 				}
+				else				
 				if (str[i] == '\\') {
 					new[j++] = '\\';
 					new[j++] =(str)[i] ;
-				}
+				}				
 				else	// pseudo ansi utf8 convertion
 					if ((str[i] > 192) && (str[i+1] < 0x80)){ // 128 = 0x80
 					new[j++] = 195; // 192 = 0xC0   195 = 0xC3
@@ -239,7 +240,7 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 			incfree(str,"str");
 
 			new = realloc(new,j+1); // adjust
-//			os_printf("stringify: exit: len:%d  \"%s\"\n",j,new);
+//printf("stringify: exit: len:%d  \"%s\"\n",j,new);
 			return new;		
 		} else 
 		{
