@@ -142,7 +142,7 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 	{
 		char *con = NULL;
 		
-		if (xSemaphoreTake(semfile,1000 ))
+		if (xSemaphoreTake(semfile,portMAX_DELAY ))
 		{				
 			do {
 				gpart /=2;
@@ -380,12 +380,13 @@ ICACHE_FLASH_ATTR void playStationInt(int sid) {
 
 	if(si != NULL &&si->domain && si->file) {
 			int i;
-			vTaskDelay(5);
+			vTaskDelay(4);
+//			clientSilentDisconnect();
 			clientDisconnect(PSTR("playStationInt"));
 			for (i = 0;i<100;i++)
 			{
 				if(!clientIsConnected())break;
-				vTaskDelay(4);
+				vTaskDelay(5);
 			}
 			clientSetName(si->name,sid);
 			clientSetURL(si->domain);
@@ -404,21 +405,22 @@ ICACHE_FLASH_ATTR void playStationInt(int sid) {
 	sprintf(answer,"{\"wsstation\":\"%d\"}",sid);
 	websocketbroadcast(answer, strlen(answer));
 	device = getDeviceSettings();
-//	printf ("playstationInt: %d, device: %d\n",sid,device->currentstation);
-	if (device->currentstation != sid)
+	if (device != NULL)
 	{
-		device->currentstation = sid;
-		saveDeviceSettings(device);
+//	printf ("playstationInt: %d, device: %d\n",sid,device->currentstation);
+		if (device->currentstation != sid)
+		{
+			device->currentstation = sid;
+			saveDeviceSettings(device);
+		}
+		infree(device);
 	}
-	infree(device);
-
 }
 	
 ICACHE_FLASH_ATTR void playStation(char* id) {
 	struct shoutcast_info* si;
 	char answer[22];
 	int uid;
-//	struct device_settings *device;
 	uid = atoi(id) ;
 //	printf ("playstation: %d\n",uid);
 	if (uid < 255)
@@ -796,6 +798,13 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		if(data_size > 0) {
 			device = getDeviceSettings();
 			device1 = getDeviceSettings1();
+			if ((device ==NULL)||(device1==NULL))
+			{
+				infree(device);
+				infree(device1);
+				respKo(conn);
+				return;
+			}
 			char* valid = getParameterFromResponse("valid=", data, data_size);
 			if(valid != NULL) if (strcmp(valid,"1")==0) val = true;
 			char* ssid = getParameterFromResponse("ssid=", data, data_size);
@@ -915,7 +924,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 		if( ((d = strstr(buf,"Connection:")) !=NULL)&& ((d = strstr(d," Upgrade")) != NULL))
 		{  // a websocket request
 			websocketAccept(conn,buf,buflen);	
-			
+//printf ("websocketAccept socket: %d\n",conn);
 			return false;
 		} else
 		{
@@ -1058,15 +1067,16 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 		if (setsockopt (client_sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
 			printf(strsSOCKET,"setsockopt",errno);
 
-		while (((recbytes = read(client_sock , buf, reclen)) > 0)) 
+		while (((recbytes = read(client_sock , buf, reclen)) != 0)) 
 		{ // For now we assume max. reclen bytes for request with 2*reclen extention if needed
 			if (recbytes < 0) {
+				break;
 				if (errno != EAGAIN )
 				{
 					printf(strsSOCKET,"client_sock",errno);
 					vTaskDelay(10);	
 					break;
-				} else printf(strsSOCKET,tryagain,errno);
+				} else {printf(strsSOCKET,tryagain,errno);break;}
 			}	
 			char* bend = NULL;
 			do {
@@ -1159,7 +1169,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 		}
 	}
 	xSemaphoreGive(semclient);	
-	
+//printf ("Give client_sock: %d\n",client_sock);		
 /*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 	printf("watermark serverClientTask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);	
 */

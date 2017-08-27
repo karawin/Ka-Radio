@@ -339,7 +339,6 @@ void uartInterfaceTask(void *pvParameters) {
 	initLed(); // start the timer for led. This will kill the ttest task to free memory
 	
 	
-	
 //autostart	
 	kprintf(PSTR("autostart: playing:%d, currentstation:%d\n"),device->autostart,device->currentstation);
 	currentStation = device->currentstation;
@@ -500,11 +499,13 @@ void user_init(void)
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
 	xTaskHandle pxCreatedTask;
     Delay(200);
+	getFlashChipRealSize();
 	device = getDeviceSettings();
 	uspeed = device->uartspeed;
 	free(device);
-	uspeed = checkUart(uspeed);
+	uspeed = checkUart(uspeed);	
 	uart_div_modify(0, UART_CLK_FREQ / uspeed);//UART_SetBaudrate(0,uspeed);
+	printf("\nuart speed: %d\n",uspeed);
 	VS1053_HW_init(); // init spi
 //	test_upgrade();
 	extramInit();
@@ -520,6 +521,7 @@ void user_init(void)
 	
     flash_size_map size_map = system_get_flash_size_map();
 	printf (PSTR("size_map: %d\n"),size_map);
+	printf("Flash size: %d\n",getFlashChipRealSize());
 	
 	xTaskCreate(testtask, "t0", 140, NULL, 1, &pxCreatedTask); // DEBUG/TEST 130
 	printf(striTASK,"t0",pxCreatedTask);

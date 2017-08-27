@@ -90,16 +90,17 @@ int32_t recbytes = 0;
 
 	if ((!istelnet(tsocket ))&&(telnetnewclient(tsocket))) 
 	{
-			char * fmt = malloc(strlen(strtWELCOME)+16);
+		char * fmt = malloc(strlen(strtWELCOME)+16);
+		if (fmt != NULL)
+		{			
 			flashRead(fmt,strtWELCOME,strlen(strtWELCOME));
 			fmt[strlen(strtWELCOME)] = 0;
 //			printf("telnet write accept\n");
-//			write(tsocket, NONEG,3);// no negociation
 			write(tsocket, fmt, strlen(strtWELCOME));  // reply to accept	
 			free(fmt);
 			return true;
-	}
-	else close(tsocket);
+		} else close(tsocket);
+	} else close(tsocket);
 	return false;
 }
 
@@ -138,6 +139,7 @@ void telnetWrite(uint32_t lenb,const char *fmt, ...)
 	}
 	va_end(ap);
 	buf = realloc(buf,rlen+1);
+	if (buf == NULL) return;
 	// write to all clients
 	for (i = 0;i<NBCLIENTT;i++)	
 		if (istelnet( telnetclients[i]))

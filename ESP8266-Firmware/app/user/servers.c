@@ -198,8 +198,9 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 					{
 //						printf ("Heap size server: %d\n",xPortGetFreeHeapSize( ));
 //						printf ("Accept socket %d\n",client_sock);
-						if (xSemaphoreTake(semclient,400))
-						{ 										
+						if (xSemaphoreTake(semclient,portMAX_DELAY))
+						{
+//printf ("Take client_sock: %d\n",client_sock);							
 							while (xTaskCreate( serverclientTask,
 								"t10",
 								stack,
@@ -211,7 +212,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 //printf(PSTR("Server low mem. Retrying...%c"),0x0d);
 							}	
 							vTaskDelay(4);							
-							xSemaphoreGive(semclient);	
+//							xSemaphoreGive(semclient);	
 							break; // while 1
 						}
 						else  // xSemaphoreTake fails

@@ -669,11 +669,15 @@ ICACHE_FLASH_ATTR void clientDisconnect(const char* from)
 {
 	//connect = 0;
 	char* lfrom = malloc(strlen(from)+16);
-	flashRead(lfrom,(int)from,strlen(from));
-	lfrom[strlen(from)] = 0;
+	if (lfrom != NULL)
+	{	
+		flashRead(lfrom,(int)from,strlen(from));
+		lfrom[strlen(from)] = 0;
+		kprintf(CLISTOP,lfrom);
+		incfree(lfrom,"disc");
+	}
 	xSemaphoreGive(sDisconnect);
-	kprintf(CLISTOP,lfrom);
-	incfree(lfrom,"disc");
+
 	if (!ledStatus) gpio2_output_set(1);
 	vTaskDelay(10);
 //	clearHeaders();

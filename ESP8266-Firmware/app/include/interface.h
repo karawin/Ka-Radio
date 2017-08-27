@@ -7,10 +7,8 @@
 
 
 #define RELEASE "1.6"
-#define REVISION "0"
+#define REVISION "1"
 
-// uncomment for an ESP07 and generate with genallmap2.sh
-//#define ESP07
 
 extern unsigned short adcdiv;	
 void switchCommand(void );

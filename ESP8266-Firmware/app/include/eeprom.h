@@ -59,6 +59,7 @@ struct shoutcast_info_ext {
 	uint8_t  futur[256];
 };	
 
+uint32_t getFlashChipRealSize(void);
 uint8_t eeGetByte(uint32_t address);
 void eeSetByte(uint32_t address, uint8_t data);
 uint32_t eeGet4Byte(uint32_t address);

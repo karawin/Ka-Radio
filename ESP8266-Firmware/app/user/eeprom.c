@@ -14,6 +14,7 @@
 /*#define EEPROM_START	0x3F0000 // Last 64k of flash (32Mbits or 4 MBytes)
 #define EEPROM_SIZE		0xBFFF	 // until xC000 (48k) espressif take the end
 #define NBSTATIONS		192*/
+/*
 #ifdef ESP07
 #define EEPROM_OLDSTART	0x0F0000 // Last 64k of flash (8Mbits or 1 MBytes)
 #define EEPROM_START	0x0E0000 // Last 128k of flash (8Mbits or 1 MBytes)
@@ -23,6 +24,7 @@
 #define EEPROM_START	0x3E0000 // Last 128k of flash (32Mbits or 4 MBytes)
 #define EEPROM_START1	0x3D0000 // Last 128k of flash (32Mbits or 4 MBytes)
 #endif
+*/
 #define EEPROM_SIZE		0xFFFF	 // until xffff , 
 #define NBOLDSTATIONS	192
 #define NBSTATIONS		255
@@ -40,15 +42,18 @@ const char streERASE[] STORE_ATTR ICACHE_RODATA_ATTR = {"erase setting1 (only on
 const char streGETDEVICE[] STORE_ATTR ICACHE_RODATA_ATTR = {"getDeviceSetting%d fails\n"};
 const char streSETDEVICE[] STORE_ATTR ICACHE_RODATA_ATTR = {"saveDeviceSetting%d:  null\n"};
 
+uint32_t Eeprom_start;
+uint32_t Eeprom_start1;
+
 //uint32_t eebuf[1024];
 /*
 ICACHE_FLASH_ATTR uint8_t eeGetByte(uint32_t address) { // address = number of 1-byte parts from beginning
 	uint8_t t = 0;
-	spi_flash_read(EEPROM_START + address, (uint32 *)&t, 1);
+	spi_flash_read(Eeprom_start + address, (uint32 *)&t, 1);
 	return t;
 }
 ICACHE_FLASH_ATTR void eeSetByte(uint32_t address, uint8_t data) {
-	uint32_t addr = (EEPROM_START + address) & 0xFFF000;
+	uint32_t addr = (Eeprom_start + address) & 0xFFF000;
 	spi_flash_read(addr, (uint32 *)eebuf, 4096);
 	spi_flash_erase_sector(addr >> 12);
 	eebuf[address & 0xFFF] = data;
@@ -57,12 +62,12 @@ ICACHE_FLASH_ATTR void eeSetByte(uint32_t address, uint8_t data) {
 ICACHE_FLASH_ATTR uint32_t eeGet4Byte(uint32_t address) { // address = number of 4-byte parts from beginning
 	address *= 4;
 	uint32_t t = 0;
-	spi_flash_read(EEPROM_START + address, (uint32 *)&t, 4);
+	spi_flash_read(Eeprom_start + address, (uint32 *)&t, 4);
 	return t;
 }
 ICACHE_FLASH_ATTR void eeSet4Byte(uint32_t address, uint32_t data) {
 	address *= 4;
-	uint32_t addr = (EEPROM_START + address) & 0xFFF000;
+	uint32_t addr = (Eeprom_start + address) & 0xFFF000;
 	spi_flash_read(addr, (uint32 *)eebuf, 4096);
 	spi_flash_erase_sector(addr >> 12);
 	eebuf[(address/4) & 0xFFF] = data;
@@ -104,6 +109,17 @@ uint32_t* eebuf= malloc(4096);
 }
 */
 
+uint32_t getFlashChipRealSize(void)
+{
+	uint32_t fSize = 1 << ((spi_flash_get_id() >> 16) & 0xFF);
+	Eeprom_start = fSize - 0x20000;
+	Eeprom_start1 = Eeprom_start - 0x10000;
+	printf("Eeprom_start: %x\nEeprom_start1: %x\n",Eeprom_start,Eeprom_start1);
+	
+    return (1 << ((spi_flash_get_id() >> 16) & 0xFF));
+}
+
+
 ICACHE_FLASH_ATTR void eeGetDatax(uint32_t eeprom, int address, void* buffer, int size) { // address, size in BYTES !!!!
 int result;
 //printf("eeGetDatax, eeprom + address= %d, size= %d\n",eeprom + address,  size);
@@ -112,10 +128,10 @@ int result;
 
 ICACHE_FLASH_ATTR void eeGetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
 //printf("eeGetData, address= %d, size= %d\n", address,  size);
-	eeGetDatax(EEPROM_START,address,buffer,size);
+	eeGetDatax(Eeprom_start,address,buffer,size);
 }
 ICACHE_FLASH_ATTR void eeGetData1(int address, void* buffer, int size) { // address, size in BYTES !!!!
-	eeGetDatax(EEPROM_START1,address,buffer,size);
+	eeGetDatax(Eeprom_start1,address,buffer,size);
 }
 
 ICACHE_FLASH_ATTR bool eeSetDatax(uint32_t eeprom,int address, void* buffer, int size) { // address, size in BYTES !!!!
@@ -159,17 +175,17 @@ return true;
 }
 
 ICACHE_FLASH_ATTR bool eeSetData(int address, void* buffer, int size) { // address, size in BYTES !!!!
-	return eeSetDatax(EEPROM_START, address, buffer, size);
+	return eeSetDatax(Eeprom_start, address, buffer, size);
 }
 ICACHE_FLASH_ATTR bool  eeSetData1(int address, void* buffer, int size) { // address, size in BYTES !!!!
-	return eeSetDatax(EEPROM_START1, address, buffer, size);
+	return eeSetDatax(Eeprom_start1, address, buffer, size);
 }
 
 ICACHE_FLASH_ATTR void eeSetClear(int address,uint8_t* eebuf) { // address, size in BYTES !!!!
 		int i;
 		spi_clock(HSPI, 4, 10); //2MHz
 		WRITE_PERI_REG(0x60000914, 0x73); //WDT clear
-		uint32_t sector = (EEPROM_START + address) & 0xFFF000;
+		uint32_t sector = (Eeprom_start + address) & 0xFFF000;
 		spi_flash_erase_sector(sector >> 12);
 		for(i=0; i<4096; i++) eebuf[i] = 0;	
 		spi_flash_write(sector, (uint32 *)eebuf, 4096);
@@ -179,7 +195,7 @@ ICACHE_FLASH_ATTR void eeSetClear1(int address,uint8_t* eebuf) { // address, siz
 		int i;
 		spi_clock(HSPI, 4, 10); //2MHz
 		WRITE_PERI_REG(0x60000914, 0x73); //WDT clear
-		uint32_t sector = (EEPROM_START1 + address) & 0xFFF000;
+		uint32_t sector = (Eeprom_start1 + address) & 0xFFF000;
 		spi_flash_erase_sector(sector >> 12);
 		for(i=0; i<4096; i++) eebuf[i] = 0;	
 		spi_flash_write(sector, (uint32 *)eebuf, 4096);

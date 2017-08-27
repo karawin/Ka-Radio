@@ -397,12 +397,14 @@ char *buf = NULL;
 		if ((!iswebsocket(wsocket ))&&(websocketnewclient(wsocket))) 
 		{
 			recbytes = decodeHttpMessage (bufin, buf);
-			buf[recbytes] = 0;
-//			printf("ws write accept request: \"%s\" len:%d\n",buf,recbytes);
-			write(wsocket, buf, recbytes);  // reply to accept	
+			buf[recbytes+1] = 0;
+//printf("ws write accept request:\n \"%s\" len:%d  socket: %d\n",buf,recbytes,wsocket);
+			write(wsocket, buf, strlen(buf));  // reply to accept	
 		}
 		inwfree(buf,"websAccept");
-	}
+	} 
+//else printf("ws write accept request fails\n");
+		
 }
 
 ICACHE_FLASH_ATTR int websocketRead(int conn)
