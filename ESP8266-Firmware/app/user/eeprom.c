@@ -234,7 +234,7 @@ int i = 0;
 	if (buffer != NULL)
 	{
 		for(i=0; i<4096; i++) buffer[i] = 0;
-		printf(streERASE,i);		
+		printf(streERASE);		
 		for(i=0; i<EEPROM_SIZE; i+=4096) {
 //			printf("erase from %x \n",i);
 			eeSetClear1(i,buffer);
@@ -248,7 +248,6 @@ int i = 0;
 ICACHE_FLASH_ATTR void eeEraseStations() {
 	uint8_t* buffer = malloc(4096);
 	int i=0;
-	int j;
 	while (buffer == NULL) 
 	{
 		if (++i > 10) break;

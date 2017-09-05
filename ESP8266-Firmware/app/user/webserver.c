@@ -25,10 +25,6 @@ const char strsGSTAT[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nCont
 
 
 
-
-
-//xSemaphoreHandle semclient = NULL ;
-
 os_timer_t sleepTimer;
 uint32_t sleepDelay;
 os_timer_t wakeTimer;
@@ -1101,16 +1097,19 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 						if ((bend - buf +cl)> recbytes)
 						{	
 //printf ("Server: try receive more:%d bytes. reclen = %d, must be %d\n", recbytes,reclen,bend - buf +cl);
-							while(((recb = read(client_sock , buf+recbytes, cl))==0));
+							while(((recb = read(client_sock , buf+recbytes, cl))==0)){vTaskDelay(1);printf(".");}
 							buf[recbytes+recb] = 0;
 //printf ("Server: received more now: %d bytes, rec:\n%s\nEnd\n", recbytes+recb,buf);
 							if (recb < 0) {
-								if (errno != EAGAIN )
+								respKo(client_sock);
+								break;
+/*								if (errno != EAGAIN )
 								{
 									printf(strsSOCKET,"read",errno);
 									vTaskDelay(10);	
 									break;
 								} else printf(strsSOCKET,tryagain,errno);
+*/								
 							}
 							recbytes += recb;
 						}
@@ -1129,12 +1128,15 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 					while(((recb= read(client_sock , buf+recbytes, reclen-recbytes))==0)) vTaskDelay(1);
 //					printf ("Server: received more for end now: %d bytes\n", recbytes+recb);
 					if (recb < 0) {
-						if (errno != EAGAIN )
+						respKo(client_sock);
+						break;
+/*						if (errno != EAGAIN )
 						{
 							printf(strsSOCKET,"read",errno);
 							vTaskDelay(10);	
 							break;
-						} else printf(strsSOCKET,tryagain,errno);				
+						} else printf(strsSOCKET,tryagain,errno);	
+*/	
 					}
 					recbytes += recb;
 				} //until "\r\n\r\n"

@@ -505,10 +505,11 @@ void user_init(void)
 	free(device);
 	uspeed = checkUart(uspeed);	
 	uart_div_modify(0, UART_CLK_FREQ / uspeed);//UART_SetBaudrate(0,uspeed);
-	printf("\nuart speed: %d\n",uspeed);
+	
 	VS1053_HW_init(); // init spi
 //	test_upgrade();
 	extramInit();
+	printf("\nuart speed: %d\n",uspeed);
 	initBuffer();
 	wifi_set_opmode_current(STATION_MODE);
 //	Delay(10);	

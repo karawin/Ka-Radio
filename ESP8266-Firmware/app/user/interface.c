@@ -591,6 +591,7 @@ ICACHE_FLASH_ATTR void sysUart(char* s)
 		speed = checkUart(speed);
 		device->uartspeed= speed;
 		saveDeviceSettings(device);	
+		kprintf("Speed: %d\n",speed);
 	}
 	kprintf(PSTR("\n%sUART= %d# on next reset\n"),msgsys,device->uartspeed);	
 	free(device);
