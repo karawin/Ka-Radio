@@ -245,7 +245,6 @@ ICACHE_FLASH_ATTR void setOffsetVolume(void) {
 
 // set the volume with vol,  add offset
 ICACHE_FLASH_ATTR void setVolume(char* vol) {
-		struct device_settings *device;
 //		uint16_t ivol = atoi(vol);
 		clientIvol = atoi(vol);
 		int16_t uvol = atoi(vol);
@@ -332,7 +331,7 @@ ICACHE_FLASH_ATTR void stopWake(){
 // treat the received message of the websocket
 void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t length)
 {
-	struct device_settings *device;
+//	struct device_settings *device;
 	//wsvol
 //	printf("websocketHandle: %s\n",payload);
 	if (strstr(payload,"wsvol=")!= NULL)
@@ -414,8 +413,8 @@ ICACHE_FLASH_ATTR void playStationInt(int sid) {
 }
 	
 ICACHE_FLASH_ATTR void playStation(char* id) {
-	struct shoutcast_info* si;
-	char answer[22];
+//	struct shoutcast_info* si;
+//	char answer[22];
 	int uid;
 	uid = atoi(id) ;
 //	printf ("playstation: %d\n",uid);
@@ -427,12 +426,12 @@ ICACHE_FLASH_ATTR void playStation(char* id) {
 // replace special  json char
 ICACHE_FLASH_ATTR void pathParse(char* str)
 {
-	int i = 0;
+	int i ;
 	char *pend;
 	char  num[3]= {0,0,0};
 	uint8_t cc;
 	if (str == NULL) return;
-	for (i; i< strlen(str);i++)
+	for (i=0 ; i< strlen(str);i++)
 	{
 		if (str[i] == '%')
 		{
@@ -447,7 +446,7 @@ ICACHE_FLASH_ATTR void pathParse(char* str)
 
 ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int conn) {
 //printf("HandlePost %s\n",name);
-	char* head = NULL;
+//	char* head = NULL;
 	int i;
 	bool changed = false;
 	struct device_settings *device;
@@ -789,7 +788,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		char tmpip[16],tmpmsk[16],tmpgw[16];
 		struct device_settings *device;
 		struct device_settings1 *device1;
-		uint8_t a,b,c,d;
+//		uint8_t a,b,c,d;
 		changed = false;		
 		if(data_size > 0) {
 			device = getDeviceSettings();
@@ -910,7 +909,8 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t buflen) {
 	char* c;
 	char* d;
-	char websocketmsg[] = {"websocket request: %s\n"};
+//	char websocketmsg[] = {"websocket request: %s\n"};
+
 //	xTaskHandle pxCreatedTask;
 //	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
 //printf("httpServerHandleConnection  %20c \n",&buf);
@@ -924,9 +924,9 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 			return false;
 		} else
 		{
-			char fname[32];
-			uint8_t i;
-			for(i=0; i<32; i++) fname[i] = 0;
+//			char fname[32];
+//			uint8_t i;
+//			for(i=0; i<32; i++) fname[i] = 0;
 			c += 4;
 			char* c_end = strstr(c, "HTTP");
 			if(c_end == NULL) return true;
@@ -1043,7 +1043,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 	struct timeval timeout; 
     timeout.tv_sec = 2000; // bug *1000 for seconds
     timeout.tv_usec = 0;
-	int recbytes ,recb,i;
+	int recbytes ,recb;
 //	portBASE_TYPE uxHighWaterMark;
 	int  client_sock =  (int)pvParams;
 	uint16_t reclen = 	RECLEN;	

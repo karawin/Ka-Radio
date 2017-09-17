@@ -294,7 +294,7 @@ void uartInterfaceTask(void *pvParameters) {
 					apconfig = malloc(sizeof(struct softap_config));
 					wifi_set_opmode_current(SOFTAP_MODE);
 					wifi_softap_get_config(apconfig);
-					strcpy (apconfig->ssid,"WifiWebRadio");
+					strcpy (apconfig->ssid,"WifiKaRadio");
 					apconfig->ssid_len = 12;					
 					wifi_softap_set_config(apconfig);
 //					conn = true; 

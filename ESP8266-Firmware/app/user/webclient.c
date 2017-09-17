@@ -30,6 +30,9 @@ uint8_t once = 0;
 uint8_t volume = 0;
 uint8_t playing = 0;
 
+static const char* icyHeaders[] = { "icy-name:", "icy-notice1:", "icy-notice2:",  "icy-url:", "icy-genre:", "icy-br:","icy-description:","ice-audio-info:", "icy-metaint:" };
+
+
 char notfound[]={"Not Found"};
 char parEmty[] = {" "};
 const char CLIPLAY[] STORE_ATTR ICACHE_RODATA_ATTR = {"##CLI.PLAYING#%c%c"};
@@ -1130,7 +1133,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				if (once == 0)
 					timeout.tv_sec = 10000; // bug *1000 for seconds
 				else
-					timeout.tv_sec = 2000; // bug *1000 for seconds
+					timeout.tv_sec = 3000; // bug *1000 for seconds
 
 				if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
 					printf(strcSOCKET,"setsockopt",errno);

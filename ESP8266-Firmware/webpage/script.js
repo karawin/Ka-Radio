@@ -144,6 +144,29 @@ function valid() {
     alert("System reboot. Please change your browser address to the new one.");
 }
 
+
+
+function scrollTo(to, duration) {
+    if (duration < 0) return;
+    var scrollTop = document.body.scrollTop + document.documentElement.scrollTop;
+    var difference = to - scrollTop;
+    var perTick = difference / duration * 10;
+
+    setTimeout(function() {
+      scrollTop = scrollTop + perTick;
+      document.body.scrollTop = scrollTop;
+      document.documentElement.scrollTop = scrollTop;
+      if (scrollTop === to) return;
+      scrollTo(to, duration - 10);
+    }, 10);
+  }
+
+// go to top
+function wtop() {
+//	window.scrollTo(0, 0);
+	scrollTo(0,200);
+}
+
 // display current time
 function dtime() {
 	var d = new Date(), elt = document.getElementById('sminutes'),eltw = document.getElementById('wminutes');
