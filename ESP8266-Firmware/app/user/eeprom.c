@@ -112,6 +112,7 @@ uint32_t* eebuf= malloc(4096);
 uint32_t getFlashChipRealSize(void)
 {
 	uint32_t fSize = 1 << ((spi_flash_get_id() >> 16) & 0xFF);
+	if (fSize > 0x400000) fSize = 0x400000;
 	Eeprom_start = fSize - 0x20000;
 	Eeprom_start1 = Eeprom_start - 0x10000;
 	printf("Eeprom_start: %x\nEeprom_start1: %x\n",Eeprom_start,Eeprom_start1);
