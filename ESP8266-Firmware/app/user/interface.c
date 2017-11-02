@@ -132,6 +132,12 @@ void readAdc()
 	adc = system_adc_read();
 	kprintf(PSTR("##ADC: %d * %d = %d\n"),adc,adcdiv,adc*adcdiv);
 }
+void readRssi()
+{
+	int8_t rssi;
+	rssi = wifi_station_get_rssi();
+	kprintf(PSTR("##RSSI: %d\n"),rssi);
+}
 // Read the command panel
 void switchCommand() {
 	uint16_t adc;
@@ -732,6 +738,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 		if     (strcmp(tmp+5, "list") == 0) 	wifiScan();
 		else if(strcmp(tmp+5, "con") == 0) 	wifiConnectMem();
 		else if(startsWith ("con", tmp+5)) 	wifiConnect(tmp);
+		else if(strcmp(tmp+5, "rssi") == 0) 	readRssi();
 		else if(strcmp(tmp+5, "discon") == 0) wifiDisconnect();
 		else if(strcmp(tmp+5, "status") == 0) wifiStatus();
 		else if(strcmp(tmp+5, "station") == 0) wifiGetStation();

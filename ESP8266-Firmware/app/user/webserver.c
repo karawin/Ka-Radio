@@ -275,6 +275,12 @@ ICACHE_FLASH_ATTR void setRelVolume(int8_t vol) {
 	wsVol(Vol);
 }
 
+// send the rssi
+ICACHE_FLASH_ATTR void rssi(int socket) {
+		char answer[20];
+		sprintf(answer,"{\"wsrssi\":\"%d\"}",wifi_station_get_rssi());
+		websocketwrite(socket,answer, strlen(answer));
+}
 // flip flop the theme indicator
 ICACHE_FLASH_ATTR void theme() {
 		struct device_settings *device;
@@ -364,6 +370,7 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 	else if (strstr(payload,"monitor")!= NULL){wsMonitor();}
 	else if (strstr(payload,"upgrade")!= NULL){update_firmware("new");}
 	else if (strstr(payload,"theme")!= NULL){theme();}
+	else if (strstr(payload,"wsrssi")!= NULL){rssi(socket);}
 }
 
 

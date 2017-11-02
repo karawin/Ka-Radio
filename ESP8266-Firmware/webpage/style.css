@@ -45,6 +45,12 @@ div.RIGHT a,a:visited {
 	color:#f0f0ff;
 	text-decoration:none
 }
+div.RIGHT div{
+	font-size:10px;
+	line-height:15px;
+	color:#fff0f0;
+	text-decoration:none
+}
 div.LEFT {
 	float:left;
 	padding-top:10px;

@@ -209,7 +209,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 								NULL ) != pdPASS) 
 							{								
 								vTaskDelay(200);
-//printf(PSTR("Server low mem. Retrying...%c"),0x0d);
+								printf(PSTR("Server low mem. Retrying...%c"),0x0d);
 							}	
 							vTaskDelay(4);							
 //							xSemaphoreGive(semclient);	
@@ -291,6 +291,6 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 		}			
 					
 	} 
-//	printf("telnet task abnormal exit\n");
+	printf("telnet task abnormal exit\n");
 	vTaskDelete( NULL );	// never called
 }

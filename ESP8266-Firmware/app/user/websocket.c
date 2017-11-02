@@ -9,6 +9,7 @@
 #include "websocket.h"
 #include "interface.h"
 
+
 char strwMALLOC[] STORE_ATTR ICACHE_RODATA_ATTR = {"inwmalloc fails for %d\n"};
 char strwMALLOC1[] STORE_ATTR ICACHE_RODATA_ATTR = {"Websocket %s malloc fails\n"};
 char strwSOCKET[] STORE_ATTR ICACHE_RODATA_ATTR = {"Websocket socket fails %s errno: %d\n"};
