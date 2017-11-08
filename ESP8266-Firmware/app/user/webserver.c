@@ -124,7 +124,7 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 		}
 	}
 	struct servFile* f = findFile(name);
-kprintf("find %s at %x\n",name,f);
+//kprintf("find %s at %x\n",name,f);
 //	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
 	gpart = PART;
 	if(f != NULL)
