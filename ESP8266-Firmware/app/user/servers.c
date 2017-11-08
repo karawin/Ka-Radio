@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#define stack  400 //320
+#define stack  410 //320
 
 
 const char strsTELNET[] STORE_ATTR ICACHE_RODATA_ATTR = {"Servers Telnet Socket fails %s errno: %d\n"};
@@ -40,7 +40,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 	os_timer_disarm(&wakeTimer);
 	os_timer_setfn(&sleepTimer, sleepCallback, NULL);
 	os_timer_setfn(&wakeTimer, wakeCallback, NULL);
-	semclient = xSemaphoreCreateCounting(2,2); 
+	semclient = xSemaphoreCreateCounting(3,3); 
 	semfile = xSemaphoreCreateCounting(1,1); 
 	
 //	portBASE_TYPE uxHighWaterMark;
@@ -200,7 +200,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 //						printf ("Accept socket %d\n",client_sock);
 						if (xSemaphoreTake(semclient,portMAX_DELAY))
 						{
-//printf ("Take client_sock: %d\n",client_sock);							
+//printf (PSTR("Take client_sock: %d\n%c"),client_sock,0x0d);							
 							while (xTaskCreate( serverclientTask,
 								"t10",
 								stack,
@@ -208,18 +208,20 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 								4, 
 								NULL ) != pdPASS) 
 							{								
+								kprintf(PSTR("Server low mem. Retrying...\n%c"),0x0d);
 								vTaskDelay(200);
-								printf(PSTR("Server low mem. Retrying...%c"),0x0d);
 							}	
-							vTaskDelay(4);							
+							//vTaskDelay(1);	
+//printf(PSTR("serverClient launched.\n%c"),0x0d);							
 //							xSemaphoreGive(semclient);	
 							break; // while 1
 						}
 						else  // xSemaphoreTake fails
 						{
 							vTaskDelay(200); 
-							printf(PSTR("Server busy. Retrying...%c"),0x0d);
+							kprintf(PSTR("Server busy. Retrying...\n%c"),0x0d);
 						}
+						
 					}
 				}					
 			}

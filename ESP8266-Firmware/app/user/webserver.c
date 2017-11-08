@@ -124,7 +124,7 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 		}
 	}
 	struct servFile* f = findFile(name);
-//	printf("find %s at %x\n",name,f);
+kprintf("find %s at %x\n",name,f);
 //	printf ("Heap size: %d\n",xPortGetFreeHeapSize( ));
 	gpart = PART;
 	if(f != NULL)
@@ -138,7 +138,7 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 	{
 		char *con = NULL;
 		
-		if (xSemaphoreTake(semfile,portMAX_DELAY ))
+		if (xSemaphoreTake(semfile,portMAX_DELAY -1))
 		{				
 			do {
 				gpart /=2;
@@ -150,9 +150,9 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 			{
 				//sprintf(buf, "HTTP/1.1 500 Internal Server Error\r\nContent-Type: %s\r\nContent-Length: %d\r\n\r\n", (f!=NULL ? f->type : "text/plain"), 0);
 				//write(conn, lowmemory, strlen(lowmemory));
+				kprintf(PSTR("serveFile malloc fails. gpart:%d%c"),gpart,0x0d);
+				if (gpart <LIMIT)infree(con);
 				respKo(conn);
-				printf(PSTR("serveFile malloc fails%c"),0x0d);
-				infree(con);
 				xSemaphoreGive(semfile);
 				return ;
 			}	
@@ -160,7 +160,7 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 //printf("serveFile socket:%d,  %s. Length: %d  sliced in %d\n",conn,name,length,gpart);		
 			sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Encoding: gzip\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n", (f!=NULL ? f->type : "text/plain"), length);
 //printf("serveFile send %d bytes\n%s\n",strlen(buf),buf);	
-			vTaskDelay(1); // why i need it? Don't know. 
+			vTaskDelay(2); // why i need it? Don't know. 
 			write(conn, buf, strlen(buf));
 			progress = length;
 			part = gpart;
@@ -173,10 +173,10 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 				content += part;
 				progress -= part;
 				if (progress <= part) part = progress;
-				//vTaskDelay(1);
+				vTaskDelay(1);
 			} 
 			xSemaphoreGive(semfile);	
-		} else {respKo(conn); printf(PSTR("semfile fails%c"),0x0D);}
+		} else {respKo(conn); kprintf(PSTR("semfile fails%c"),0x0D);}
 		infree(con);
 		//vTaskDelay(1);
 	}
@@ -923,7 +923,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 //printf("httpServerHandleConnection  %20c \n",&buf);
 	if( (c = strstr(buf, "GET ")) != NULL)
 	{
-//printf("GET socket:%d str:\n%s\n",conn,buf);
+//kprintfl("GET socket:%d str:\n%s\n",conn,buf);
 		if( ((d = strstr(buf,"Connection:")) !=NULL)&& ((d = strstr(d," Upgrade")) != NULL))
 		{  // a websocket request
 			websocketAccept(conn,buf,buflen);	
@@ -1019,7 +1019,7 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 		}
 	} else if( (c = strstr(buf, "POST ")) != NULL) {
 // a post request		
-//	printf("POST socket: %d  buflen: %d\n",conn,buflen);
+//kprintf("POST socket: %d  buflen: %d\n",conn,buflen);
 		char fname[32];
 		uint8_t i;
 		for(i=0; i<32; i++) fname[i] = 0;
@@ -1053,22 +1053,26 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 	int recbytes ,recb;
 //	portBASE_TYPE uxHighWaterMark;
 	int  client_sock =  (int)pvParams;
-	uint16_t reclen = 	RECLEN;	
+	uint32_t reclen = 	RECLEN;	
     char *buf = (char *)inmalloc(reclen);
 	bool result = true;
 
+//kprintf("Client entry  socket:%x  reclen:%d\n",client_sock,reclen);
 	
 	if (buf == NULL)
 	{
 		vTaskDelay(100);
+		kprintf("Client entry Buff null\n");
 		buf = (char *)inmalloc(reclen); // second chance
 	}
-//printf("Client entry  socket:%x  reclen:%d\n",client_sock,reclen);
+//kprintf("Client entry 1 socket:%x  reclen:%d\n",client_sock,reclen);
 	if (buf != NULL)
 	{
+//kprintf("Client entry 2 socket:%x  reclen:%d\n",client_sock,reclen);
 		memset(buf,0,reclen);
 		if (setsockopt (client_sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
 			printf(strsSOCKET,"setsockopt",errno);
+//kprintf("Client entry 3 socket:%x  reclen:%d\n",client_sock,reclen);
 
 		while (((recbytes = read(client_sock , buf, reclen)) != 0)) 
 		{ // For now we assume max. reclen bytes for request with 2*reclen extention if needed
@@ -1076,10 +1080,10 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 				break;
 				if (errno != EAGAIN )
 				{
-					printf(strsSOCKET,"client_sock",errno);
+					kprintf(strsSOCKET,"client_sock",errno);
 					vTaskDelay(10);	
 					break;
-				} else {printf(strsSOCKET,tryagain,errno);break;}
+				} else {kprintf(strsSOCKET,tryagain,errno);break;}
 			}	
 			char* bend = NULL;
 			do {
@@ -1087,7 +1091,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 				if (bend != NULL) 
 				{	
 					bend += 4;
-//printf("Server: header len : %d,recbytes = %d,reclen: %d\n%s\nend\n",bend - buf,recbytes,reclen,buf);	
+//kprintf("Server: header len : %d,recbytes = %d,reclen: %d\n%s\nend\n",bend - buf,recbytes,reclen,buf);	
 					if (strstr(buf,"POST") ) //rest of post?
 					{
 						uint16_t cl = atoi(strstr(buf, "Content-Length: ")+16);
@@ -1103,7 +1107,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 						vTaskDelay(1);
 						if ((bend - buf +cl)> recbytes)
 						{	
-//printf ("Server: try receive more:%d bytes. reclen = %d, must be %d\n", recbytes,reclen,bend - buf +cl);
+//kprintf ("Server: try receive more:%d bytes. reclen = %d, must be %d\n", recbytes,reclen,bend - buf +cl);
 							while(((recb = read(client_sock , buf+recbytes, cl))==0)){vTaskDelay(1);printf(".");}
 							buf[recbytes+recb] = 0;
 //printf ("Server: received more now: %d bytes, rec:\n%s\nEnd\n", recbytes+recb,buf);
@@ -1124,16 +1128,16 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 				} 
 				else { 
 					
-//					printf ("Server: try receive more for end:%d bytes\n", recbytes);					
+//kprintf ("Server: try receive more for end:%d bytes\n", recbytes);					
 					if (reclen == RECLEN) 
 					{
-//						printf ("Server: try receive more for end:%d bytes\n", recbytes);
+//kprintf ("Server: try receive more for end:%d bytes\n", recbytes);
 						buf = realloc(buf,(2*RECLEN) +1);
 						if (buf == NULL) {printf(strsSOCKET,"Realloc",errno);break;}
 						reclen = 2*RECLEN;
 					}	
 					while(((recb= read(client_sock , buf+recbytes, reclen-recbytes))==0)) vTaskDelay(1);
-//					printf ("Server: received more for end now: %d bytes\n", recbytes+recb);
+//kprintf ("Server: received more for end now: %d bytes\n", recbytes+recb);
 					if (recb < 0) {
 						respKo(client_sock);
 						break;
@@ -1148,12 +1152,14 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 					recbytes += recb;
 				} //until "\r\n\r\n"
 			} while (bend == NULL);
+//kprintf ("Server: call httpServerHandleConnection: %d bytes\n", recbytes);
 			result = httpServerHandleConnection(client_sock, buf, recbytes);
+//kprintf ("Server: exit httpServerHandleConnection: %d bytes\n", recbytes);
 			if (reclen == 2*RECLEN)
 			{
 				reclen = RECLEN;
 				buf = realloc(buf,reclen);
-				vTaskDelay(10);	
+				vTaskDelay(5);	
 			}
 			//if (buf == NULL) printf("WARNING\n");
 			memset(buf,0,reclen);
@@ -1164,7 +1170,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 			vTaskDelay(1);
 		}
 		infree(buf);
-	} else  printf(strsMALLOC1,"buf");
+	} else  kprintf(strsMALLOC1,"buf");
 	if (result)
 	{
 		int err;
@@ -1178,7 +1184,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 		}
 	}
 	xSemaphoreGive(semclient);	
-//printf ("Give client_sock: %d\n",client_sock);		
+//kprintf (PSTR("Give client_sock: %d %s"),client_sock,"\n");		
 /*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 	printf("watermark serverClientTask: %x  %d\n",uxHighWaterMark,uxHighWaterMark);	
 */

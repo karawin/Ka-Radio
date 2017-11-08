@@ -27,12 +27,24 @@ bool inIac = false; // if in negociation
 char *obrec;
 uint16_t irec;
 uint8_t iiac;
+xSemaphoreHandle sTELNET = NULL;
+
+static uint8_t telnet_take_semaphore() {
+	if(sTELNET) if(xSemaphoreTake(sTELNET, portMAX_DELAY)) return 1;
+	return 0;
+}
+
+static void telnet_give_semaphore() {
+	if(sTELNET) xSemaphoreGive(sTELNET);
+}
 
 ///////////////////////
 // init some data
 void telnetinit(void)
 {
 	int i;
+	vSemaphoreCreateBinary(sTELNET);
+	
 	for (i = 0;i<NBCLIENTT;i++) 
 	{
 		telnetclients[i] = -1;
@@ -118,7 +130,8 @@ void telnetWrite(uint32_t lenb,const char *fmt, ...)
 	strcpy(buf,"ok\n");
 	
 	va_list ap;
-	va_start(ap, fmt);	
+	va_start(ap, fmt);
+//printf("=================================\ntelnet write lenb: %d, fmt: %x\n",lenb,(int)fmt);
 	
 	if (fmt> (char*)0x40100000)  // in flash
 	{
@@ -130,6 +143,13 @@ void telnetWrite(uint32_t lenb,const char *fmt, ...)
 			lfmt[len] = 0; // if aligned, trunkate
 //			printf("lfmt: %s\n",lfmt);
 			rlen = vsprintf(buf,lfmt, ap);
+			if (rlen > lenb)
+			{ // big problem fatal error
+				printf(PSTR("WARNING Fatal error detected in telnetWrite. \n"));
+				free (lfmt);
+				va_end(ap);
+				return;
+			}		
 			free (lfmt);
 		}
 	}	
@@ -139,16 +159,18 @@ void telnetWrite(uint32_t lenb,const char *fmt, ...)
 	}
 	va_end(ap);
 	buf = realloc(buf,rlen+1);
+//printf("telnet write len: %d, %s\n",rlen,buf);
 	if (buf == NULL) return;
 	// write to all clients
+	telnet_take_semaphore();
 	for (i = 0;i<NBCLIENTT;i++)	
 		if (istelnet( telnetclients[i]))
 		{
-			write( telnetclients[i],  buf, strlen(buf));
+			write( telnetclients[i],  buf, rlen);//strlen(buf));
 		}	
-		
+	telnet_give_semaphore();	
 	free (buf);
-
+//printf("telnet write exit lenb:%d\n--------------------------\n",lenb);
 }
 
 ICACHE_FLASH_ATTR int telnetNego(int tsocket)
