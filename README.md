@@ -1,6 +1,8 @@
 # ** ESP8266 & VS1053 Wifi WebRadio ** #
 
-### Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips
+### Ka-Radio, a WiFi shoutcast player based on ESP8266 and VS1053b chips</br>
+See also the esp32 version at https://github.com/karawin/Ka-Radio32</br>
+
 ## Basic informations<BR/>
 ###Release 1.6.2- Built on 2017/11/02
 New:<br/>
