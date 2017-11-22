@@ -7,7 +7,6 @@ See also the esp32 version at https://github.com/karawin/Ka-Radio32</br>
 ###Release 1.6.2- Built on 2017/11/20
 New:<br/>
     <ul>
-=======
 		<li>1.6.2 R4: server NTP changed </li></br>
 		<li>1.6.2: Add of the rssi (Received Signal Strength Indication -30:best, -99:worst) at top right of the web page. </li>
 		<li>1.6.1: Click on the header to rewind to the top </li>
