@@ -7,7 +7,7 @@ See also the esp32 version at https://github.com/karawin/Ka-Radio32</br>
 ###Release 1.6.2- Built on 2017/11/20
 New:<br/>
     <ul>
-<<<<<<< HEAD
+
 		<li>1.6.2 R4: server NTP changed </li></br>
 		<li>1.6.2: Add of the rssi (Received Signal Strength Indication -30:best, -99:worst) at top right of the web page. </li></br>
 		<li>1.6.1: Click on the header to rewind to the top </li></br>
@@ -20,7 +20,7 @@ New:<br/>
 		<li>Header stays on top of the web page </li>
 		<li>gzipped html tranfert. More stable and improved speed</li>
 		<li>The page content follows the header size.</li>
->>>>>>> origin/master
+
     </ul><br/>
 ###Release 1.5- Built on 2017/08/07
 New:<br/>
