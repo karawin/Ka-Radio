@@ -6,26 +6,25 @@ See also the esp32 version at https://github.com/karawin/Ka-Radio32</br>
 ## Basic informations<BR/>
 ###Release 1.6.2- Built on 2017/11/20
 New:<br/>
-    <ul>
-		<li>1.6.2 R4: server NTP changed </li></br>
-		<li>1.6.2: Add of the rssi (Received Signal Strength Indication -30:best, -99:worst) at top right of the web page. </li>
-		<li>1.6.1: Click on the header to rewind to the top </li>
-		<li>Header stays on top of the web page </li>
-		<li>gzipped html tranfert. More stable and improved speed</li>
-		<li>The page content follows the header size.</li>
-
-    </ul><br/>
+<ul>
+	<li>1.6.2 R4: server NTP changed </li></br>
+	<li>1.6.2: Add of the rssi (Received Signal Strength Indication -30:best, -99:worst) at top right of the web page. </li>
+	<li>1.6.1: Click on the header to rewind to the top </li>
+	<li>Header stays on top of the web page </li>
+	<li>gzipped html tranfert. More stable and improved speed</li>
+	<li>The page content follows the header size.</li>
+</ul>
 ###Release 1.5- Built on 2017/08/07
 New:<br/>
-    <ul>
-		<li>Deeply tuned and optimized</li>
-		<li>Added: a button erase on the station edit</li>
-		<li>Little change of the menu labels.</li>
-		<li>If the same meta is repeated in the stream, it is filtered</li>
-		<li>telnet server now accepts the negociation.</li>
-		<li>Only one task for all servers: websocket, web interface and telnet.</li>
-		<li>Optimized threshold to start playing.It depends now of the size of the reception buffer.</li>
-		<li>New web command: version, infos and list. See the interface.txt file on setting menu.</li>
+<ul>
+	<li>Deeply tuned and optimized</li>
+	<li>Added: a button erase on the station edit</li>
+	<li>Little change of the menu labels.</li>
+	<li>If the same meta is repeated in the stream, it is filtered</li>
+	<li>telnet server now accepts the negociation.</li>
+	<li>Only one task for all servers: websocket, web interface and telnet.</li>
+	<li>Optimized threshold to start playing.It depends now of the size of the reception buffer.</li>
+	<li>New web command: version, infos and list. See the interface.txt file on setting menu.</li>
     </ul>
     <p></br>Bugs resolved: (Thanks Kim)</p>
     <ul>
