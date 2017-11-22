@@ -37,7 +37,7 @@ bool ICACHE_FLASH_ATTR ntp_get_time(struct tm **dt) {
 	char *msg;
 	int rv;
 	char service[] = {"123"}; //ntp port
-	char node[] = {"time.nist.gov"}; // this one is universel
+	char node[] = {"pool.ntp.org"}; // this one is universel
 	char msp[] = {"##SYS.DATE#: ntp fails on %s %d\n"};
     struct addrinfo hints, *servinfo = NULL, *p = NULL;
 //	struct tm *dt;
