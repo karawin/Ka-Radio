@@ -4,7 +4,7 @@
 See also the esp32 version at https://github.com/karawin/Ka-Radio32</br>
 
 ## Basic informations<BR/>
-###Release 1.6.3- Built on 2017/12/27
+### Release 1.6.3- Built on 2017/12/27
 New:<br/>
 <ul>
 	<li>1.6.3 R0: Correction for stations with the char & in path.</li>
@@ -15,7 +15,7 @@ New:<br/>
 	<li>gzipped html tranfert. More stable and improved speed</li>
 	<li>The page content follows the header size.</li>
 </ul>
-###Release 1.5- Built on 2017/08/07
+### Release 1.5- Built on 2017/08/07
 New:<br/>
 <ul>
 	<li>Deeply tuned and optimized</li>
