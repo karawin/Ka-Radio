@@ -99,7 +99,9 @@ The binaries are on ESP8266-Firmware/bin/upgrade/
 - Validate. The equipment restart to the new configuration. Connect your wifi to your AP and browse to the ip given in configuration.
 - Congratulation, you can edit your own station list. Dont forget to save your stations list in case of problem or for new equipments.
 - if the AP is already know by the esp8266, the default ip is given by dhcp.
-- a sample of stations list is on https://github.com/karawin/ESP8266-WebRadio/blob/master/ESP8266-Firmware/WebStations.txt . Can be uploaded via the web page.        
+- a sample of stations list is on https://github.com/karawin/ESP8266-WebRadio/blob/master/ESP8266-Firmware/WebStations.txt . Can be uploaded via the web page.   
+- Karadio can be controlled by the web interface or by the uart interface or by telnet. List of commands: type help
+- See the list of command at http://karadio.karawin.fr/interface.txt
 
 #### Feedback
 Please tell me if you succeded or something more can be done, thanks.<br/>
@@ -156,95 +158,4 @@ WiFi : ESP8266 (ESP-12 with 32Mbits flash)<br />
 Additional MCU (as a bridge UART<=>UI): AVR<br />
 Audio decoder: VS1053<br />
 
-### update history:
-Release 1.1.8 
-- New uart command: cli.info Display nameSet, all icy and volume. Used to synchronize the lcd extension.
-- cli.list command modified.
 
-Release 1.1.7+ 
-- Now Both AP SSID and AP Password are encoded to permit special characters like & : etc
-- "Restore stations" corrected for some heavy lists
-- Station information now gives the number of the current station
-- retry client connection modified to avoid blocking situation.
-- (1.1.7+) Volume offset on playlist was not working.
-
-Release 1.1.6 
-- Modification of the list of uart command. See uart and html interfaces
-- New sys.patch command. Inhibit or permit (default) the load of a vs1053 patch for AAC stations.
-- New sys.led command. Default is blinking mode, or Play mode: the led is on when a station is playing.
-- Modification of the wifi.con command. Now the AP can be set in the AP mode (192.168.4.1) without the need of the web interface.
-- New print button on the Stations panel: Print the list of stations, number and name.
-- New logo ;-)
-
-Release 1.1.5 
-- Modification of the list of uart command. See uart and html interfaces
-- New IR and LCD software
-- Autoplay corrected
-
-Release 1.1.4 
-- Now 2 AP's can be set. The second one will be tested if the first is not detected.
-- The Mac address of the radio is displayed
-- An offset volume can be set for each station in Station editor.
-- Pb on Autostart not correctly checked: corrected
-- Added: a reset button for the equalizer
-- Added a new uart command: cli.boot
-
-Release 1.1.3 
-- New html command: instant="http://your url"
-- The path of a station can now include some & parameters.
-
-Release 1.1.2 
-- uart command list now can take a parameter: the number of the station to display.
-.If no parameter, the complete list is sent.
-- New wake and sleep features. Two modes: Time mode: "hh:mm" to wake or sleep at a given hour, or the delay mode "mm".
-- Many minors html adjustments.
-- Many bugs removed thanks to users feedback's.
-
-Release 1.1.1 
-- The user agent for http request can be set for some special streams.
-   Example: http://pcradio.ru/player/listradio/pcradio_ru.xml which need a user agent= pcradio.
-   This pcradio user agent is already implemented automatically in the code when a pcradio station is encountered.
-- Better station start and stop. (no more strange noises).
-- Many bugs removed thanks to users feedback's.
-
-Release 1.1.0 
-- Drag an drop on the stations list: rearrange the list by dragging a line to another one. Save the change when asked.
-- Themes toggle between light blue and dark marron theme with a click on the logo.
-- Sleep mode to stop the play after a delay.
-- Functions on the web page are optimized. 
-- Many minor improvements on the code and the web page.
-
-Release 1.0.10 
-- New uart interface command: cli.uart("x")
-With x the uart baudrate at the next reset and permanently.
-List of valid baudrate: 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 76880, 115200, 230400
-The command will reply with
-##CLI.UART= 115200# on the next reset.
-- New Station selection with number
-- Stations management in one page
-- abort button on station edition.
-Corrected:
-- The I2S interface was not working. Thanks Discover1977 for the test
-
-Release 1.0.9 
-- New html interface see uart and html interfaces
-- New I2S external DAC interface on the vs1053. The I2S is enabled by default to 48kHz. To change the speed permanently use the uart interface with the command cli.i2s("x") with x =0 for 48kHz, x=1 for 96kHz and x=2 for 192kHz
-The i2s interface is available on the alientek vs1053 with i2s_sclk on SCLK (GPIO16), i2s_sdata on SDIN (GPIO07), i2s_mclk on MCLK (GPIO05), i2s_lrout on LRCK (GPIO04).
-- New Autostart: If autoplay is checked on the web interface, the current station is started at power on even with no web browser.
-
-Release 1.0.8 
-- Corrected: 
-Some chunked html stations was wrong.
-If no metadata, the station name is displayed in place
-A station not found is indicated in the name on the web interface
-
-Release 1.0.7 
-- Corrected: The webstation lists was wrong on empty station.
-
-Release 1.0.6 
-- New sdk patch from Espressif see http://bbs.espressif.com/viewtopic.php?f=46&t=2349 
-- Now the maximum number of stations is 256
-- Detection of external ram is working. If your chip has a /Vhold in place of /VBAT, the pin 7 must be wired to VCC (pin8)
-- Save stations from... now working with the right filename for edge browser
-- The AP Password field is masked.
-- Increased spi clock for external ram
