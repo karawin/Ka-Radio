@@ -101,7 +101,7 @@ The binaries are on ESP8266-Firmware/bin/upgrade/
 - if the AP is already know by the esp8266, the default ip is given by dhcp.
 - a sample of stations list is on https://github.com/karawin/ESP8266-WebRadio/blob/master/ESP8266-Firmware/WebStations.txt . Can be uploaded via the web page.   
 - Karadio can be controlled by the web interface or by the uart interface or by telnet. List of commands: type help
-- See the list of command at http://karadio.karawin.fr/interface.txt
+- See the list of command at http://karadio.karawin.fr/Interface.txt
 
 #### Feedback
 Please tell me if you succeded or something more can be done, thanks.<br/>
