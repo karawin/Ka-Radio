@@ -408,5 +408,7 @@ INCLUDES += -I $(PDIR)include/nopoll
 INCLUDES += -I $(PDIR)include/spiffs
 INCLUDES += -I $(PDIR)include/ssl
 INCLUDES += -I $(PDIR)include/json
+INCLUDES += -I $(PDIR)include/platform
+INCLUDES += -I $(PDIR)include/mdns
 PDIR := ../$(PDIR)
 sinclude $(PDIR)Makefile

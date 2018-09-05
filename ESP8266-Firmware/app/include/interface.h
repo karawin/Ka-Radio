@@ -6,7 +6,7 @@
 #define MAXDATAT	 256
 
 
-#define RELEASE "1.6.3"
+#define RELEASE "1.7"
 #define REVISION "0"
 
 

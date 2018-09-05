@@ -966,6 +966,12 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 // stop command				
 				param = strstr(c,"stop") ;
 				if (param != NULL) {clientDisconnect(PSTR("Web stop"));}
+// next command				
+				param = strstr(c,"next") ;
+				if (param != NULL) {wsStationNext();}
+// prev command				
+				param = strstr(c,"prev") ;
+				if (param != NULL) {wsStationPrev();}	
 // instantplay command				
 				param = getParameterFromComment("instant=", c, strlen(c)) ;
 				if (param != NULL) {

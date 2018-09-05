@@ -69,6 +69,8 @@ LINKFLAGS_eagle.app.v6 = \
 	-lfreertos	\
 	_lupgrade	\
 	-llwip	\
+	-lplatform \
+	-lmdns \
 	$(DEP_LIBS_eagle.app.v6)					\
 	-Wl,--end-group
 
