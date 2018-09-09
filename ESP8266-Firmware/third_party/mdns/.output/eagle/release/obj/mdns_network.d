@@ -1,4 +1,4 @@
-.output/eagle/release/obj/mdns_network.o .output/eagle/release/obj/mdns_network.d : mdns_network.c ../platform/debug.h \
+.output/eagle/release/obj/mdns_network.o .output/eagle/release/obj/mdns_network.d : mdns_network.c ../../include/mdns/debug.h \
  ../../include/espressif/c_types.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/include/stdint.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/stdint.h \
@@ -22,7 +22,7 @@
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/types.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/stdio.h \
  ../../include/mdns/mdns_network.h ../../include/mdns/mdns.h \
- ../../include/platform/platform.h ../../include/lwip/lwip/opt.h \
+ ../../include/mdns/platform.h ../../include/lwip/lwip/opt.h \
  ../../include/lwip/lwipopts.h ../../include/lwip/lwip/debug.h \
  ../../include/lwip/lwip/arch.h ../../include/lwip/arch/cc.h \
  ../../include/lwip/lwip/udp.h ../../include/lwip/lwip/pbuf.h \
@@ -34,7 +34,7 @@
  ../../include/lwip/ipv4/lwip/inet.h ../../include/lwip/ipv4/lwip/igmp.h \
  ../../include/lwip/lwip/mem.h ../../include/mdns/stream.h \
  ../../include/mdns/dns.h ../../include/mdns/mdns_query.h \
- ../../include/mdns/mdns_publish.h ../platform/stream.h \
+ ../../include/mdns/mdns_publish.h ../../include/mdns/stream.h \
  ../../include/mdns/server.h ../../include/freertos/FreeRTOS.h \
  ../../include/freertos/projdefs.h \
  ../../include/freertos/FreeRTOSConfig.h \

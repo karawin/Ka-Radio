@@ -6,7 +6,7 @@
 #include "dns.h"
 
 #define MDNS_MULTICAST_ADDR 0xfb0000e0
-#define MDNS_MULTICAST_TTL 60 /* seconds */
+#define MDNS_MULTICAST_TTL  60 /* seconds */
 #define MDNS_PORT 5353
 
 //

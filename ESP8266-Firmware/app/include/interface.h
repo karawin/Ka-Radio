@@ -11,6 +11,7 @@
 
 
 extern unsigned short adcdiv;	
+extern char* getIp() ;
 void switchCommand(void );
 void checkCommand(int size, char* s);
 void wifiConnectMem();

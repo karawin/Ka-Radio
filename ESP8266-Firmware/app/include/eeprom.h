@@ -2,7 +2,7 @@
 
 #include "c_types.h"
 
-
+#define HOSTLEN		24
 //define for bit array in theme
 #define T_THEME 	1
 #define NT_THEME	0xFE
@@ -44,7 +44,8 @@ struct device_settings1 {
 	uint8_t mask[4];		//19
 	uint8_t gate[4];		//23	
 	uint8_t pass2[64];
-	uint8_t fill[169];
+	char hostname[HOSTLEN];	
+	uint8_t fill[169-HOSTLEN-1];
 };
 
 struct shoutcast_info {

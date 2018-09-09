@@ -8,7 +8,7 @@
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/features.h \
  ../../extra_include/xtensa/config/core-isa.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/include/stdbool.h \
- ../../include/mdns/tools.h ../../include/platform/platform.h \
+ ../../include/mdns/tools.h ../../include/mdns/platform.h \
  ../../include/lwip/lwip/opt.h ../../include/lwip/lwipopts.h \
  ../../include/lwip/lwip/debug.h ../../include/lwip/lwip/arch.h \
  ../../include/lwip/arch/cc.h ../../include/espressif/c_types.h \
@@ -52,4 +52,4 @@
  ../../include/freertos/mpu_wrappers.h ../../include/freertos/queue.h \
  ../../include/freertos/task.h ../../include/freertos/list.h \
  ../../include/mdns/mdns_network.h ../../include/mdns/stream.h \
- ../../include/mdns/dns.h ../platform/debug.h
+ ../../include/mdns/dns.h ../../include/mdns/debug.h

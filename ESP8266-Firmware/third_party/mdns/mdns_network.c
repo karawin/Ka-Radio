@@ -8,7 +8,7 @@
 
 #if !MDNS_BROADCAST_ONLY
 void mdns_parse_packet(mdnsHandle *handle, mdnsStreamBuf *buffer, ip_addr_t *ip, uint16_t port) {
-    uint16_t transactionID = mdns_stream_read16(buffer);
+	uint16_t transactionID = mdns_stream_read16(buffer);
     uint16_t flagsTmp = mdns_stream_read16(buffer);
     mdnsPacketFlags flags;
     memcpy(&flags, &flagsTmp, 2);
@@ -24,6 +24,8 @@ void mdns_parse_packet(mdnsHandle *handle, mdnsStreamBuf *buffer, ip_addr_t *ip,
     uint16_t numAuthorityRR = mdns_stream_read16(buffer);
     uint16_t numAdditionalRR = mdns_stream_read16(buffer);
 
+	LOG(TRACE, "mdns: parse packet: transID:%x,flags:%x, numQuest:%x, numAnsw:%x, numAuth:%x, numAdd:%x", transactionID,flagsTmp,numQuestions,numAnswers,numAuthorityRR,numAdditionalRR);
+	
     // MDNS Answer flag set -> read answers
     if (flags.isResponse) {
 #if defined(MDNS_ENABLE_QUERY) && MDNS_ENABLE_QUERY

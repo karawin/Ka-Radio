@@ -73,16 +73,17 @@
  ../../include/freertos/queue.h ../../include/lwip/lwip/sockets.h \
  ../../include/lwip/ipv4/lwip/inet.h ../../include/lwip/ipv6/lwip/inet6.h \
  ../../include/lwip/lwip/dns.h ../../include/lwip/lwip/err.h \
- ../../include/lwip/lwip/netdb.h ../include/webserver.h \
- ../include/webclient.h ../include/vs1053.h ../../include/lwip/lwip/api.h \
- ../../include/lwip/lwip/netbuf.h ../../include/lwip/lwip/pbuf.h \
- ../../include/lwip/lwip/sys.h ../../include/lwip/arch/sys_arch.h \
- ../../include/espressif/esp_timer.h ../include/flash.h \
- ../include/eeprom.h ../include/interface.h ../include/websocket.h \
- ../../include/ssl/ssl_crypto.h ../../include/ssl/ssl_config.h \
- ../../include/ssl/ssl_bigint_impl.h ../../include/ssl/ssl_bigint.h \
- ../include/cencode_inc.h ../include/webclient.h ../include/buffer.h \
- ../include/extram.h ../include/ntp.h \
+ ../../include/lwip/lwip/netdb.h ../../include/mdns/mdns.h \
+ ../include/webserver.h ../include/webclient.h ../include/vs1053.h \
+ ../../include/lwip/lwip/api.h ../../include/lwip/lwip/netbuf.h \
+ ../../include/lwip/lwip/pbuf.h ../../include/lwip/lwip/sys.h \
+ ../../include/lwip/arch/sys_arch.h ../../include/espressif/esp_timer.h \
+ ../include/flash.h ../include/eeprom.h ../include/interface.h \
+ ../include/websocket.h ../../include/ssl/ssl_crypto.h \
+ ../../include/ssl/ssl_config.h ../../include/ssl/ssl_bigint_impl.h \
+ ../../include/ssl/ssl_bigint.h ../include/cencode_inc.h \
+ ../include/webclient.h ../include/buffer.h ../include/extram.h \
+ ../include/ntp.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/time.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/time.h \
  ../include/telnet.h ../include/servers.h ../include/interface.h

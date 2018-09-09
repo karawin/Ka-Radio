@@ -17,7 +17,7 @@
 
 // Broadcast only API ?
 #ifndef MDNS_BROADCAST_ONLY
-#define MDNS_BROADCAST_ONLY 0
+#define MDNS_BROADCAST_ONLY 1
 #endif
 
 #if MDNS_BROADCAST_ONLY

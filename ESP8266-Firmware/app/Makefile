@@ -82,6 +82,7 @@ LINKFLAGS_eagle.app.v6 = \
 	-lupgrade	\
 	-lwpa	\
 	-lwps		\
+	-lmdns	\
 	$(DEP_LIBS_eagle.app.v6)					\
 	-Wl,--end-group
 

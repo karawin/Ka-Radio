@@ -21,7 +21,7 @@
 #include "lwip/sockets.h"
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
-
+#include "mdns/mdns.h"
 
 #include "webserver.h"
 #include "webclient.h"
@@ -37,7 +37,7 @@
 
 #include "interface.h"
 
-const char striDEF0[] STORE_ATTR ICACHE_RODATA_ATTR = {"The default AP is  WifiWebRadio. Connect your wifi to it.\nThen connect a webbrowser to 192.168.4.1 and go to Setting\nMay be long to load the first time.Be patient.%c"};
+const char striDEF0[] STORE_ATTR ICACHE_RODATA_ATTR = {"The default AP is  WifiKaRadio. Connect your wifi to it.\nThen connect a webbrowser to 192.168.4.1 and go to Setting\nMay be long to load the first time.Be patient.%c"};
 const char striDEF1[] STORE_ATTR ICACHE_RODATA_ATTR = {"Erase the database and set ssid, password and ip's field%c"};
 const char striAP[] STORE_ATTR ICACHE_RODATA_ATTR = {"AP1: %s, AP2: %s\n"};
 const char striSTA1[] STORE_ATTR ICACHE_RODATA_ATTR = {" AP1:Station Ip: %d.%d.%d.%d\n"};
@@ -48,8 +48,9 @@ const char striHEAP[] STORE_ATTR ICACHE_RODATA_ATTR = {"Heap size: %d\n"};
 const char striUART[] STORE_ATTR ICACHE_RODATA_ATTR = {"UART READY%c"};
 const char striWATERMARK[] STORE_ATTR ICACHE_RODATA_ATTR = {"watermark %s: %d  heap:%d\n"};
 
-
-
+//ip
+static char localIp[20] = {"0.0.0.0"};
+static mdnsHandle *mdns;
 void uart_div_modify(int no, unsigned int freq);
 
 //	struct station_config config;
@@ -69,6 +70,9 @@ void cb(sc_status stat, void *pdata)
 }
 */
 
+char* getIp() { return (localIp);}
+mdnsHandle* getMdns() { return mdns;}
+void setMdns(mdnsHandle* toset) {mdns= toset;}
 
 void testtask(void* p) {
 struct device_settings *device;	
@@ -159,6 +163,21 @@ ICACHE_FLASH_ATTR void initLed(void)
 }
 
 
+//-------------------------
+// mDNS management
+//-------------------------
+void initMDNS(char* host,uint32_t ip)
+{
+	ip_address_t addrip;
+	ip6_address_t addrv6 = { 0 };
+	addrip.addr = ip;
+	mdns = mdns_create(host);
+	mdns_update_ip(mdns, addrip, addrv6); 
+	mdnsService *service;
+	service= mdns_create_service("_http", mdnsProtocolTCP, 80);
+	mdns_add_service(mdns, service);
+	mdns_start(mdns);
+}
 
 void uartInterfaceTask(void *pvParameters) {
 	char tmp[255];
@@ -180,11 +199,12 @@ void uartInterfaceTask(void *pvParameters) {
 //-------------------------
 // AP Connection management
 //-------------------------
+	char hostn[HOSTLEN];
 	struct ip_info *info;
 	struct device_settings *device;
 	struct device_settings1* device1;
 	struct station_config* config;
-	wifi_station_set_hostname("WifiWebRadio");
+	wifi_station_set_hostname("WifiKaRadio");
 	
 	device = getDeviceSettings();
 	device1 = getDeviceSettings1();  // extention of saved data
@@ -320,6 +340,22 @@ void uartInterfaceTask(void *pvParameters) {
 	wifi_set_sleep_type(MODEM_SLEEP_T);	
 	
 	
+	if (wifi_get_opmode ( ) == 1)
+	{
+		sprintf(localIp,"%d.%d.%d.%d",(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));	
+		if ((strlen(device1->hostname) >= HOSTLEN) ||
+			(strlen(device1->hostname) == 0) || (device1->hostname[0] ==  0xff))
+		{
+			strcpy(hostn,"WifiKaRadio");
+			strcpy(device1->hostname,hostn);
+			saveDeviceSettings1(device1);	
+		}
+		else strcpy(hostn,device1->hostname);
+		printf(PSTR("HOSTNAME: %s\nLocal IP: %s\n"),hostn,localIp);
+		initMDNS(hostn,info->ip.addr);
+	}	
+
+
 	ap = 0;
 	ap =system_adc_read();
 
@@ -498,7 +534,7 @@ void user_init(void)
 //	system_update_cpu_freq(SYS_CPU_160MHZ);
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
 	xTaskHandle pxCreatedTask;
-    Delay(200);
+//    Delay(200);
 	getFlashChipRealSize();
 	device = getDeviceSettings();
 	uspeed = device->uartspeed;
@@ -509,7 +545,7 @@ void user_init(void)
 	VS1053_HW_init(); // init spi
 //	test_upgrade();
 	extramInit();
-	printf("\nuart speed: %d\n",uspeed);
+	printf(PSTR("\nuart speed: %d\n"),uspeed);
 	initBuffer();
 	wifi_set_opmode_current(STATION_MODE);
 //	Delay(10);	
@@ -518,11 +554,11 @@ void user_init(void)
 	system_print_meminfo();
 	printf (PSTR("Heap size: %d\n"),xPortGetFreeHeapSize( ));
 	clientInit();
-	Delay(10);	
+//	Delay(10);	
 	
     flash_size_map size_map = system_get_flash_size_map();
 	printf (PSTR("size_map: %d\n"),size_map);
-	printf("Flash size: %d\n",getFlashChipRealSize());
+	printf(PSTR("Flash size: %d\n"),getFlashChipRealSize());
 	
 	xTaskCreate(testtask, "t0", 140, NULL, 1, &pxCreatedTask); // DEBUG/TEST 130
 	printf(striTASK,"t0",pxCreatedTask);

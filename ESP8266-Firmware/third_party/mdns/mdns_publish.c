@@ -165,6 +165,8 @@ void mdns_parse_query(mdnsHandle *handle, mdnsStreamBuf *buffer, uint16_t numQue
             return;
         }
 
+		LOG(TRACE, "mdns: parsing queries type %d", queryType);
+		
         switch(queryType) {
             case mdnsRecordTypePTR: {
                 // PTR records are for searching for services
@@ -185,13 +187,17 @@ void mdns_parse_query(mdnsHandle *handle, mdnsStreamBuf *buffer, uint16_t numQue
 
             case mdnsRecordTypeA: {
                 // A records want to find an IP address for a hostname
-                if (strcasecmp(serviceName[0], handle->hostname) == 0) {
+				LOG(TRACE, "mdns: responding to A query, %s, %s",serviceName[0],handle->hostname);
+				
+ //               if ((serviceName[0] != NULL)&&(strcasecmp(serviceName[0], handle->hostname) == 0))
+				{
                     LOG(TRACE, "mdns: responding to A query");
                     uint16_t responseLen = 0;
                     char *response = mdns_prepare_response(handle, mdnsRecordTypeA, MDNS_MULTICAST_TTL, transactionID, &responseLen, NULL);
                     mdns_send_udp_packet(handle, response, responseLen);
                     break;                    
                 }
+                break;//jp
             }
 
             case mdnsRecordTypeSRV:
@@ -230,6 +236,8 @@ void mdns_parse_query(mdnsHandle *handle, mdnsStreamBuf *buffer, uint16_t numQue
                     }
                     break;                    
                 }
+               break;//jp
+ 				
             }
 
             case mdnsRecordTypeAAAA:

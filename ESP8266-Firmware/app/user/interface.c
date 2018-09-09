@@ -2,6 +2,7 @@
  * Copyright 2015 Piotr Sperka (http://www.piotrsperka.info)/*
  * Copyright 2016 karawin (http://www.karawin.fr)
 */
+#include "mdns/mdns.h"
 #include "interface.h"
 #include "user_interface.h"
 //#include "osapi.h"
@@ -84,6 +85,8 @@ sys.date: Send a ntp request and Display the current locale time\n\
 : YYYY-MM-DDThh:mm:ssTZD (eg 2017-07-16T19:20:30+01:00)\n\
 sys.adc: Display the adc value\n\
 sys.version: Display the release and Revision of KaraDio\n\
+sys.host: display the hostname for mDNS\n\
+sys.host(\"your hostname\"): change and display the hostname for mDNS\n\
 ///////\n\
   Other\n\
 ///////\n\
@@ -101,8 +104,9 @@ extern void playStation(char* id);
 extern void setVolume(char* vol);
 extern void setRelVolume(int8_t vol);
 extern uint16_t getVolume(void);
-
-
+extern mdnsHandle* getMdns();
+extern void setMdns(mdnsHandle* toset);
+extern void initMDNS(char* ,uint32_t );
 ICACHE_FLASH_ATTR void clientVol(char *s);
 
 #define MAX_WIFI_STATIONS 50
@@ -124,7 +128,56 @@ void setVolumew(char* vol)
 
 unsigned short adcdiv;	
 
-
+//display or change the hostname and services
+void chostname(char* s)
+{
+	char *t = strstr(s, parslashquote);
+	struct device_settings1 *device;
+	
+	device = getDeviceSettings1();
+	if(t == NULL)
+	{
+		kprintf(PSTR("##SYS.HOST#: %s.local\n  IP:%s #\n"),device->hostname,getIp());
+		free(device);
+		return;
+	}
+	
+	t +=2;
+	char *t_end  = strstr(t, parquoteslash);
+    if(t_end == NULL)
+    {
+		kprintf(stritCMDERROR);
+		free(device);
+		return;
+    }
+		
+    char *hn = (char*) malloc((t_end-t+1)*sizeof(char));
+    if(hn != NULL)
+    {
+		struct ip_info  *info;
+		info = malloc(sizeof(struct ip_info));
+		if (t_end-t ==0)
+			strcpy(	device->hostname, "karadio");
+		else
+		{	
+			if (t_end-t >= HOSTLEN) t_end = t+HOSTLEN;
+			strncpy(device->hostname,t,(t_end-t)*sizeof(char));
+			device->hostname[(t_end-t)*sizeof(char)] = 0;
+		}
+		saveDeviceSettings1(device);	
+		if (getMdns() != NULL)
+			mdns_destroy(getMdns());
+		vTaskDelay(1);
+		wifi_get_ip_info ( STATION_IF, info );
+		initMDNS(device->hostname ,info->ip .addr);
+		vTaskDelay(1);
+		kprintf(PSTR("##SYS.HOST#: %s.local\n    IP:%s #\n"),device->hostname,getIp());
+		vTaskDelay(100);
+		free(info);
+		free(hn);
+	}
+	free(device);	
+}
 
 void readAdc()
 {
@@ -778,6 +831,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 		else if(strncmp(tmp+4, "version",4) == 0) 	kprintf(PSTR("Release: %s, Revision: %s\n"),RELEASE,REVISION);
 		else if(startsWith(   "tzo",tmp+4)) 	tzoffset(tmp);
 		else if(startsWith(   "log",tmp+4)) 	; // do nothing
+		else if(startsWith (  "host",tmp+4)) 	chostname(tmp);
 		else printInfo(tmp);
 	}
 	else 

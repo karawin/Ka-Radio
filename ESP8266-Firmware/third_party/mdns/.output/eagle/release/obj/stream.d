@@ -1,7 +1,8 @@
-.output/eagle/release/obj/stream.o .output/eagle/release/obj/stream.d : stream.c ../platform/stream.h ../../include/platform/platform.h \
- ../../include/lwip/lwip/opt.h ../../include/lwip/lwipopts.h \
- ../../include/lwip/lwip/debug.h ../../include/lwip/lwip/arch.h \
- ../../include/lwip/arch/cc.h ../../include/espressif/c_types.h \
+.output/eagle/release/obj/stream.o .output/eagle/release/obj/stream.d : stream.c ../../include/mdns/stream.h \
+ ../../include/mdns/platform.h ../../include/lwip/lwip/opt.h \
+ ../../include/lwip/lwipopts.h ../../include/lwip/lwip/debug.h \
+ ../../include/lwip/lwip/arch.h ../../include/lwip/arch/cc.h \
+ ../../include/espressif/c_types.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/include/stdint.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/stdint.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/_ansi.h \
@@ -33,4 +34,5 @@
  ../../include/lwip/lwip/mem.h ../../include/mdns/mdns.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/stdlib.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/stdlib.h \
- /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/alloca.h
+ /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/alloca.h \
+ ../../include/mdns/platform.h

@@ -8,7 +8,7 @@
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/features.h \
  ../../extra_include/xtensa/config/core-isa.h \
  ../../include/mdns/mdns_query.h ../../include/mdns/stream.h \
- ../../include/platform/platform.h ../../include/lwip/lwip/opt.h \
+ ../../include/mdns/platform.h ../../include/lwip/lwip/opt.h \
  ../../include/lwip/lwipopts.h ../../include/lwip/lwip/debug.h \
  ../../include/lwip/lwip/arch.h ../../include/lwip/arch/cc.h \
  ../../include/espressif/c_types.h \
