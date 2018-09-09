@@ -4,6 +4,13 @@
 See also the esp32 version at https://github.com/karawin/Ka-Radio32</br>
 
 ## Basic informations<BR/>
+### Release 1.7- Built on 2018/09/09
+New:<br/>
+<ul>
+	<li>mDns added </li>
+	<li>web commands next and prev added</li>
+	<li>uart or teknet command sys.host added.</li>
+</ul>
 ### Release 1.6.3- Built on 2017/12/27
 New:<br/>
 <ul>

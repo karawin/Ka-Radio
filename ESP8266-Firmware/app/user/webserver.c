@@ -854,7 +854,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			if (changed)
 			{
 				saveDeviceSettings(device);	
-//printf("WServer saveDeviceSettings\n");
+
 				saveDeviceSettings1(device1);
 			}			
 			uint8_t *macaddr = inmalloc(10*sizeof(uint8_t));
