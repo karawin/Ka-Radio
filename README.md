@@ -22,6 +22,7 @@ New:<br/>
 	<li>gzipped html tranfert. More stable and improved speed</li>
 	<li>The page content follows the header size.</li>
 </ul>
+
 ### Release 1.5- Built on 2017/08/07
 New:<br/>
 <ul>
