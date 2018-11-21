@@ -1,6 +1,7 @@
 #!/bin/bash
+
 echo style
-yui-compressor   -o style.min.css style.css 
+python3 ./css-html-js-minify.py style.css 
 mv style.css style.ori
 mv style.min.css style.css
 gzip  style.css 
@@ -11,7 +12,7 @@ sed -i 's/unsigned/const /g' style
 mv style.ori style.css
 
 echo style1
-yui-compressor   -o style1.min.css style1.css 
+python3 ./css-html-js-minify.py style1.css 
 mv style1.css style1.ori
 mv style1.min.css style1.css
 gzip  style1.css 
@@ -22,7 +23,7 @@ sed -i 's/unsigned/const /g' style1
 mv style1.ori style1.css
 
 echo script
-yui-compressor   -o script.min.js script.js 
+python3 ./css-html-js-minify.py script.js 
 mv script.js script.ori
 mv script.min.js script.js
 gzip  script.js 
