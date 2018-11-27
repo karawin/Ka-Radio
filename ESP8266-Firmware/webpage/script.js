@@ -20,12 +20,13 @@ function openwebsocket(){
 				//document.getElementById("CONTENT").style.marginTop = document.getElementById('HEADER').clientHeight+"px" ;
 				setMainHeight(curtab);
 			}
+		changeTitle(document.getElementById('meta').innerHTML);
 		if (arr["wsvol"]) onRangeVolChange(arr['wsvol'],false); 
 		if (arr["wsicy"]) icyResp(arr["wsicy"]); 
 		if (arr["wssound"]) soundResp(arr["wssound"]); 
 		if (arr["monitor"]) playMonitor(arr["monitor"]); 
 		if (arr["wsstation"]) wsplayStation(arr["wsstation"]); 
-		if (arr["wsrssi"]) {document.getElementById('rssi').innerHTML = arr["wsrssi"]+' dBm';recrssi = 0}
+		if (arr["wsrssi"]) {document.getElementById('rssi').innerHTML = arr["wsrssi"]+' dBm';recrssi = 0;}
 	} catch(e){ console.log("error"+e);}
 }
 
@@ -51,6 +52,12 @@ function openwebsocket(){
 		websocket.close();
 	}
 }
+
+// Change the title of the page
+function changeTitle($arr) {
+    window.parent.document.title = $arr; // on change l'attribut <title>
+}
+
 // ask for the rssi and restart the timer
 function wsaskrssi(){
 	try{
@@ -384,7 +391,7 @@ function icyResp(arr) {
 			if (arr["meta"] == "") 
 				{ document.getElementById('meta').innerHTML = karadio;setMainHeight(curtab);}			
 			if (arr["meta"]) document.getElementById('meta').innerHTML = arr["meta"].replace(/\\/g,"");
-//					else document.getElementById('meta').innerHTML = karadio;
+			changeTitle(document.getElementById('meta').innerHTML);
             if (typeof arr["auto"] != 'undefined')  // undefined for websocket
 			if (arr["auto"] == "1")
 				document.getElementById("aplay").setAttribute("checked","");
@@ -523,7 +530,16 @@ function wifi(valid) {
 	}
 	xhr.open("POST","wifi",false);
 	xhr.setRequestHeader(content,ctype);
-	xhr.send("valid=" + valid +"&ssid=" + encodeURIComponent(document.getElementById('ssid').value )+ "&pasw=" + encodeURIComponent(document.getElementById('passwd').value) +"&ssid2=" + encodeURIComponent(document.getElementById('ssid2').value) + "&pasw2=" + encodeURIComponent(document.getElementById('passwd2').value) + "&ip=" + document.getElementById('ip').value+"&msk=" + document.getElementById('mask').value+"&gw=" + document.getElementById('gw').value+"&ua=" + encodeURIComponent(document.getElementById('ua').value) +"&dhcp=" + document.getElementById('dhcp').checked+"&");
+	xhr.send("valid=" + valid 
+	+"&ssid=" + encodeURIComponent(document.getElementById('ssid').value )
+	+ "&pasw=" + encodeURIComponent(document.getElementById('passwd').value) 
+	+"&ssid2=" + encodeURIComponent(document.getElementById('ssid2').value) 
+	+ "&pasw2=" + encodeURIComponent(document.getElementById('passwd2').value) 
+	+ "&ip=" + document.getElementById('ip').value
+	+"&msk=" + document.getElementById('mask').value
+	+"&gw=" + document.getElementById('gw').value
+	+"&ua=" + encodeURIComponent(document.getElementById('ua').value) 
+	+"&dhcp=" + document.getElementById('dhcp').checked+"&");
 }
 function instantPlay() {
 	var curl;
