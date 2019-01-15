@@ -1,16 +1,15 @@
 html,body {
-	margin:0;
+	margin:0px;
 	height:100%;
 	padding:0;
 	font:12px "Trebuchet MS";
-	color:#ffffff;
-	background-color:#333333;
+	color:#222;
+	background-color:#033069
 }
 #MAIN {
 	width:100%;
-	height:120%;
 	overflow:hidden;
-	margin:0
+	margin:0px
 }
 #HEADER{
 	z-index:10;
@@ -25,12 +24,13 @@ html,body {
 	text-align: center;
 	padding-top:20px;
 	padding-bottom:5px;
-	background-color:#333333;
-	color:#f8f8f0;
+	background-color:#39c;
+	background-image: radial-gradient( #39c,#033069);
+	color:#f0f0ff;
 	font-size:22px;
 	line-height:25px;
 	padding-left:20px;
-	box-shadow:5px 5px 8px -2px #494242;
+	box-shadow:0 10px 10px 0 #333
 }
 div.RIGHT {
 	float:right;
@@ -69,7 +69,7 @@ div.LEFT {
 		color:#fff;
 	}
 	to {
-		color:#FBFAE6;
+		color:#ff0;
 	}
 }
 @keyframes mymove4 {
@@ -84,7 +84,6 @@ div.LEFT {
 .CONTENT {
 	width:92%;
 	position:relative;
-	top:100px;
 	overflow:hidden;
 	min-height:calc(100% - 70px);
 	margin-left:auto;
@@ -92,17 +91,16 @@ div.LEFT {
 	margin-top:auto;
 	padding-left:10px;
 	padding-right:10px;
-	padding-top:30px;
-	background-color:#222222;
-	box-shadow: 0px 0px 9px 2px #1E1C1C;
-	/*box-shadow:10px 5px 10px 255 #333,-10px 6px 10px 0 #333*/
+	padding-top: 30px;
+	background-color: #f4f4f4;
+	box-shadow: 10px 5px 10px 0 #333,-10px 6px 10px 0 #333
 }
+
 .CONTENT h1 {
 	font:18px "Trebuchet MS";
 	color:#f8f8f8;
-	background-color:#666145;
+	background-color:#39c;
 	padding:4px 4px;
-	width:98%
 }
 .CONTENT p {
 	font-size:15px;
@@ -112,7 +110,7 @@ div.LEFT {
 }
 .CONTENT a,a:visited {
 	font-size:15px;
-	color:#AAAAAA;
+	color:#222;
 	text-decoration:none
 }
 .CONTENT a:hover {
@@ -175,6 +173,7 @@ div.LEFT {
 }
 
 
+
 .tabs {
 	width:calc(100%-20px);
 	float:none;
@@ -182,12 +181,15 @@ div.LEFT {
 	position:relative;
 	text-align:left
 }
+
+ul#ordered li {float:none;text-align:left;}
+
 .tabs li {
 	float:left
 }
 .tabs hr {
-	size: 1;
-	color: #fff;
+	height: 1px;
+	color: #0;
 }
 .tabs input[type="radio"] {
 	position:absolute;
@@ -197,171 +199,153 @@ div.LEFT {
 .tabs [id^="vol1_range"] input[type=range] {
 	font-weight:bold;
 	min-width:200px;
-	background-color:#222222
+	background-color:#f8f8ff
 }
 .tabs input[type=range] {
 	min-width:200px;
-	color: #f8f8f8;
-	background-color:#111111 background:-webkit-linear-gradient(#666145,#555);
-	background:-moz-linear-gradient(#666145,#555);
-	background:-ms-linear-gradient(#666145,#555);
-	background:-o-linear-gradient(#666145,#555);
-	background:linear-gradient(#666145,#555);
-    border:1px solid #444;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
 	border-radius:5px
 }
-.tabs input[type=range]::-ms-fill-lower {
-    background: #777;
-    border-radius: 5px;
-}
-.tabs input[type=range]::-ms-fill-upper {
-    background: #ddd;
-    border-radius: 5px;
-}
 .tabs input[type=range]:hover {
-  box-shadow:3px 3px 3px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.5)
 }
 .tabs input[type="text"] {
-  font-size: 14px;
-  width: 140px;
-  height: 20px;
-  color: #0;
-  background-color: #E8C37D background:-webkit-linear-gradient(#ddd,#fff);
-  background: -moz-linear-gradient(#ddd,#fff);
-  background: -ms-linear-gradient(#ddd,#fff);
-  background: -o-linear-gradient(#ddd,#fff);
-  background: linear-gradient(#ddd,#fff);
-  border: 1px solid #444;
-  border-radius: 5px
+	font-size:12px;
+	width:140px;
+	height:20px;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
+	border-radius:5px
 }
-
 .tabs input[type="text"]:hover {
-  box-shadow:3px 3px 3px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs [id^="sw"] input[type="text"] {
-  font-size: 14px;
-  width: 70px;
-  height: 20px;
-  color: #0;
-  background-color: #E8C37D background:-webkit-linear-gradient(#ddd,#fff);
-  background: -moz-linear-gradient(#ddd,#fff);
-  background: -ms-linear-gradient(#ddd,#fff);
-  background: -o-linear-gradient(#ddd,#fff);
-  background: linear-gradient(#ddd,#fff);
-  border: 1px solid #444;
-  border-radius: 5px
+	font-size:14px;
+	min-width:70px;
+	height:20px;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
+	border-radius:5px
 }
-
 .tabs [id^="sw"] input[type="text"]:hover {
-  box-shadow:3px 3px 3px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs input[type="password"] {
-  font-size: 14px;
-  width: 140px;
-  height: 20px;
-  color: #0;
-  background-color: #E8C37D background:-webkit-linear-gradient(#ddd,#fff);
-  background: -moz-linear-gradient(#ddd,#fff);
-  background: -ms-linear-gradient(#ddd,#fff);
-  background: -o-linear-gradient(#ddd,#fff);
-  background: linear-gradient(#ddd,#fff);
-  border: 1px solid #444;
-  border-radius: 5px
+	font-size:14px;
+	width:140px;
+	height:20px;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
+	border-radius:5px
 }
 .tabs input[type="password"]:hover {
-  box-shadow:3px 3px 3px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs input[type="file"] {
 	font-size:14px;
-	min-width:100px;
+	min-width:140px;
 	height:30px;
-	color: #0;
-  background-color: #E8C37D background:-webkit-linear-gradient(#ddd,#fff);
-  background: -moz-linear-gradient(#ddd,#fff);
-  background: -ms-linear-gradient(#ddd,#fff);
-  background: -o-linear-gradient(#ddd,#fff);
-  background: linear-gradient(#ddd,#fff);
-border:1px solid #444;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
 	border-radius:5px
 }
 .tabs input[type="file"]:hover {
-  box-shadow:3px 3px 3px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs input[type="button"] {
 	font-size:14px;
 	min-width:100px;
 	height:25px;
-	color: #f8f8f8;
-	background: #554;
-	border:1px solid #444;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
 	border-radius:5px
 }
 .tabs input[type="button"]:hover {
-  box-shadow:3px 3px 3px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
+
+.tabs [class="icon icons8"]:hover {
+	box-shadow: 3px 3px 15px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)	
+}
+
+
+
 .tabs [id^="sw"] input[type="button"] {
 	font-size:14px;
 	min-width:50px;
 	height:25px;
-	color: #f8f8f8;
-	background: #554;
-	border:1px solid #444;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
 	border-radius:5px
 }
-.tabs [class="icon icons8"]:hover {
-	box-shadow:3px 3px 15px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
+.tabs [id^="sw"] nput[type="button"]:hover {
+  box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
-.tabs input[type="button"]:hover {
-	box-shadow:3px 3px 3px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
-}
-
-.tabs span.icon icons8:hover {
-	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)	
-}
-
-
-
 .tabs span input[type="button"] {
 	font-size:14px;
 	min-width:100px;
-	height:30px; 
-	color: #f8f8f8;
-	background: #554;
-	border:1px solid #444;
+	height:30px;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
 	border-radius:5px
 }
 .tabs span input[type="button"]:hover {
-  box-shadow:3px 3px 3px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
-}
-::selection {
-	background: #ABA06A;
-}
-::-moz-selection {
-	background: #ABA06A;
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs select {
 	min-width:230px;
-	color: #fff;
-	border:1px solid #444;
-	background: #554;
+	background-color:#f8f8ff;
+	border:1px solid #111;
+	border:1px solid #ccc;
+	background-color:#f8f8ff background:-webkit-linear-gradient(F8F8F8,#e8e8ef);
+	background:-moz-linear-gradient(#f8f8f8,#e8e8ef);
+	background:-ms-linear-gradient(F8F8F8,#e8e8ef);
+	background:-o-linear-gradient(#f8f8f8,#e8e8ef);
+	background:linear-gradient(#f8f8f8,#e8e8ef);
 	border-radius:5px
+}
+.tabs select:hover {
+	box-shadow:3px 3px 3px 0 rgba(0,0,0,0.24),3px 3px 3px 0 rgba(0,0,0,0.24)
 }
 .tabs option {
   min-width: 230px;
-  color: #fff;
-  border: 1px solid #444;
-  background-color: #554;
-  border-radius:5px
-}
-.tabs select:hover {
-  box-shadow:3px 3px 3px 0 rgba(200,200,200,0.5),3px 3px 3px 0 rgba(100,100,100,0.9)
+  color: #0;
+  border: 1px solid #fff;
+  background-color: #f8f8f8;
+  border-radius: 5px
 }
 .tabs label {
 	display:run-in;
 	padding:14px 14px;
 	font-weight:normal;
 	text-transform:uppercase;
-	background:#666145;
+	background:#39c;
 	cursor:pointer;
 	position:relative;
 	top:4px;
@@ -372,15 +356,35 @@ border:1px solid #444;
 	border-radius:5px
 }
 .tabs label:hover {
-	background:#96906B
+	background:#3cc
 }
+.tabs span.coutput label {
+	display:run-in;
+	padding:1px 1px;
+	background:#39c;
+	top:1px;
+	border-radius:0px;
+	
+}
+.tabs span.coutput label:hover {
+	background:#3cc
+}
+
+.tabs [id^="output"]:checked+label {
+	top:0;
+	padding:2px 2px;
+	color:#EEE;
+	background:#37c;
+	border-radius:4px
+}
+
 .tabs .tab-content {
 	z-index:2;
 	display:none;
 	overflow:auto;
 	width:100%;
 	font-size:14px;
-//	line-height:24px;
+	/*line-height:24px;*/
 	position:absolute;
 	top:53px;
 	left:0;
@@ -392,7 +396,7 @@ border:1px solid #444;
 	padding:16px 14px;
 	font-size:18px;
 	color:#EEE;
-	background:#918B69;
+	background:#38c;
 	border-radius:5px
 }
 .tabs [id^="tab"]:checked ~ [id^="tab-content"] {
@@ -423,16 +427,13 @@ a.page {
 }
 .modal-content {
     position: relative;
-    background-color: #333;
+    background-color: #f8f8f8;
     margin: auto;
     padding: 0;
     border: 1px solid #888;
     width: 80%;
 	height: 90%; 
-   box-shadow: 0 4px 8px 0 #aaa,0 6px 20px 0 rgba(128,128,128,0.19);
-/*
- box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-box-shadow:10px 5px 10px 255 #333,-10px 6px 10px 0 #333*/
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
     -webkit-animation-name: animatetop;
     -webkit-animation-duration: 0.4s;
     animation-name: animatetop;
@@ -446,6 +447,7 @@ box-shadow:10px 5px 10px 255 #333,-10px 6px 10px 0 #333*/
     from {top:-300px; opacity:0}
     to {top:0; opacity:1}
 }
-.modal-body {padding: 2px 16px;}
-
+.modal-body {
+	padding: 2px 16px
+}
 

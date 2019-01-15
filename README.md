@@ -4,9 +4,21 @@
 See also the esp32 version at https://github.com/karawin/Ka-Radio32</br>
 
 ## Basic informations<BR/>
-### Release 1.7- Built on 2018/09/09
+### New
+A new android application is born  
+  
+- KaRadio Remote Control by Vassilis Serasidis on google Play.
+
+It is an easy and fast WiFi remote control for your KaRadio or KaRadio32 hardware.  
+With this android app you can select the WebRadio station you want to play, set the volume and get the station information such as Station name, Genre, Bit rate, Meta data and more.   
+Found it at
+https://play.google.com/store/apps/details?id=com.serasidis.karadio.rc
+
+Thanks Vassilis.
+### Release 1.7 R1- Built on 2018/12/09
 New:<br/>
 <ul>
+	<li>Title on the web page</li>
 	<li>mDns added </li>
 	<li>web commands next and prev added</li>
 	<li>uart or teknet command sys.host added.</li>

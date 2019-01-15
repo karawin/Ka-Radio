@@ -8,7 +8,7 @@ html,body {
 }
 #MAIN {
 	width:100%;
-	height:120%;
+
 	overflow:hidden;
 	margin:0px
 }
@@ -26,6 +26,7 @@ html,body {
 	padding-top:20px;
 	padding-bottom:5px;
 	background-color:#39c;
+	background-image: radial-gradient( #39c,#033069);
 	color:#f0f0ff;
 	font-size:22px;
 	line-height:25px;
@@ -84,7 +85,7 @@ div.LEFT {
 .CONTENT {
 	width:92%;
 	position:relative;
-	top:100px;
+
 	overflow:hidden;
 	min-height:calc(100% - 70px);
 	margin-left:auto;
@@ -93,7 +94,7 @@ div.LEFT {
 	padding-left:10px;
 	padding-right:10px;
 	padding-top: 30px;
-	background-color: #f8f8f8;
+	background-color: #f4f4f4;
 	box-shadow: 10px 5px 10px 0 #333,-10px 6px 10px 0 #333
 }
 
@@ -102,7 +103,7 @@ div.LEFT {
 	color:#f8f8f8;
 	background-color:#39c;
 	padding:4px 4px;
-	width:98%
+
 }
 .CONTENT p {
 	font-size:15px;
@@ -175,6 +176,7 @@ div.LEFT {
 }
 
 
+
 .tabs {
 	width:calc(100%-20px);
 	float:none;
@@ -182,6 +184,9 @@ div.LEFT {
 	position:relative;
 	text-align:left
 }
+
+ul#ordered li {float:none;text-align:left;}
+
 .tabs li {
 	float:left
 }
@@ -356,6 +361,26 @@ div.LEFT {
 .tabs label:hover {
 	background:#3cc
 }
+.tabs span.coutput label {
+	display:run-in;
+	padding:1px 1px;
+	background:#39c;
+	top:1px;
+	border-radius:0px;
+	
+}
+.tabs span.coutput label:hover {
+	background:#3cc
+}
+
+.tabs [id^="output"]:checked+label {
+	top:0;
+	padding:2px 2px;
+	color:#EEE;
+	background:#37c;
+	border-radius:4px
+}
+
 .tabs .tab-content {
 	z-index:2;
 	display:none;
@@ -425,5 +450,7 @@ a.page {
     from {top:-300px; opacity:0}
     to {top:0; opacity:1}
 }
-.modal-body {padding: 2px 16px;}
+.modal-body {
+	padding: 2px 16px
+}
 
