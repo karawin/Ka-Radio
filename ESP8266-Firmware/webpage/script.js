@@ -1249,11 +1249,22 @@ document.addEventListener("DOMContentLoaded", function() {
 		switch (event.key) {
 		case "ArrowDown":
 		case "ArrowLeft":
-		if (event.ctrlKey) onRangeVolChange(parseInt(document.getElementById('vol_range').value) -5 ,true)	  
+		if (event.ctrlKey) 
+		{
+			vol=parseInt(document.getElementById('vol_range').value);
+			if (vol <5) vol = 0;
+			else vol -= 5;
+			onRangeVolChange(vol ,true)	 ;
+		}			
 		break;
 		case "ArrowUp":
 		case "ArrowRight":
-		if (event.ctrlKey) onRangeVolChange(parseInt(document.getElementById('vol_range').value) +5 ,true)	  
+		{
+			vol=parseInt(document.getElementById('vol_range').value);
+			if (vol > 249) vol = 254;
+			else vol += 5;
+			onRangeVolChange(vol ,true)	 ;
+		}		
 		break;
 		default:
 		return;
