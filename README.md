@@ -15,83 +15,16 @@ Found it at
 https://play.google.com/store/apps/details?id=com.serasidis.karadio.rc
 
 Thanks Vassilis.
-### Release 1.7 R1- Built on 2018/12/09
-New:<br/>
-<ul>
-	<li>Title on the web page</li>
-	<li>mDns added </li>
-	<li>web commands next and prev added</li>
-	<li>uart or teknet command sys.host added.</li>
-</ul>
+### Release 1.8 R0 - Built on 2019/01/31
 
-### Release 1.6.3- Built on 2017/12/27
-New:<br/>
-<ul>
-	<li>1.6.3 R0: Correction for stations with the char & in path.</li>
-	<li>1.6.2 R4: server NTP changed </li>
-	<li>1.6.2: Add of the rssi (Received Signal Strength Indication -30:best, -99:worst) at top right of the web page. </li>
-	<li>1.6.1: Click on the header to rewind to the top </li>
-	<li>Header stays on top of the web page </li>
-	<li>gzipped html tranfert. More stable and improved speed</li>
-	<li>The page content follows the header size.</li>
-</ul>
+-  New edit panel with play/stop control  
+-  New volume control on web with Ctrl arrow keys  
+-  New upgrade indication on telnet, serial and web  
+-  Web page look changed (a bit),  
+-  Added the TZO on the setting page  
+-  Added the mDNS hostname on the setting page  
 
-### Release 1.5- Built on 2017/08/07
-New:<br/>
-<ul>
-	<li>Deeply tuned and optimized</li>
-	<li>Added: a button erase on the station edit</li>
-	<li>Little change of the menu labels.</li>
-	<li>If the same meta is repeated in the stream, it is filtered</li>
-	<li>telnet server now accepts the negociation.</li>
-	<li>Only one task for all servers: websocket, web interface and telnet.</li>
-	<li>Optimized threshold to start playing.It depends now of the size of the reception buffer.</li>
-	<li>New web command: version, infos and list. See the interface.txt file on setting menu.</li>
-    </ul>
-    <p></br>Bugs resolved: (Thanks Kim)</p>
-    <ul>
-		<li>autoplay was broken</li><br>
-		<li>monitor doesn't always start well.</li></br>
-		<li>A bug in meta for low stream stations removed.</li><br>
-    </ul>
 
-### Release 1.4.2 - Built on 2017/08/01
-New:<br/>
-Unable to make the Espressif RTOS SDK 1.5.0-dev working, so I fed up.<br/>
-- This 1.4.2 is able to play every 320Kb/s stations.<br/>
-- New command: sys.version : Display the current Release and Revision.<br/>
-- As always, more free ram memories. The websocket and telnet tasks are now one task for both.<br/>
-- The web interface loading speed is improved.<br/>
-- A telnet server multi clients on port 23. It is the same interface as the uart one. So the low level management can be done via the network and it offer a complete interface for remote addons.<br/>
-- A deep modification of the memory management. More free room.<br/>
-- new commands: help and sys.adc.<br/>
-- The web volume command is now on a POST if the websocket is not ready.<br/>
-- Play all 320Kb/s Stations<br/>
--new command: sys.version<br/>
-<br/>
-Bugs resolved:<br/>
-- a problem on the web interface close resolved.<br/>
-A lot!<br/>
-1.4.1 crashed on stations reload and some other occasions.<br/>
-Improved: the second AP connection.<br/>
-Improved: low bitrate stations meta decoding.<br/>
-cli.list modified. Now for a complete listing, each line begins with CLI.LISTNUM to avoid interference with addons.<br/>
-<br/>
-### Release 1.3.4 - Built on 2017/07/11
-Bugs removed:<br/>
-- Internal optimization on websocket. More free ram for the web interface multi-user.
-- 1.3.3 A problem when a control panel and an addon are present is removed<BR/>
-- 1.3.3 A problem with the AP2 password not working is removed (regression).<BR/>
-<br/>
-### Release 1.3.2 - Built on 2017/06/19
-New features:<br/>
-- The test task is replaced with an os timer to have more free memories
-- Edit station now in modal window<br
-- Added a mouse event on full url<br/>
-- Many internal optimizations<br/>
-- New control buttons on the web interface<br/>
-- A potential huge bug removed<br/>
-<br/>
 
 ###Add On: add a lcd, a remote control, and other goodies: see https://github.com/karawin/Karadio-addons <br/>
 <br/>
@@ -121,7 +54,7 @@ The binaries are on ESP8266-Firmware/bin/upgrade/
 - Congratulation, you can edit your own station list. Dont forget to save your stations list in case of problem or for new equipments.
 - if the AP is already know by the esp8266, the default ip is given by dhcp.
 - a sample of stations list is on https://github.com/karawin/ESP8266-WebRadio/blob/master/ESP8266-Firmware/WebStations.txt . Can be uploaded via the web page.   
-- Karadio can be controlled by the web interface or by the uart interface or by telnet. List of commands: type help
+- Karadio can be controlled by the web interface or by the uart interface or by telnet. List of commands: type help  
 - See the list of command at http://karadio.karawin.fr/Interface.txt
 
 #### Feedback
