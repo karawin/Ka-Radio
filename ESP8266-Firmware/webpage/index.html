@@ -42,10 +42,10 @@
 	
 	<div id="MAIN">	
 		<div id="HEADER" onclick="wtop()"> 
-<!--<div id="HEADER-cont">-->
+
 			<div class="LEFT"><img title="Click on the logo to change the theme" onClick= "theme()" src="logo.png"></div>
 			<div class="RIGHT">
-			<a href="https://github.com/karawin/Ka-Radio" target="_blank">V1.7R1</a><br/>
+			<a href="https://github.com/karawin/Ka-Radio" target="_blank">V1.8 R0</a><br/>
 			<a href="http://www.karawin.fr" target="_blank" >By KaraWin</a><br/>
 			<div id="rssi" >0 dBm</div><br/>
 <!--			<a href="https://github.com/PiotrSperka/ESP8266-WebRadio" style="font-size:8px" target="_blank">From PiotrSperka</a> -->
@@ -150,15 +150,17 @@
 					<input type="radio" name="tabs" id="tab2" />
 					<label for="tab2">EDIT</label>
 					<div id="tab-content2" class="tab-content">
-						<!--<h1>Manage stations</h1>--><br/>
+						<!--<h1>Manage stations</h1>-->
+						<h1>
 						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list(i)">
 						<input type="button" id="stsave" disabled="true" style="margin:0px auto" title="This will save all stations to the WebRadio" onClick="stChanged()"  value="Save the list(i)">
 						<input type="button" style="margin:0px auto" id="clear" title="Warning: This will erase all stations.\n Be sure to save them before." onClick="clearList()"  value="Erase all(i)">				
 						<input type="button" style="margin:0px auto" id="clear" title="Print the list" onClick="printList()"  value="Print all(i)"><br/>				
-						<br/>
+						</h1>
 						<span >You can Drag/Drop each line to sort the list</span><br/>
 						<table id = "stationsTable" style="table-layout: fixed; width: 100%;">
-							<thead><tr><td style="width:8%">No.</td><td style="width:30%; ">Name</td><td style="width:20%">URL</td><td style="width:20%">File</td><td style="width:8%">Port</td><td style="width:4%">Vol</td><td style="width:9%"></td></tr></thead>
+<!--							<thead><tr><td style="width:8%">No.</td><td style="width:30%; ">Name</td><td style="width:20%">URL</td><td style="width:20%">File</td><td style="width:8%">Port</td><td style="width:4%">Vol</td><td style="width:9%"></td></tr></thead> -->
+							<thead><tr><td style="width:5%;text-align: center; vertical-align: middle;">No.</td><td style="width:38%; ">Name<td style="width:45%; ">URL</td></td><td style="width:3%;text-align: center; vertical-align: middle;">Vol</td><td style="width:9%;text-align: center; vertical-align: middle;">Edit</td></tr></thead>
 							<tbody>  							
 							</tbody>
 						</table>
@@ -184,12 +186,12 @@
 						<p>
 						<input type="button"  onClick="saveTextAsFile()" value="Save Stations from WebRadio"> 
 						<span style="display:inline-block;">To &nbsp;&nbsp;&nbsp;
-						<input type="text" style="width:300px;" value="WebStations.txt" id="filesave"></span>
+						<input type="text" style="width:300px;color:black;" value="WebStations.txt" id="filesave"></span>
 <!--						<a HREF="" download="WebStations.txt" id="downloadlink" style="display: none;">Download it</a>
  -->
 						<br/><br/>
 						<input type="button"   onClick="downloadStations()" value="Restore Stations to WebRadio"> <span style="display:inline-block;">From 
-						<input type="file" style="width:300px;" id="fileload"></span><br/>
+						<input type="file" style="width:300px;color:black;" id="fileload"></span><br/>
 <!--						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list">
 						<input type="button" style="float:right;" id="clear" title="Warning: This will clear all stations.\n Be sure to save them before." onClick="clearList()"  value="Clear all stations"><br/>				
 						<br/>-->
@@ -213,12 +215,17 @@
 						<span class="bold">Gateway:</span>
 						<input id="gw" type="text" oninput="chkip(this)" />
 						</p>						
-						<h1>HTML Option &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="Validate" onclick="wifi(0)" /></h1>
+						<h1>Other options &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button" value="Validate" onclick="wifi(0)" /></h1>
 						<p>						
 						<span class="bold">User Agent:</span>
-						<input id="ua" type="text" value="" />						
+						<input id="ua" type="text" value="" />	<br/>					
+						<span class="bold">mDNS Hostname:</span>
+						<input id="host" type="text" value="" />
+						<span class="bold">.local</span><br/>
+						<span class="bold">Time Zone Offset:</span>
+						<input id="tzo" type="text" value="" />						
 						</p>
-						<h1>Update to: <span id="newrelease"></span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type=button value="Update now" onclick="upgrade()" /><br/>	</h1>
+						<h1>Update to: <span id="newrelease"></span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type=button value="Update now" onclick="upgrade()" />  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="updatefb"></span><br/>	</h1>
 						<p>
 						<span class="bold4" id="Version"></span><br/>
 						<span class="bold4">To update or reload the current release:</span><br/><br/>		

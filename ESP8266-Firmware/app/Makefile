@@ -79,7 +79,6 @@ LINKFLAGS_eagle.app.v6 = \
 	-lsmartconfig	\
 	-lspiffs	\
 	-lssl	\
-	-lupgrade	\
 	-lwpa	\
 	-lwps		\
 	-lmdns	\

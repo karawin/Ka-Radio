@@ -8,7 +8,6 @@ html,body {
 }
 #MAIN {
 	width:100%;
-
 	overflow:hidden;
 	margin:0px
 }
@@ -85,7 +84,6 @@ div.LEFT {
 .CONTENT {
 	width:92%;
 	position:relative;
-
 	overflow:hidden;
 	min-height:calc(100% - 70px);
 	margin-left:auto;
@@ -391,8 +389,8 @@ ul#ordered li {float:none;text-align:left;}
 	position:absolute;
 	top:53px;
 	left:0;
-	border-color:#185213;
-	border-top:solid 1px
+	border-color:#9cc199;
+//	border-top:solid 1px
 }
 .tabs [id^="tab"]:checked+label {
 	top:0;
@@ -410,6 +408,17 @@ table#stationsTable,table#stationsTable th,table#stationsTable td {
 	border-collapse:collapse;
 	width:100%;
 	overflow-x: hidden;
+	border-color:#185213;
+}
+
+table#stationsTable tr:nth-child(even)
+{
+	background-color: #f8f8f8;
+}
+
+table#stationsTable tr:nth-child(odd)
+{
+	background-color: #f0f0f0;
 }
 a.page {
 	font-size:18pt!important;

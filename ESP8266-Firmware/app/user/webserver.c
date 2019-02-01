@@ -19,8 +19,10 @@ const char strsMALLOC1[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer %s malloc f
 const char strsSOCKET[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer Socket fails %s errno: %d\n"};
 const char strsID[] STORE_ATTR ICACHE_RODATA_ATTR = {"getstation, no id or Wrong id %d\n"};
 const char strsRAUTO[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"rauto\":\"%c\"}"};
+const char strsTHEME[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"theme\":\"%c\"}"};
 const char strsICY[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"curst\":\"%s\",\"descr\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\",\"meta\":\"%s\",\"vol\":\"%s\",\"treb\":\"%s\",\"bass\":\"%s\",\"tfreq\":\"%s\",\"bfreq\":\"%s\",\"spac\":\"%s\",\"auto\":\"%c\"}"};
-const char strsWIFI[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ssid2\":\"%s\",\"pasw2\":\"%s\",\"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\",\"mac\":\"%s\"}"};
+const char strsWIFI[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ssid2\":\"%s\",\"pasw2\":\"%s\",\
+\"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\",\"mac\":\"%s\",\"host\":\"%s\",\"tzo\":\"%s\"}"};
 const char strsGSTAT[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: %d\r\n\r\n{\"Name\":\"%s\",\"URL\":\"%s\",\"File\":\"%s\",\"Port\":\"%d\",\"ovol\":\"%d\"}"};
 
 
@@ -106,7 +108,7 @@ ICACHE_FLASH_ATTR void respKo(int conn)
 
 ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 {
-#define PART 2048
+#define PART 1024
 #define LIMIT 128
 
 	int length;
@@ -189,6 +191,26 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 
 
 
+ICACHE_FLASH_ATTR bool getSParameter(char* result,const char* sep,const char* param, char* data, uint16_t data_length) {
+	if ((data == NULL) || (param == NULL))return false;
+	size_t len = sizeof(result);
+	char* p = strstr(data, param);
+	if(p != NULL) {
+		p += strlen(param);
+		char* p_end = strstr(p, sep);
+		if(p_end ==NULL) p_end = data_length + data;
+		if(p_end != NULL ) {
+			if (p_end==p) return false;
+			int i;
+			if (len > (p_end-p )) len = p_end-p ;
+			for(i=0; i<len; i++) result[i] = 0;
+			strncpy(result, p, len);
+			result[len]=0;
+//			ESP_LOGV(TAG,"getSParam: in: \"%s\"   \"%s\"",data,result);
+			return true;
+		} else return false;
+	} else return false;
+}
 
 ICACHE_FLASH_ATTR char* getParameter(char* sep,char* param, char* data, uint16_t data_length) {
 	if ((data == NULL) || (param == NULL))return NULL;
@@ -212,6 +234,9 @@ ICACHE_FLASH_ATTR char* getParameter(char* sep,char* param, char* data, uint16_t
 }
 ICACHE_FLASH_ATTR char* getParameterFromResponse(char* param, char* data, uint16_t data_length) {
 	return getParameter("&",param,data, data_length) ;
+}
+ICACHE_FLASH_ATTR bool getSParameterFromResponse(char* result, const char* param, char* data, uint16_t data_length) {
+	return getSParameter(result,"&",param,data, data_length) ;
 }
 ICACHE_FLASH_ATTR char* getParameterFromComment(char* param, char* data, uint16_t data_length) {
 	return getParameter("\"",param,data, data_length) ;
@@ -368,7 +393,7 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 	else if (strstr(payload,"stopWake")!= NULL){stopWake();}
 	//monitor
 	else if (strstr(payload,"monitor")!= NULL){wsMonitor();}
-	else if (strstr(payload,"upgrade")!= NULL){update_firmware("new");}
+//	else if (strstr(payload,"upgrade")!= NULL){update_firmware("new");}
 	else if (strstr(payload,"theme")!= NULL){theme();}
 	else if (strstr(payload,"wsrssi")!= NULL){rssi(socket);}
 }
@@ -455,16 +480,19 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 //printf("HandlePost %s\n",name);
 //	char* head = NULL;
 	int i;
+	bool tst;
 	bool changed = false;
 	struct device_settings *device;
 	if(strcmp(name, "/instant_play") == 0) {
 		if(data_size > 0) {
-			char* url = getParameterFromResponse("url=", data, data_size);
-			char* path = getParameterFromResponse("path=", data, data_size);
+			char url[100];
+			tst = getSParameterFromResponse(url,"url=", data, data_size);
+			char path[200];
+			tst &=getSParameterFromResponse(path,"path=", data, data_size);
 			pathParse(path);
-			char* port = getParameterFromResponse("port=", data, data_size);
-//			int i;
-			if(url != NULL && path != NULL && port != NULL) {
+			char port[10];
+			tst &=getSParameterFromResponse(port,"port=", data, data_size);
+			if(tst)  {
 				clientDisconnect(PSTR("Post instant_play"));
 				for (i = 0;i<100;i++)
 				{
@@ -484,13 +512,9 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 					vTaskDelay(5);
 				}
 			} 
-			infree(url);
-			infree(path);
-			infree(port);
 		}
 	} else if(strcmp(name, "/soundvol") == 0) {
 		if(data_size > 0) {
-//			char* vol = getParameterFromResponse("vol=", data, data_size);
 			char * vol = data+4;
 			data[data_size-1] = 0;
 //			printf("/sounvol vol: %s num:%d \n",vol, atoi(vol));
@@ -498,48 +522,65 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		}
 	} else if(strcmp(name, "/sound") == 0) {
 		if(data_size > 0) {
-			char* bass = getParameterFromResponse("bass=", data, data_size);
-			char* treble = getParameterFromResponse("treble=", data, data_size);
-			char* bassfreq = getParameterFromResponse("bassfreq=", data, data_size);
-			char* treblefreq = getParameterFromResponse("treblefreq=", data, data_size);
-			char* spacial = getParameterFromResponse("spacial=", data, data_size);
+			char bass[6];
+			char treble[6];
+			char bassfreq[6];
+			char treblefreq[6];
+			char spacial[6];
+			changed = false;
 			device = getDeviceSettings();
 			if (device != NULL)
 			{
-				changed = false;
-				if(bass) {
-					VS1053_SetBass(atoi(bass));
-					if (device->bass != atoi(bass)){ device->bass = atoi(bass); changed = true;}
-					infree(bass);
+			if(getSParameterFromResponse(bass,"bass=", data, data_size)) {		
+				if (device->bass != atoi(bass))
+				{ 
+						VS1053_SetBass(atoi(bass));
+						changed = true;
+						device->bass = atoi(bass); 
 				}
-				if(treble) {
-					VS1053_SetTreble(atoi(treble));
-					if (device->treble != atoi(treble)){ device->treble = atoi(treble); changed = true;}
-					infree(treble);
-				}
-				if(bassfreq) {
-					VS1053_SetBassFreq(atoi(bassfreq));
-					if (device->freqbass != atoi(bassfreq)){ device->freqbass = atoi(bassfreq); changed = true;}
-					infree(bassfreq);
-				}
-				if(treblefreq) {
-					VS1053_SetTrebleFreq(atoi(treblefreq));
-					if (device->freqtreble != atoi(treblefreq)){ device->freqtreble = atoi(treblefreq); changed = true;}
-					infree(treblefreq);
-				}
-				if(spacial) {
-					VS1053_SetSpatial(atoi(spacial));
-					if (device->spacial != atoi(spacial)){ device->spacial = atoi(spacial); changed = true;}
-					infree(spacial);
-				}
-				if (changed) saveDeviceSettings(device);
-				infree(device);
 			}
+			if(getSParameterFromResponse(treble,"treble=", data, data_size)) {				
+				if (device->treble != atoi(treble))
+				{ 
+						VS1053_SetTreble(atoi(treble));
+						changed = true;
+						device->treble = atoi(treble); 
+				}
+			}
+			if(getSParameterFromResponse(bassfreq,"bassfreq=", data, data_size)) {					
+				if (device->freqbass != atoi(bassfreq))
+				{ 
+						VS1053_SetBassFreq(atoi(bassfreq));
+						changed = true;
+						device->freqbass = atoi(bassfreq); 
+				}
+			}
+			if(getSParameterFromResponse(treblefreq,"treblefreq=", data, data_size)) {					
+				if (device->freqtreble != atoi(treblefreq))
+				{
+						VS1053_SetTrebleFreq(atoi(treblefreq)); 
+						changed = true;
+						device->freqtreble = atoi(treblefreq); 
+				}
+			}
+			if(getSParameterFromResponse(spacial,"spacial=", data, data_size)) {					
+				if (device->spacial != atoi(spacial))
+				{
+							VS1053_SetSpatial(atoi(spacial)); 
+							changed = true;
+							device->spacial = atoi(spacial); 
+				}
+			}
+			if (changed) saveDeviceSettings(device);
+			infree(device);
+			}
+
 		}
 	} else if(strcmp(name, "/getStation") == 0) {
 		if(data_size > 0) {
-			char* id = getParameterFromResponse("idgp=", data, data_size);
-			if (id ) 
+			char id[6];
+//			char* id = getParameterFromResponse("idgp=", data, data_size);
+			if (getSParameterFromResponse(id,"idgp=", data, data_size) ) 
 			{
 				if ((atoi(id) >=0) && (atoi(id) < 255)) 
 				{
@@ -577,24 +618,27 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 						infree(fmt);
 					}
 					infree(si);
-					infree(id);
 					return;
 				} else printf(strsID,atoi(id));
-				infree (id);
+//				infree (id);
 			} 			
 		}
 	} else if(strcmp(name, "/setStation") == 0) 
 	{
 		if(data_size > 0) {
 //printf("data:%s\n",data);
-			char* nb = getParameterFromResponse("nb=", data, data_size);
+			char nb[6] ;
+			bool res;
 			uint16_t unb,uid = 0;
 //printf("nb init:%s\n",nb);
 			bool pState = getState();  // remember if we are playing
-			if (nb) {unb = atoi(nb); infree(nb);}
+			res=getSParameterFromResponse(nb,"nb=", data, data_size);
+			if (res) 
+				unb = atoi(nb);
 			else unb = 1;
+
 //printf("unb init:%d\n",unb);
-			char* id; char* url; char* file; char* name; char* port; char* ovol;
+			char* url; char* file; char* name;
 			struct shoutcast_info *si =  inmalloc(sizeof(struct shoutcast_info)*unb);
 			struct shoutcast_info *nsi ;
 			
@@ -606,40 +650,36 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* bsi = (char*)si;
 			int j;
 			for (j=0;j< sizeof(struct shoutcast_info)*unb;j++) bsi[j]=0; //clean 
-
+			
+			char id[6];
+			char port[6];
+			char ovol[6];
 			for (i=0;i<unb;i++)
 			{
 				nsi = si + i;
-				id = getParameterFromResponse("id=", data, data_size);
 				url = getParameterFromResponse("url=", data, data_size);
 				file = getParameterFromResponse("file=", data, data_size);
 				pathParse(file);
 				name = getParameterFromResponse("name=", data, data_size);
-				port = getParameterFromResponse("port=", data, data_size);
-				ovol = getParameterFromResponse("ovol=", data, data_size);
-//printf("nb:%d,si:%x,nsi:%x,id:%s,url:%s,file:%s\n",i,si,nsi,id,url,file);
-				if(id ) {
+				if(getSParameterFromResponse(id,"id=", data, data_size)) {
 					if (i == 0) uid = atoi(id);
 					if ((atoi(id) >=0) && (atoi(id) < 255))
 					{	
-						if(url && file && name && port) {
+						if(url && file && name && getSParameterFromResponse(port,"port=", data, data_size)) {
 							if (strlen(url) > sizeof(nsi->domain)) url[sizeof(nsi->domain)-1] = 0; //truncate if any
 							strcpy(nsi->domain, url);
 							if (strlen(file) > sizeof(nsi->file)) url[sizeof(nsi->file)-1] = 0; //truncate if any
 							strcpy(nsi->file, file);
 							if (strlen(name) > sizeof(nsi->name)) url[sizeof(nsi->name)-1] = 0; //truncate if any
 							strcpy(nsi->name, name);
-							nsi->ovol = (ovol==NULL)?0:atoi(ovol);
+							nsi->ovol = (getSParameterFromResponse(ovol,"ovol=", data, data_size))?atoi(ovol):0;
 							nsi->port = atoi(port);
 						}
-					} 					
+					} 						
 				} 
-				infree(ovol);
-				infree(port);
 				infree(name);
 				infree(file);
 				infree(url);
-				infree(id);
 				
 				data = strstr(data,"&&")+2;
 //				printf("si:%x, nsi:%x, addr:%x\n",si,nsi,data);
@@ -698,9 +738,28 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				infree(buf);
 				infree(device);	
 			}
-		}
-		
+		}		
 		return;		
+	} else if(strcmp(name, "/theme") == 0) {
+		char *buf = inmalloc( strlen(strsTHEME)+16);
+		if (buf == NULL)
+		{	
+			printf(strsTHEME,"post theme");
+			respOk(conn,"nok");
+		}
+		else {			
+			device = getDeviceSettings();
+			if (device != NULL)
+			{
+				flashRead(buf,(int)strsTHEME,strlen(strsTHEME));
+				buf[strlen(strsTHEME)] = 0;
+				sprintf(buf, buf,(device->options & T_THEME)?'1':'0' );
+				write(conn, buf, strlen(buf));
+				infree(buf);
+				infree(device);	
+			}
+		}		
+		return;			
 	} else if(strcmp(name, "/stop") == 0) {
 //	    int i;
 		if (clientIsConnected())
@@ -712,6 +771,8 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				vTaskDelay(4);
 			}
 		}
+	} else if(strcmp(name, "/upgrade") == 0) {
+		update_firmware("new");  // start the OTA
 	} else if(strcmp(name, "/icy") == 0)	
 	{	
 //		printf("icy vol \n");
@@ -792,12 +853,13 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 	} else if(strcmp(name, "/wifi") == 0)	
 	{
 		bool val = false;
-		char tmpip[16],tmpmsk[16],tmpgw[16];
+		char tmpip[16],tmpmsk[16],tmpgw[16],tmptzo[10];;
 		struct device_settings *device;
 		struct device_settings1 *device1;
 //		uint8_t a,b,c,d;
 		changed = false;		
 		if(data_size > 0) {
+			char valid[5];
 			device = getDeviceSettings();
 			device1 = getDeviceSettings1();
 			if ((device ==NULL)||(device1==NULL))
@@ -807,24 +869,30 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				respKo(conn);
 				return;
 			}
-			char* valid = getParameterFromResponse("valid=", data, data_size);
-			if(valid != NULL) if (strcmp(valid,"1")==0) val = true;
-			char* ssid = getParameterFromResponse("ssid=", data, data_size);
-			pathParse(ssid);
-			char* pasw = getParameterFromResponse("pasw=", data, data_size);
-			pathParse(pasw);
-			char* ssid2 = getParameterFromResponse("ssid2=", data, data_size);
-			pathParse(ssid2);
-			char* pasw2 = getParameterFromResponse("pasw2=", data, data_size);
-			pathParse(pasw2);
-			char* aip = getParameterFromResponse("ip=", data, data_size);
-			char* amsk = getParameterFromResponse("msk=", data, data_size);
-			char* agw = getParameterFromResponse("gw=", data, data_size);
+			if(getSParameterFromResponse(valid,"valid=", data, data_size))
+				if (strcmp(valid,"1")==0) val = true;
 			char* aua = getParameterFromResponse("ua=", data, data_size);
 			pathParse(aua);
-			char* adhcp = getParameterFromResponse("dhcp=", data, data_size);
+			char* host = getParameterFromResponse("host=", data, data_size);
+			pathParse(host);
+			char* tzo = getParameterFromResponse("tzo=", data, data_size);
+			pathParse(tzo);
+
+			
 // printf("rec:%s\nwifi received  valid:%s,val:%d, ssid:%s, pasw:%s, aip:%s, amsk:%s, agw:%s, adhcp:%s, aua:%s \n",data,valid,val,ssid,pasw,aip,amsk,agw,adhcp,aua);
 			if (val) {
+				char* ssid = getParameterFromResponse("ssid=", data, data_size);
+				pathParse(ssid);
+				char* pasw = getParameterFromResponse("pasw=", data, data_size);
+				pathParse(pasw);
+				char* ssid2 = getParameterFromResponse("ssid2=", data, data_size);
+				pathParse(ssid2);
+				char* pasw2 = getParameterFromResponse("pasw2=", data, data_size);
+				pathParse(pasw2);
+				char* aip = getParameterFromResponse("ip=", data, data_size);
+				char* amsk = getParameterFromResponse("msk=", data, data_size);
+				char* agw = getParameterFromResponse("gw=", data, data_size);
+				char* adhcp = getParameterFromResponse("dhcp=", data, data_size);				
 				changed = true;
 				ip_addr_t valu;
 				ipaddr_aton(aip, &valu);
@@ -837,9 +905,12 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				strcpy(device->ssid,(ssid==NULL)?"":ssid);
 				strcpy(device->pass,(pasw==NULL)?"":pasw);
 				strcpy(device->ssid2,(ssid2==NULL)?"":ssid2);
-				strcpy(device1->pass2,(pasw2==NULL)?"":pasw2);				
+				strcpy(device1->pass2,(pasw2==NULL)?"":pasw2);	
+				infree(ssid);infree(pasw);infree(ssid2); infree(pasw2);  
+				infree(aip);infree(amsk);infree(agw);
+				infree(adhcp); 
 			}
-			if (strlen(device->ua)==0)
+			if ((device->ua!= NULL)&&(strlen(device->ua)==0))
 			{
 				if (aua==NULL) {aua= inmalloc(12); strcpy(aua,"Karadio/1.5");}
 			}	
@@ -850,23 +921,67 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 					strcpy(device->ua,aua);
 					changed = true;
 				}
+				infree(aua);
 			}
+			
+			if (host!=NULL)
+			{ 
+				if (strlen(host) >0)
+				{
+					if ((strcmp(device1->hostname,host) != 0)&&(strcmp(host,"undefined") != 0))
+					{
+						strncpy(device1->hostname,host,HOSTLEN-1);
+						printf("HOSTAME  %s. Need to restart\n",device1->hostname);
+//						setHostname(device1->hostname);
+						changed = true;
+					}	
+				}				
+				infree(host);
+			}
+			
+			if (tzo==NULL) 
+			{
+				tzo= inmalloc(10); 
+				sprintf(tmptzo,"%d",device->tzoffset);
+				strcpy(tzo,tmptzo);
+			}
+			else if (strlen(tzo) ==0)
+			{
+				free (tzo);
+				tzo= inmalloc(10); strcpy(tzo,"0");
+			}
+
+			if (strlen(tzo) >0)
+			{
+				if (strcmp(tzo,"undefined") != 0)
+				{
+					device->tzoffset= atoi(tzo);
+//					addonDt();
+					changed = true;
+				}	
+			}				
+			infree(tzo);			
+			
 			if (changed)
 			{
 				saveDeviceSettings(device);	
-
 				saveDeviceSettings1(device1);
 			}			
-			uint8_t *macaddr = inmalloc(10*sizeof(uint8_t));
-			char* macstr = inmalloc(20*sizeof(char));
+			//uint8_t *macaddr = inmalloc(10*sizeof(uint8_t));
+			uint8_t macaddr[10]; // = inmalloc(10*sizeof(uint8_t));
+			char macstr[20]; // = inmalloc(20*sizeof(char));
+			char adhcp[4];
+			//char* macstr = inmalloc(20*sizeof(char));
 			wifi_get_macaddr ( 0, macaddr );			
 			int json_length ;
-			json_length =95+ //64 //86 95
+			json_length =95+ 19+
 			strlen(device->ssid) +
 			strlen(device->pass) +
 			strlen(device->ssid2) +
 			strlen(device1->pass2) +
 			strlen(device->ua)+
+			strlen(device1->hostname)+
+			sprintf(tmptzo,"%d",device->tzoffset)+
 			sprintf(tmpip,"%d.%d.%d.%d",device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3])+
 			sprintf(tmpmsk,"%d.%d.%d.%d",device->mask[0], device->mask[1],device->mask[2], device->mask[3])+
 			sprintf(tmpgw,"%d.%d.%d.%d",device->gate[0], device->gate[1],device->gate[2], device->gate[3])+
@@ -888,24 +1003,21 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				fmt[strlen(strsWIFI)] = 0;		
 				sprintf(buf, fmt,
 				json_length,
-				device->ssid,device->pass,device->ssid2,device1->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp,macstr);
+				device->ssid,device->pass,device->ssid2,device1->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp,macstr,device1->hostname,tmptzo);
 //printf(PSTR("wifi Buf len:%d\n%s\nfmt:%s\n"),strlen(buf),buf,fmt);
 				write(conn, buf, strlen(buf));
 				infree(buf);
 				infree(fmt);
 			}
-			infree(ssid); infree(pasw);infree(ssid2); infree(pasw2);  
-			infree(aip);infree(amsk);infree(agw);infree(aua);
-			infree(valid); infree(adhcp); infree(macaddr); 
-			infree(macstr);
+			
 			infree(device);
 			infree(device1);
 			if (val){
 				vTaskDelay(100);		
 				system_restart_enhance(SYS_BOOT_NORMAL_BIN, system_get_userbin_addr());	
 			}	
+			return;
 		}	
-		return;
 	} else if(strcmp(name, "/clear") == 0)	
 	{
 		eeEraseStations();	//clear all stations

@@ -50,7 +50,7 @@ const char striWATERMARK[] STORE_ATTR ICACHE_RODATA_ATTR = {"watermark %s: %d  h
 
 //ip
 static char localIp[20] = {"0.0.0.0"};
-static mdnsHandle *mdns;
+static mdnsHandle *mdns = NULL;
 void uart_div_modify(int no, unsigned int freq);
 
 //	struct station_config config;

@@ -127,7 +127,26 @@ void setVolumew(char* vol)
 }	
 
 unsigned short adcdiv;	
-
+void setHostname(char* s)
+{
+	struct ip_info  *info;
+	mdnsHandle* mydns = getMdns();
+	info = malloc(sizeof(struct ip_info));
+//	printf("HOSTAME0  %s. Need to restart\n",s);
+	if (mydns != NULL)
+	{
+		mdns_destroy(mydns);
+//		printf("HOSTAME0  Destroy\n");
+	}
+	vTaskDelay(1);
+//	printf("HOSTAME1\n");
+	wifi_get_ip_info ( STATION_IF, info );
+	vTaskDelay(1);
+//	printf("HOSTAME2\n");
+	initMDNS(s ,info->ip.addr);
+	vTaskDelay(1);
+	free(info);
+}
 //display or change the hostname and services
 void chostname(char* s)
 {
@@ -140,8 +159,7 @@ void chostname(char* s)
 		kprintf(PSTR("##SYS.HOST#: %s.local\n  IP:%s #\n"),device->hostname,getIp());
 		free(device);
 		return;
-	}
-	
+	}	
 	t +=2;
 	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
@@ -150,32 +168,19 @@ void chostname(char* s)
 		free(device);
 		return;
     }
-		
-    char *hn = (char*) malloc((t_end-t+1)*sizeof(char));
-    if(hn != NULL)
-    {
-		struct ip_info  *info;
-		info = malloc(sizeof(struct ip_info));
-		if (t_end-t ==0)
-			strcpy(	device->hostname, "karadio");
-		else
-		{	
-			if (t_end-t >= HOSTLEN) t_end = t+HOSTLEN;
-			strncpy(device->hostname,t,(t_end-t)*sizeof(char));
-			device->hostname[(t_end-t)*sizeof(char)] = 0;
-		}
-		saveDeviceSettings1(device);	
-		if (getMdns() != NULL)
-			mdns_destroy(getMdns());
-		vTaskDelay(1);
-		wifi_get_ip_info ( STATION_IF, info );
-		initMDNS(device->hostname ,info->ip .addr);
-		vTaskDelay(1);
-		kprintf(PSTR("##SYS.HOST#: %s.local\n    IP:%s #\n"),device->hostname,getIp());
-		vTaskDelay(100);
-		free(info);
-		free(hn);
+	if (t_end-t ==0)
+		strcpy(	device->hostname, "karadio");
+	else
+	{	
+		if (t_end-t >= HOSTLEN) t_end = t+HOSTLEN;
+		strncpy(device->hostname,t,(t_end-t)*sizeof(char));
+		device->hostname[(t_end-t)*sizeof(char)] = 0;
 	}
+	saveDeviceSettings1(device);
+	setHostname(device->hostname);
+
+	kprintf(PSTR("##SYS.HOST#: %s.local\n    IP:%s #\n"),device->hostname,getIp());
+	vTaskDelay(100);
 	free(device);	
 }
 
@@ -491,10 +496,92 @@ ICACHE_FLASH_ATTR void clientPlay(char *s)
     }	
 }
 
+// parse url
+bool parseUrl(char* src, char* url, char* path, uint16_t *port)
+{
+	char* teu,*tbu,*tbpa;
+	char* tmp = src;
+	tmp = strstr(src,"://");
+	if (tmp) tmp +=3;
+	else tmp = src;
+	tbu = tmp;
+//printf("tbu: %s\n",tbu);
+	teu = strchr(tbu,':');
+	if (teu)
+	{
+		tmp = teu+1;
+		*port = atoi(tmp);
+	}	
+	tbpa = strchr(tmp,'/');	
+	if (tbpa)
+	{
+		if(!teu) teu = tbpa-1;
+		strcpy(path,tbpa);
+	}
+	if (teu)
+	{
+		strncpy(url,tbu,teu-tbu);
+		url[teu-tbu] = 0;
+	} else
+		strcpy(url,src);
+	return true;
+}
+
+//edit a station
+void clientEdit(char *s)
+{
+struct shoutcast_info* si;
+uint8_t id = 0xff;
+char* tmp; 
+char* tmpend ;
+char url[200];
+
+	si = malloc(sizeof(struct shoutcast_info));	
+	if (si == NULL) { kprintf("##CLI.EDIT#: ERROR MEM#") ; return;}
+	memset(si->domain, 0, sizeof(si->domain));
+    memset(si->file, 0, sizeof(si->file));
+    memset(si->name, 0, sizeof(si->name));
+	memset(url,0,200);
+    si->port = 80;
+	si->ovol = 0;
+//	printf("##CLI.EDIT: %s",s);
+	tmp = s+10;
+	tmpend = strchr(tmp,':');
+	if (tmpend-tmp) id = atoi(tmp);	
+	tmp = ++tmpend;//:
+	tmpend = strchr(tmp,',');
+	if (tmpend-tmp) {strncpy(si->name,tmp,tmpend-tmp);} //*tmpend = 0; }
+	tmp = ++tmpend;//,
+	tmpend = strchr(tmp,'%');
+	if (tmpend == NULL )tmpend = strchr(tmp,'"');
+	if (tmpend-tmp){ strncpy(url,tmp,tmpend-tmp);} //*tmpend = 0; }
+	else url[0] = 0;
+	tmp = ++tmpend;//%
+	tmpend = strchr(tmp,'"');
+	if ((tmpend != NULL)&&(tmpend-tmp)) si->ovol = atoi(tmp);	
+	
+	
+//printf("==> id: %d, name: %s, url: %s\n",id,si->name,url);	
+	
+    // Parsing
+	if (url[0] != 0)
+		parseUrl(url, si->domain, si->file, &(si->port));
+	
+//printf(" id: %d, name: %s, url: %s, port: %d, path: %s\n",id,si->name,si->domain,si->port,si->file);
+	if (id < 0xff) {
+		if (si->domain[0]==0) {si->port = 0;si->file[0] = 0;}
+		saveStation(si, id); 
+		kprintf("##CLI.EDIT#: OK (%d)\n",id);
+	}
+	else
+		kprintf("##CLI.EDIT#: ERROR\n");	
+	
+}
+
 const char strilLIST[] STORE_ATTR ICACHE_RODATA_ATTR = {"##CLI.LIST#%c"};
 const char strilINFOND[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTINFO#: %3d: not defined\n"};
-const char strilINFO[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTINFO#: %3d: %s, %s:%d%s\n"};
-const char strilINFO1[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTNUM#: %3d: %s, %s:%d%s\n"};
+//const char strilINFO[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTINFO#: %3d: %s, %s:%d%s\n"};
+const char strilINFO1[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTNUM#: %3d: %s, %s:%d%s%%%d\n"};
 const char strilDINFO[] STORE_ATTR ICACHE_RODATA_ATTR = {"\n#CLI.LIST#%c"};
 
 
@@ -502,7 +589,7 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 {
 	struct shoutcast_info* si;
 	uint16_t i = 0,j = 255;
-	bool onlyOne = false;
+//	bool onlyOne = false;
 	
 	char *t = strstr(s, parslashquote);
 	if(t != NULL) // a number specified
@@ -516,7 +603,7 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 		i = atoi(t+2);
 		if (i>254) i = 0;
 		j = i+1;
-		onlyOne = true;
+//		onlyOne = true;
 		
 	} 
 	{	
@@ -537,10 +624,10 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 			{
 				if(si->port !=0)
 				{	
-					if (onlyOne)
-						kprintf(strilINFO,i,si->name,si->domain,si->port,si->file);	
-					else
-						kprintf(strilINFO1,i,si->name,si->domain,si->port,si->file);
+//					if (onlyOne)
+	//					kprintf(strilINFO,i,si->name,si->domain,si->port,si->file);	
+//					else
+						kprintf(strilINFO1,i,si->name,si->domain,si->port,si->file,si->ovol);
 				}
 				free(si);
 			}	
@@ -813,6 +900,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 		else if(strcmp(tmp+4, "vol-") == 0) 	setVolumeMinus();
 		else if(strcmp(tmp+4, "info") == 0) 	clientInfo();
 		else if(startsWith (  "vol",tmp+4)) 	clientVol(tmp);
+		else if(startsWith (  "edit",tmp+4)) 	clientEdit(tmp);
 		else printInfo(tmp);
 	} else
 	if(startsWith ("sys.", tmp))
@@ -828,7 +916,7 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 		else if(startsWith (  "patch",tmp+4)) 	syspatch(tmp);
 		else if(startsWith (  "led",tmp+4)) 	sysled(tmp);
 		else if(strcmp(tmp+4, "date") == 0) 	ntp_print_time();
-		else if(strncmp(tmp+4, "version",4) == 0) 	kprintf(PSTR("Release: %s, Revision: %s\n"),RELEASE,REVISION);
+		else if(strncmp(tmp+4, "version",4) == 0) 	kprintf(PSTR("Release: %s, Revision: %s, KaRadio\n"),RELEASE,REVISION);
 		else if(startsWith(   "tzo",tmp+4)) 	tzoffset(tmp);
 		else if(startsWith(   "log",tmp+4)) 	; // do nothing
 		else if(startsWith (  "host",tmp+4)) 	chostname(tmp);

@@ -1,8 +1,9 @@
 var content = "Content-type",
 	ctype = "application/x-www-form-urlencoded",
 	cjson = "application/json";
-var auto,intervalid, intervalrssi  ,recrssi = 0, timeid, websocket,urlmonitor , e, playing = false, curtab = "tab-content1",stchanged = false,maxStation = 255;
+var auto,intervalid, intervalrssi  ,recrssi = 0, timeid, websocket,urlmonitor , e, moniPlaying = false,editPlaying = false, curtab = "tab-content1",stchanged = false,maxStation = 255,themeIn = "0";
 const karadio = "Karadio";
+const working = "Working.. Please Wait";
 
 function openwebsocket(){	
 	autoplay(); //to force the server socket to accept and open the web server client.
@@ -17,7 +18,6 @@ function openwebsocket(){
 		{ document.getElementById('meta').innerHTML = karadio;setMainHeight(curtab);}
 		if (arr["meta"]) 
 			{	document.getElementById('meta').innerHTML = arr["meta"].replace(/\\/g,"");
-				//document.getElementById("CONTENT").style.marginTop = document.getElementById('HEADER').clientHeight+"px" ;
 				setMainHeight(curtab);
 			}
 		changeTitle(document.getElementById('meta').innerHTML);
@@ -27,12 +27,12 @@ function openwebsocket(){
 		if (arr["monitor"]) playMonitor(arr["monitor"]); 
 		if (arr["wsstation"]) wsplayStation(arr["wsstation"]); 
 		if (arr["wsrssi"]) {document.getElementById('rssi').innerHTML = arr["wsrssi"]+' dBm';recrssi = 0;}
+		if (arr["upgrade"]) {document.getElementById('updatefb').innerHTML = arr["upgrade"];}
 	} catch(e){ console.log("error"+e);}
 }
 
 	websocket.onopen = function (event) {
 		console.log("Open, url:"+"ws://"+window.location.host+"/");
-//		console.log("onopen websocket: "+websocket);
 		if(window.timerID){ /* a setInterval has been fired */
 		window.clearInterval(window.timerID);
 		window.timerID=0;}
@@ -43,7 +43,7 @@ function openwebsocket(){
 		console.log("onclose code: "+event.code);
 		console.log("onclose reason: "+event.reason);
 		if(!window.timerID){ /* avoid firing a new setInterval, after one has been done */
-		window.timerID=setInterval(function(){checkwebsocket()}, 2000);
+		window.timerID=setInterval(function(){checkwebsocket()}, 1500);
 		}	
 	}	
 	websocket.onerror = function(event) {
@@ -83,7 +83,7 @@ function wsplayStation($arr){
 function playMonitor($arr){
 	urlmonitor = "";
 	urlmonitor = $arr;	
-	if (playing)
+	if (moniPlaying)
 	{
 		monitor = document.getElementById("audio");	
 		if (urlmonitor.endsWith("/"))
@@ -102,7 +102,7 @@ function mplay(){
 	monitor.volume = document.getElementById("volm_range").value / 100;
 	while (monitor.networkState == 2);
 	monitor.play();
-	playing = true;	
+	moniPlaying = true;	
 	monitor.muted = false;
 }	
 
@@ -115,7 +115,7 @@ function mstop(){
 		monitor = document.getElementById("audio");	
 		monitor.muted = true;
 		monitor.src = 'http://karadio.karawin.fr/silence-1sec.mp3';
-		playing = false;
+		moniPlaying = false;
 }	
 function mpause(){
 		monitor = document.getElementById("audio");	
@@ -520,6 +520,8 @@ function wifi(valid) {
 			document.getElementById('gw').value = arr["gw"];
 			chkip(document.getElementById('gw'));
 			document.getElementById('ua').value = arr["ua"];
+			document.getElementById('host').value = arr["host"];
+			document.getElementById('tzo').value = arr["tzo"];
 			if (arr["dhcp"] == "1")
 				document.getElementById("dhcp").setAttribute("checked","");
 			else
@@ -539,6 +541,8 @@ function wifi(valid) {
 	+"&msk=" + document.getElementById('mask').value
 	+"&gw=" + document.getElementById('gw').value
 	+"&ua=" + encodeURIComponent(document.getElementById('ua').value) 
+	+"&host=" + encodeURIComponent(document.getElementById('host').value) 
+	+"&tzo=" + encodeURIComponent(document.getElementById('tzo').value) 
 	+"&dhcp=" + document.getElementById('dhcp').checked+"&");
 }
 function instantPlay() {
@@ -615,12 +619,51 @@ function autostart() {
 		xhr.send("&");		
 	} catch(e){console.log("error"+e);}	
 }
-
+//ask for the state of the theme
+function atheme() {
+	xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4 && xhr.status == 200) {	
+			var arr = JSON.parse(xhr.responseText);
+			themeIn = arr["theme"]  ;			
+		}
+	}
+	try{		
+		xhr.open("POST","theme",false); // request auto state
+		xhr.setRequestHeader(content,ctype);
+		xhr.send("&");		
+	} catch(e){console.log("error"+e);}	
+}
 function Select() {
 	if (document.getElementById('aplay').checked)
 		 playStation() ;
 }
 
+function setEditBackground(tr) {
+		if (themeIn == '1')
+			tr.style.background =  "#1a3c56";
+		else
+			tr.style.background = "rgb(185, 213, 236)";
+}
+function playEditStation(tr) {
+	id = tr.cells[0].innerText;
+	if ((editPlaying)&&(editIndex== tr))
+	{
+		stopStation();
+		tr.style.background = "initial";
+		editPlaying = false;
+		editIndex = 0;
+	}
+	else{
+		if (editIndex != 0) editIndex.style.background = "initial";
+		wsplayStation(id); // select the station in the list
+		editPlaying = true;
+		editIndex = tr;
+//		getComputedStyle(element).getPropertyValue('--color-font-general');
+		setEditBackground(tr);
+		playStation() ; //play it 
+	}
+}
 function playStation() {
 	var select,id;
 	try{
@@ -757,8 +800,8 @@ function parseEditURL(e)
 }
 
 function refreshList() {
-	promptworking("Working.. Please Wait");
-	intervalid =window.setTimeout(refreshListtemp, 2);
+	promptworking(working);
+	intervalid =window.setTimeout(refreshListtemp, 10);
 }
 function refreshListtemp() {
 	if (stchanged) stChanged();
@@ -770,7 +813,7 @@ function refreshListtemp() {
 	refresh();
 }
 function clearList() {
-		promptworking("Working.. Please Wait");
+		promptworking(working);
 	if (confirm("Warning: This will clear all stations.\n Be sure to save station before.\nClear now?"))
 	{
 		xhr = new XMLHttpRequest();
@@ -778,25 +821,21 @@ function clearList() {
 		xhr.setRequestHeader(content,ctype);
 		xhr.send( );
 		refreshList();
-		window.setTimeout(loadStations, 5);
+		window.setTimeout(loadStations, 10);
 	}
 	else 	promptworking("");
 }	
-/*
-function removeOptions(selectbox)
-{
-    var i;
-    for(i = selectbox.options.length - 1 ; i >= 0 ; i--)
-    {
-        selectbox.remove(i);
-    }
-}
-*/
 
 function upgrade()
 {
-	if (websocket.readyState == websocket.OPEN) websocket.send("upgrade");	
-	alert("Rebooting to the new release\nPlease refresh the page in few seconds.");
+//	if (websocket.readyState == websocket.OPEN) websocket.send("upgrade");	
+//	alert("Rebooting to the new release\nPlease refresh the page in few seconds.");
+	try{
+		xhr = new XMLHttpRequest();
+		xhr.open("POST","upgrade",false);
+		xhr.setRequestHeader(content,ctype);
+		xhr.send();
+	} catch(e){console.log("error"+e);}	
 }
 function checkhistory()
 {
@@ -857,7 +896,7 @@ function downloadStations()
 		reader = new FileReader();
 		xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
-			promptworking("Working.. Please Wait"); // some time to display promptworking
+			promptworking(working); // some time to display promptworking
 		}
 		reader.onload = function(e){
 			function fillInfo(ind,arri){
@@ -906,8 +945,7 @@ function downloadStations()
 		file = document.getElementById('fileload').files[0];
 		if (file==null) alert("Please select a file");
 		else {			
-//			stopStation();
-			promptworking("Working.. Please Wait");		
+			promptworking(working);		
 			reader.readAsText(file);			
 		}
 	}	
@@ -924,7 +962,6 @@ function moveNodes(a, b){
 	for (txt=0;txt<maxStation;txt++)
 	{
 		pa1.rows[txt].cells[0].innerText = txt.toString();
-//		pa1.rows[txt].cells[6].innerHTML = "<a href=\"#\" onClick=\"editStation("+ txt.toString()+")\">Edit</a>";
 		pa1.rows[txt].cells[6].innerHTML = b.parentNode.rows[txt].cells[6].innerHTML ;
 	}
 	stchanged = true;
@@ -952,13 +989,13 @@ function stChanged()
 				localStorage.setItem(id,"{\"Name\":\""+name+"\",\"URL\":\""+url +"\",\"File\":\""+file+"\",\"Port\":\""+port+"\",\"ovol\":\""+ovol+"\"}");
 				tosend = tosend+"&id="+id + "&url="+ url+"&name="+ name+ "&file="+file + "&port=" +port+"&ovol=" +ovol+"&";
 	}
-	promptworking("Working.. Please Wait"); // some time to display promptworking
+	promptworking(working); // some time to display promptworking
 	if (stchanged && confirm("The list is modified. Do you want to save the modified list?"))
 	{
 		xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
 		}
-		promptworking("Working.. Please Wait"); // some time to display promptworking
+		promptworking(working); // some time to display promptworking
 		localStorage.clear();	
 		indmax = 7;
 		index = 0;	
@@ -994,6 +1031,7 @@ function stChanged()
 //Load the Stations table
 function loadStations() {
 	var new_tbody = document.createElement('tbody'),
+	idlist,select,
 	id = 0;
 	function cploadStations(id,arr) {
 			tr = document.createElement('TR'),
@@ -1004,20 +1042,51 @@ function loadStations() {
 			tr.ondrop=dragDrop;
 			tr.ondragover=allowDrop;
 			td.appendChild(document.createTextNode(id ));
+			td.setAttribute('onclick', 'playEditStation(this.parentNode);');
 			tr.appendChild(td);
-			for(key in arr){
+// Name
 				td = document.createElement('TD');
 				td.style="word-break: break-all;overflow-wrap: break-word; word-wrap: break-word;";
-				if(arr[key].length > 116) arr[key] = "Error";
-				td.appendChild(document.createTextNode(arr[key]));
+				td.setAttribute('onclick','playEditStation(this.parentNode);');
+				if(arr["Name"].length > 116) arr["Name"] = "Error";
+				td.appendChild(document.createTextNode(arr["Name"]));
 				tr.appendChild(td);
-			}
+// URL
+				td = document.createElement('TD');
+				td.style="word-break: break-all;overflow-wrap: break-word; word-wrap: break-word;";
+				td.setAttribute('onclick','playEditStation(this.parentNode);');
+				if (arr["Name"].length > 0)
+				{
+					if(arr["URL"].length > 116) arr["URL"] = "Error";
+					if(arr["File"].length > 116) arr["File"] = "Error";
+					if(arr["Port"].length > 116) arr["Port"] = "Error";
+					td.appendChild(document.createTextNode(arr["URL"] + ":" + arr["Port"] + arr["File"]));
+				} else
+					td.appendChild(document.createTextNode(""));
+				tr.appendChild(td);
+// Ovol
+				td = document.createElement('TD');
+				td.style="word-break: break-all;overflow-wrap: break-word; word-wrap: break-word;";
+				td.setAttribute('onclick','playEditStation(this.parentNode);');
+				if(arr["ovol"].length > 116) arr["ovol"] = "Error";
+				td.appendChild(document.createTextNode(arr["ovol"]));
+				tr.appendChild(td);
+
+// edit button			
 			td = document.createElement('TD');
-//			td.innerHTML = "<div  onClick=\"editStation("+id+")\"> Edit</div>";
+			td.style="text-align: center; vertical-align: middle;";
 			td.innerHTML = "<a href=\"javascript:void(0)\" onClick=\"editStation("+id+")\">Edit</a>";
 			tr.appendChild(td);
+			if (idlist === idstr){
+				setEditBackground(tr);
+				editIndex = tr;
+				editPlaying = true;
+			}
 			new_tbody.appendChild(tr);
 	}	
+	select = document.getElementById('stationsSelect');
+	idlist = select.options[select.selectedIndex].value.split(":");
+	idlist = idlist[0];	
 	for(id; id < maxStation; id++) {
 		idstr = id.toString();		
 		if (localStorage.getItem(idstr) != null)
@@ -1066,16 +1135,13 @@ function loadStationsList(max) {
 			{
 				opt = document.createElement('option');
 				opt.appendChild(document.createTextNode(id+": \t"+arr["Name"]));
-//				opt.id = id;
-//				select.appendChild(opt);
 				select.add(opt);
 			} else foundNull = true;
 			return foundNull;
 	}		
 	select.disabled = true;
-	promptworking("Working.. Please Wait");
+	promptworking(working);
 	for(id=0; id<max; id++) {
-//		if (foundNull) break;
 		idstr = id.toString();
 		if (localStorage.getItem(idstr) != null)
 		{	
@@ -1083,7 +1149,6 @@ function loadStationsList(max) {
 				arr = JSON.parse(localStorage.getItem(idstr));
 			} catch(e){console.log("error"+e);}
 			foundNull = cploadStationsList(id,arr);
-//			liste.push(arr);
 		}
 		else
 		try {
@@ -1104,49 +1169,13 @@ function loadStationsList(max) {
 		} catch(e){console.log("error"+e); id--;}
 	}
 	
-/*
-	var map = liste.map(function(e, i) {
-		return { index: i, value: e.Name.toLowerCase() };
-	})
-	map.sort(function(a, b) {
-		return +(a.value > b.value) || +(a.value === b.value) - 1;
-	});
-
-	// on utilise un objet final pour les résultats
-	var result = map.map(function(e){
-		return {index: e.index, value:liste[e.index]};
-});	
-	for(id=0; id < maxStation; id++) {
-		foundNull = cploadStationsList(result[id].index,result[id].value);
-	}	
-*/	
 	promptworking("");
 	select.disabled = false;
 	select.options.selectedIndex= parseInt(localStorage.getItem('selindexstore'));
-//	getSelIndex();
-
 }
-/*	
-function getSelIndex() {
-		xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4 && xhr.status == 200) {
-				console.log("JSON: " + xhr.responseText);
-				var arr = JSON.parse(xhr.responseText);
-				if(arr["Index"].length > 0) {
-					document.getElementById("stationsSelect").options.selectedIndex = arr["Index"];
-					document.getElementById("stationsSelect").disabled = false;
-					console.log("selIndex received " + arr["Index"]);
-				} 
-			}
-		}
-		xhr.open("POST","getSelIndex",false);
-		xhr.setRequestHeader(content,ctype);
-		xhr.send();	
-}	*/
 
 function setMainHeight(name) {
-	intervalid =window.setTimeout(setMainHeightd,2,name );	
+	intervalid =window.setTimeout(setMainHeightd,5,name );	
 }
 
 function setMainHeightd(name) {
@@ -1155,24 +1184,20 @@ function setMainHeightd(name) {
 	if(h<minh) h = minh;
 	document.getElementById("MAIN").style.height = h +"px";
 	document.getElementById("MAINCONTENT").style.top = document.getElementById('HEADER').clientHeight+"px" ;
-//	checkwebsocket();
 }
 
 function resizeContent(){
 	if (document.getElementById("MAINCONTENT") != null) 
 	{
 		setMainHeight(curtab);
-		//document.getElementById("MAINCONTENT").style.top = document.getElementById('HEADER').clientHeight+"px" ;
 	}
 }
 window.onresize = resizeContent;
-
 
 function printList()
 {
    var html="<html>";
    id = 0;
-//   html+= document.getElementById(id).innerHTML;
    html+="</html>";
    html+="<h1>KaraDio Stations list</h1><br/><hr><br/>";
    for(id; id < maxStation; id++) {
@@ -1207,7 +1232,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			if (stchanged) stChanged();
 			loadStations(/*1*/);
 			curtab = "tab-content2";
-			intervalid =window.setTimeout(setMainHeight,1,curtab );			
+			intervalid =window.setTimeout(setMainHeight,5,curtab );			
 	});
 	document.getElementById("tab3").addEventListener("click", function() {
 			if (stchanged) stChanged();
@@ -1215,7 +1240,27 @@ document.addEventListener("DOMContentLoaded", function() {
 			wifi(0) ;
 			checkversion();
 			setMainHeight(curtab);	
-});
+	});
+	window.addEventListener("keydown", function (event)
+	{
+		if (event.defaultPrevented) {
+			return;
+		}
+		switch (event.key) {
+		case "ArrowDown":
+		case "ArrowLeft":
+		if (event.ctrlKey) onRangeVolChange(parseInt(document.getElementById('vol_range').value) -5 ,true)	  
+		break;
+		case "ArrowUp":
+		case "ArrowRight":
+		if (event.ctrlKey) onRangeVolChange(parseInt(document.getElementById('vol_range').value) +5 ,true)	  
+		break;
+		default:
+		return;
+		}
+		event.preventDefault();
+	}, true);
+	
 	if (intervalid != 0)  window.clearTimeout(intervalid);
 	intervalid = 0;
 	if (timeid != 0)  window.clearInterval(timeid);
@@ -1225,6 +1270,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	refresh();
 	wifi(0) ;
 	autostart();
+	atheme();
 	checkversion();
 	setMainHeight(curtab);
 	promptworking("");

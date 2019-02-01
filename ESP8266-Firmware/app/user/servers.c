@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#define stack  410 //320
+#define stack  460
 
 
 const char strsTELNET[] STORE_ATTR ICACHE_RODATA_ATTR = {"Servers Telnet Socket fails %s errno: %d\n"};

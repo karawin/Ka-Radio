@@ -57,6 +57,8 @@ const char strupd[] STORE_ATTR ICACHE_RODATA_ATTR = {\
 Connection: keep-alive\r\nCache-Control: no-cache\r\nUser-Agent: Karadio 1.5 \r\n\
 Accept: */*\r\nAccept-Encoding: gzip,deflate,sdch\r\n\r\n"};
 
+extern void wsUpgrade(const char* str,int count,int total);
+
 /******************************************************************************
  * FunctionName : user_esp_upgrade_rsp
  * Description  : upgrade check call back function
@@ -67,10 +69,12 @@ void user_esp_upgrade_rsp(void *arg)
 {
 	struct upgrade_server_info *server = (struct upgrade_server_info *)arg;
 	if(server->upgrade_flag == true){
-		kprintf(PSTR(" +OK: FW upgrade success.%c"),0x0d);
+//		kprintf(PSTR("FW upgrade success.%c"),0x0d);
+		wsUpgrade("FW OK Refresh the page" , 0,100);
 		system_upgrade_reboot();
 	} else {
-		kprintf(PSTR("-ERR: FW upgrade failed.%c"),0x0d);
+//		kprintf(PSTR("-ERR: FW upgrade failed.%c"),0x0d);
+		wsUpgrade("FW upgrade failed." , 0,100);
 	}
     free(server->url);
     server->url = NULL;

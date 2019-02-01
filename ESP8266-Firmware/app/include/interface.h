@@ -6,7 +6,7 @@
 #define MAXDATAT	 256
 
 
-#define RELEASE "1.7"
+#define RELEASE "1.8"
 #define REVISION "0"
 
 
@@ -17,7 +17,7 @@ void checkCommand(int size, char* s);
 void wifiConnectMem();
 char* webInfo();
 char* webList(int id);
-
+void setHostname(char* s);
 
 #define kprintf(fmt, ...) do {    \
         printf(fmt, ##__VA_ARGS__);   \

@@ -144,7 +144,7 @@ mdnsHandle *mdns_create(char *hostname) {
 void mdns_start(mdnsHandle *handle) {
     LOG(DEBUG, "mdns: Starting service");
 
-    if (xTaskCreate(mdns_server_task, "mdns", 250, handle, 3, &handle->mdnsTask) != pdPASS) {
+    if (xTaskCreate(mdns_server_task, "mdns", 260, handle, 3, &handle->mdnsTask) != pdPASS) {
         LOG(ERROR, "mdns: Could not create service, terminating");
         mdns_destroy(handle);
     }
