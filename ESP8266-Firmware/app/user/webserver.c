@@ -191,9 +191,9 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 
 
 
-ICACHE_FLASH_ATTR bool getSParameter(char* result,const char* sep,const char* param, char* data, uint16_t data_length) {
+ICACHE_FLASH_ATTR bool getSParameter(char* result,uint32_t len,const char* sep,const char* param, char* data, uint16_t data_length) {
 	if ((data == NULL) || (param == NULL))return false;
-	size_t len = sizeof(result);
+	
 	char* p = strstr(data, param);
 	if(p != NULL) {
 		p += strlen(param);
@@ -235,8 +235,8 @@ ICACHE_FLASH_ATTR char* getParameter(char* sep,char* param, char* data, uint16_t
 ICACHE_FLASH_ATTR char* getParameterFromResponse(char* param, char* data, uint16_t data_length) {
 	return getParameter("&",param,data, data_length) ;
 }
-ICACHE_FLASH_ATTR bool getSParameterFromResponse(char* result, const char* param, char* data, uint16_t data_length) {
-	return getSParameter(result,"&",param,data, data_length) ;
+ICACHE_FLASH_ATTR bool getSParameterFromResponse(char* result,uint32_t size, const char* param, char* data, uint16_t data_length) {
+	return getSParameter(result,size,"&",param,data, data_length) ;
 }
 ICACHE_FLASH_ATTR char* getParameterFromComment(char* param, char* data, uint16_t data_length) {
 	return getParameter("\"",param,data, data_length) ;
@@ -486,12 +486,12 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 	if(strcmp(name, "/instant_play") == 0) {
 		if(data_size > 0) {
 			char url[100];
-			tst = getSParameterFromResponse(url,"url=", data, data_size);
+			tst = getSParameterFromResponse(url,100,"url=", data, data_size);
 			char path[200];
-			tst &=getSParameterFromResponse(path,"path=", data, data_size);
+			tst &=getSParameterFromResponse(path,200,"path=", data, data_size);
 			pathParse(path);
 			char port[10];
-			tst &=getSParameterFromResponse(port,"port=", data, data_size);
+			tst &=getSParameterFromResponse(port,10,"port=", data, data_size);
 			if(tst)  {
 				clientDisconnect(PSTR("Post instant_play"));
 				for (i = 0;i<100;i++)
@@ -531,7 +531,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			device = getDeviceSettings();
 			if (device != NULL)
 			{
-			if(getSParameterFromResponse(bass,"bass=", data, data_size)) {		
+			if(getSParameterFromResponse(bass,6,"bass=", data, data_size)) {		
 				if (device->bass != atoi(bass))
 				{ 
 						VS1053_SetBass(atoi(bass));
@@ -539,7 +539,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 						device->bass = atoi(bass); 
 				}
 			}
-			if(getSParameterFromResponse(treble,"treble=", data, data_size)) {				
+			if(getSParameterFromResponse(treble,6,"treble=", data, data_size)) {				
 				if (device->treble != atoi(treble))
 				{ 
 						VS1053_SetTreble(atoi(treble));
@@ -547,7 +547,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 						device->treble = atoi(treble); 
 				}
 			}
-			if(getSParameterFromResponse(bassfreq,"bassfreq=", data, data_size)) {					
+			if(getSParameterFromResponse(bassfreq,6,"bassfreq=", data, data_size)) {					
 				if (device->freqbass != atoi(bassfreq))
 				{ 
 						VS1053_SetBassFreq(atoi(bassfreq));
@@ -555,7 +555,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 						device->freqbass = atoi(bassfreq); 
 				}
 			}
-			if(getSParameterFromResponse(treblefreq,"treblefreq=", data, data_size)) {					
+			if(getSParameterFromResponse(treblefreq,6,"treblefreq=", data, data_size)) {					
 				if (device->freqtreble != atoi(treblefreq))
 				{
 						VS1053_SetTrebleFreq(atoi(treblefreq)); 
@@ -563,7 +563,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 						device->freqtreble = atoi(treblefreq); 
 				}
 			}
-			if(getSParameterFromResponse(spacial,"spacial=", data, data_size)) {					
+			if(getSParameterFromResponse(spacial,6,"spacial=", data, data_size)) {					
 				if (device->spacial != atoi(spacial))
 				{
 							VS1053_SetSpatial(atoi(spacial)); 
@@ -580,7 +580,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		if(data_size > 0) {
 			char id[6];
 //			char* id = getParameterFromResponse("idgp=", data, data_size);
-			if (getSParameterFromResponse(id,"idgp=", data, data_size) ) 
+			if (getSParameterFromResponse(id,6,"idgp=", data, data_size) ) 
 			{
 				if ((atoi(id) >=0) && (atoi(id) < 255)) 
 				{
@@ -632,7 +632,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			uint16_t unb,uid = 0;
 //printf("nb init:%s\n",nb);
 			bool pState = getState();  // remember if we are playing
-			res=getSParameterFromResponse(nb,"nb=", data, data_size);
+			res=getSParameterFromResponse(nb,6,"nb=", data, data_size);
 			if (res) 
 				unb = atoi(nb);
 			else unb = 1;
@@ -661,18 +661,18 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				file = getParameterFromResponse("file=", data, data_size);
 				pathParse(file);
 				name = getParameterFromResponse("name=", data, data_size);
-				if(getSParameterFromResponse(id,"id=", data, data_size)) {
+				if(getSParameterFromResponse(id,6,"id=", data, data_size)) {
 					if (i == 0) uid = atoi(id);
 					if ((atoi(id) >=0) && (atoi(id) < 255))
 					{	
-						if(url && file && name && getSParameterFromResponse(port,"port=", data, data_size)) {
+						if(url && file && name && getSParameterFromResponse(port,6,"port=", data, data_size)) {
 							if (strlen(url) > sizeof(nsi->domain)) url[sizeof(nsi->domain)-1] = 0; //truncate if any
 							strcpy(nsi->domain, url);
 							if (strlen(file) > sizeof(nsi->file)) url[sizeof(nsi->file)-1] = 0; //truncate if any
 							strcpy(nsi->file, file);
 							if (strlen(name) > sizeof(nsi->name)) url[sizeof(nsi->name)-1] = 0; //truncate if any
 							strcpy(nsi->name, name);
-							nsi->ovol = (getSParameterFromResponse(ovol,"ovol=", data, data_size))?atoi(ovol):0;
+							nsi->ovol = (getSParameterFromResponse(ovol,6,"ovol=", data, data_size))?atoi(ovol):0;
 							nsi->port = atoi(port);
 						}
 					} 						
@@ -869,7 +869,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				respKo(conn);
 				return;
 			}
-			if(getSParameterFromResponse(valid,"valid=", data, data_size))
+			if(getSParameterFromResponse(valid,5,"valid=", data, data_size))
 				if (strcmp(valid,"1")==0) val = true;
 			char* aua = getParameterFromResponse("ua=", data, data_size);
 			pathParse(aua);
@@ -881,6 +881,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			
 // printf("rec:%s\nwifi received  valid:%s,val:%d, ssid:%s, pasw:%s, aip:%s, amsk:%s, agw:%s, adhcp:%s, aua:%s \n",data,valid,val,ssid,pasw,aip,amsk,agw,adhcp,aua);
 			if (val) {
+				char adhcp[4];
 				char* ssid = getParameterFromResponse("ssid=", data, data_size);
 				pathParse(ssid);
 				char* pasw = getParameterFromResponse("pasw=", data, data_size);
@@ -892,7 +893,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				char* aip = getParameterFromResponse("ip=", data, data_size);
 				char* amsk = getParameterFromResponse("msk=", data, data_size);
 				char* agw = getParameterFromResponse("gw=", data, data_size);
-				char* adhcp = getParameterFromResponse("dhcp=", data, data_size);				
+//				char* adhcp = getSParameterFromResponse("dhcp=",4, data, data_size);				
 				changed = true;
 				ip_addr_t valu;
 				ipaddr_aton(aip, &valu);
@@ -901,14 +902,17 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				memcpy(device->mask,&valu,sizeof(uint32_t));
 				ipaddr_aton(agw, &valu);
 				memcpy(device->gate,&valu,sizeof(uint32_t));
-				if (adhcp!= NULL) if (strlen(adhcp)!=0) if (strcmp(adhcp,"true")==0)device->dhcpEn = 1; else device->dhcpEn = 0;
+				if (getSParameterFromResponse(adhcp,4,"dhcp=", data, data_size))
+					if (strlen(adhcp)!=0) 
+					{if (strcmp(adhcp,"true")==0) 
+					device->dhcpEn = 1; else device->dhcpEn = 0;}
+//				if (adhcp!= NULL) if (strlen(adhcp)!=0) if (strcmp(adhcp,"true")==0)device->dhcpEn = 1; else device->dhcpEn = 0;
 				strcpy(device->ssid,(ssid==NULL)?"":ssid);
 				strcpy(device->pass,(pasw==NULL)?"":pasw);
 				strcpy(device->ssid2,(ssid2==NULL)?"":ssid2);
 				strcpy(device1->pass2,(pasw2==NULL)?"":pasw2);	
 				infree(ssid);infree(pasw);infree(ssid2); infree(pasw2);  
-				infree(aip);infree(amsk);infree(agw);
-				infree(adhcp); 
+				infree(aip);infree(amsk);infree(agw); 
 			}
 			if ((device->ua!= NULL)&&(strlen(device->ua)==0))
 			{
