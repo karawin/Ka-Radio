@@ -648,6 +648,7 @@ function setEditBackground(tr) {
 			tr.style.background = "rgb(185, 213, 236)";
 }
 function playEditStation(tr) {
+	if (stchanged) stChanged();
 	id = tr.cells[0].innerText;
 	if ((editPlaying)&&(editIndex== tr))
 	{
@@ -1033,6 +1034,9 @@ function stChanged()
 		}
 		loadStationsList(maxStation);		
 	}
+	else 
+	if (stchanged) 
+		loadStations();
 	stchanged = false;
 	document.getElementById("stsave").disabled = true;
 	promptworking("");
@@ -1185,7 +1189,7 @@ function loadStationsList(max) {
 }
 
 function setMainHeight(name) {
-	intervalid =window.setTimeout(setMainHeightd,5,name );	
+	intervalid =window.setTimeout(setMainHeightd,10,name );	
 }
 
 function setMainHeightd(name) {
