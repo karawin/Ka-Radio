@@ -16,13 +16,11 @@ const char strsMALLOC[] ICACHE_RODATA_ATTR STORE_ATTR = {"WebServer inmalloc fai
 const char strsMALLOC1[] ICACHE_RODATA_ATTR STORE_ATTR = {"WebServer %s malloc fails\n"};
 const char strsSOCKET[] ICACHE_RODATA_ATTR STORE_ATTR = {"WebServer Socket fails %s errno: %d\n"};
 const char strsID[] ICACHE_RODATA_ATTR STORE_ATTR = {"getstation, no id or Wrong id %d\n"};
-const char strsRAUTO[] ICACHE_RODATA_ATTR STORE_ATTR  = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"rauto\":\"%c\"}"};
+//const char strsRAUTO[] ICACHE_RODATA_ATTR STORE_ATTR  = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"rauto\":\"%c\"}"};
 const char strsTHEME[] ICACHE_RODATA_ATTR STORE_ATTR  = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"theme\":\"%c\"}"};
 const char strsICY[] ICACHE_RODATA_ATTR STORE_ATTR  = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"curst\":\"%s\",\"descr\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\",\"meta\":\"%s\",\"vol\":\"%s\",\"treb\":\"%s\",\"bass\":\"%s\",\"tfreq\":\"%s\",\"bfreq\":\"%s\",\"spac\":\"%s\",\"auto\":\"%c\"}"};
-const char strsWIFI[] ICACHE_RODATA_ATTR STORE_ATTR  = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ssid2\":\"%s\",\"pasw2\":\"%s\",\
-\"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\",\"mac\":\"%s\",\"host\":\"%s\",\"tzo\":\"%s\"}"};
-const char strsGSTAT[] ICACHE_RODATA_ATTR STORE_ATTR  = {"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: %d\r\n\r\n{\"Name\":\"%s\",\"URL\":\"%s\",\"File\":\"%s\",\"Port\":\"%d\",\"ovol\":\"%d\"}"};
-const char strsFOURD[]   = {"%d.%d.%d.%d"};
+
+
 
 
 os_timer_t sleepTimer;
@@ -598,7 +596,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 						}
 						else {
 							for(i = 0; i<sizeof(buf); i++) buf[i] = 0;
-							kasprintf(buf, strsGSTAT,					
+							kasprintf(buf, PSTR("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: %d\r\n\r\n{\"Name\":\"%s\",\"URL\":\"%s\",\"File\":\"%s\",\"Port\":\"%d\",\"ovol\":\"%d\"}"),					
 							json_length, si->name, si->domain, si->file,si->port,si->ovol);
 //							printf("getStation Buf len:%d : %s\n",strlen(buf),buf);						
 							write(conn, buf, strlen(buf));
@@ -708,7 +706,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			}			
 		}
 	} else if(strcmp(name, "/rauto") == 0) {
-		char *buf = inmalloc( strlen(strsRAUTO)+16);
+		char *buf = inmalloc(106);
 		if (buf == NULL)
 		{	
 			printf(strsMALLOC1,("post rauto"));
@@ -718,7 +716,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			device = getDeviceSettings();
 			if (device != NULL)
 			{
-				if (kasprintf(buf,strsRAUTO,(device->autostart)?'1':'0' ))
+				if (kasprintf(buf,PSTR("HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"rauto\":\"%c\"}"),(device->autostart)?'1':'0' ))
 				{
 					write(conn, buf, strlen(buf));
 					infree(buf);
@@ -967,11 +965,11 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			strlen(device->ua)+
 			strlen(device1->hostname)+
 			kasprintf(tmptzo,PSTR("%d"),device->tzoffset)+
-			kasprintf(tmpip,strsFOURD,device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3])+
-			kasprintf(tmpmsk,strsFOURD,device->mask[0], device->mask[1],device->mask[2], device->mask[3])+
-			kasprintf(tmpgw,strsFOURD,device->gate[0], device->gate[1],device->gate[2], device->gate[3])+
+			kasprintf(tmpip,PSTR("%d.%d.%d.%d"),device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3])+
+			kasprintf(tmpmsk,PSTR("%d.%d.%d.%d"),device->mask[0], device->mask[1],device->mask[2], device->mask[3])+
+			kasprintf(tmpgw,PSTR("%d.%d.%d.%d"),device->gate[0], device->gate[1],device->gate[2], device->gate[3])+
 			kasprintf(adhcp,PSTR("%d"),device->dhcpEn)+
-			kasprintf(macstr,MACSTR,MAC2STR(macaddr));
+			kasprintf(macstr,PSTR(MACSTR),MAC2STR(macaddr));
 
 			char *buf = inmalloc( json_length + 95);
 			if ((buf == NULL) )
@@ -980,7 +978,8 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				respKo(conn);
 			}
 			else {			
-				if (kasprintf(buf, strsWIFI,
+				if (kasprintf(buf, PSTR("HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ssid2\":\"%s\",\"pasw2\":\"%s\",\
+\"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\",\"mac\":\"%s\",\"host\":\"%s\",\"tzo\":\"%s\"}"),
 				json_length,
 				device->ssid,device->pass,device->ssid2,device1->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp,macstr,device1->hostname,tmptzo))
 				{

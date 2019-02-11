@@ -70,11 +70,11 @@ void user_esp_upgrade_rsp(void *arg)
 	struct upgrade_server_info *server = (struct upgrade_server_info *)arg;
 	if(server->upgrade_flag == true){
 //		kprintf(PSTR("FW upgrade success.%c"),0x0d);
-		wsUpgrade(PSTR("FW OK Refresh the page") , 0,100);
+		wsUpgrade("FW OK Refresh the page" , 0,100);
 		system_upgrade_reboot();
 	} else {
 //		kprintf(PSTR("-ERR: FW upgrade failed.%c"),0x0d);
-		wsUpgrade(PSTR("FW upgrade failed.") , 0,100);
+		wsUpgrade("FW upgrade failed." , 0,100);
 	}
     free(server->url);
     server->url = NULL;
