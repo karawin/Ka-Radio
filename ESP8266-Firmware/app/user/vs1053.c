@@ -24,11 +24,11 @@ extern uint8_t clientIvol ;
 
 	int vsVersion ; // the version of the chip
 //	SS_VER is 0 for VS1001, 1 for VS1011, 2 for VS1002, 3 for VS1003, 4 for VS1053 and VS8053, 5 for VS1033, 7 for VS1103, and 6 for VS1063.
-//char strvMODE[] STORE_ATTR ICACHE_RODATA_ATTR = {"SCI_Mode (0x4800) = 0x%X\n"};
-const char strvSTATUS[] STORE_ATTR ICACHE_RODATA_ATTR = {"SCI_Status (0x48) = 0x%X\n"};
-const char strvVERSION[] STORE_ATTR ICACHE_RODATA_ATTR = {"VS Version (VS1053 is 4) = %d\n"};
-const char strvCLOCK[] STORE_ATTR ICACHE_RODATA_ATTR = {"SCI_ClockF = 0x%X\n"};
-const char strvI2S[] STORE_ATTR ICACHE_RODATA_ATTR = {"I2S Speed: %d\n"};
+//char strvMODE[] ICACHE_RODATA_ATTR STORE_ATTR  = {"SCI_Mode (0x4800) = 0x%X\n"};
+const char strvSTATUS[] ICACHE_RODATA_ATTR STORE_ATTR  = {"SCI_Status (0x48) = 0x%X\n"};
+const char strvVERSION[] ICACHE_RODATA_ATTR STORE_ATTR  = {"VS Version (VS1053 is 4) = %d\n"};
+const char strvCLOCK[] ICACHE_RODATA_ATTR STORE_ATTR  = {"SCI_ClockF = 0x%X\n"};
+const char strvI2S[] ICACHE_RODATA_ATTR STORE_ATTR  = {"I2S Speed: %d\n"};
 
 extern volatile uint32_t PIN_OUT;
 extern volatile uint32_t PIN_OUT_SET;

@@ -11,7 +11,7 @@
 #define ICACHE_RAM_ATTR __attribute__((section(".iram0.text")))
 
 // 117
-const unsigned short admix[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR   = { /* Compressed plugin */
+const unsigned short admix[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR    = { /* Compressed plugin */
 
   0x0007, 0x0001, 0x8f00, 0x0006, 0x0070, 0x2803, 0xc2c0, 0x0030, /*    0 */
   0x0697, 0x0fff, 0xfdc0, 0x3700, 0x4024, 0xb100, 0x0024, 0xbc82, /*    8 */

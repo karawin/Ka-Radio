@@ -54,9 +54,8 @@ void wsUpgrade(const char* str,int count,int total)
 	memset(answer,0,80);
 	if (strlen(str)!= 0)
 	{
-		sprintf(answer,"{\"upgrade\":\"%s\"}",str);
-//		sprintf(answer,PSTR("{\"upgrade\":\"Starting\"}"));
-		kprintf(answer);kprintf("\n");
+		kasprintf(answer,PSTR("{\"upgrade\":\"%s\"}"),str);
+		kprintf(answer);kprintf(PSTR("\n"));
 	}
 	else		
 	{
@@ -67,7 +66,7 @@ void wsUpgrade(const char* str,int count,int total)
 		if (value == 0)
 		{
 			strcpy(answer,"{\"upgrade\":\"Started.\"}");
-			kprintf(answer);kprintf("\n");
+			kprintf(answer);kprintf(PSTR("\n"));
 		}
 		else
 		{

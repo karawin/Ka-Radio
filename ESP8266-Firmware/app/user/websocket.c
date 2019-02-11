@@ -10,9 +10,9 @@
 #include "interface.h"
 
 
-char strwMALLOC[] STORE_ATTR ICACHE_RODATA_ATTR = {"inwmalloc fails for %d\n"};
-char strwMALLOC1[] STORE_ATTR ICACHE_RODATA_ATTR = {"Websocket %s malloc fails\n"};
-char strwSOCKET[] STORE_ATTR ICACHE_RODATA_ATTR = {"Websocket socket fails %s errno: %d\n"};
+const char strwMALLOC[] ICACHE_RODATA_ATTR STORE_ATTR  = {"inwmalloc fails for %d\n"};
+const char strwMALLOC1[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Websocket %s malloc fails\n"};
+const char strwSOCKET[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Websocket socket fails %s errno: %d\n"};
 
 client_t webserverclients[NBCLIENT];
 //set of socket descriptors
@@ -95,10 +95,10 @@ void websocketinit(void)
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 // decode and build the accept answer to open the websocket
+const char str1[]  = {"HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: "};
+const char s[3] = "\r\n";
 uint32_t decodeHttpMessage (char * inputMessage, char * outputMessage)
 {
-	const char str1[98] = "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ";
-	const char s[3] = "\r\n";
 //	const char str2[5] = "\r\n\r\n";
 	char *tokens[12];
 	uint32_t index = 1;
@@ -359,7 +359,7 @@ void websocketbroadcast(char* buf, int len)
 	for (i = 0;i<NBCLIENT;i++)	
 		if (iswebsocket( webserverclients[i].socket))
 		{
-//			printf("ws broadcast to %d, freeheap:%d, msg:\"%s\"\n",webserverclients[i].socket,xPortGetFreeHeapSize( ),buf);
+//printf("ws broadcast to %d, freeheap:%d, msg:\"%s\"\n",webserverclients[i].socket,xPortGetFreeHeapSize( ),buf);
 			websocketwrite( webserverclients[i].socket,  buf, len);
 		}
 }	
@@ -370,7 +370,7 @@ void websocketlimitedbroadcast(int socket,char* buf, int len)
 	for (i = 0;i<NBCLIENT;i++)	
 		if (iswebsocket( webserverclients[i].socket))
 		{
-//			printf("ws broadcast to %d omit %d,freeheap:%d,  msg:\"%s\"\n",webserverclients[i].socket,socket,xPortGetFreeHeapSize( ),buf);
+//printf("ws broadcast to %d omit %d,freeheap:%d,  msg:\"%s\"\n",webserverclients[i].socket,socket,xPortGetFreeHeapSize( ),buf);
 			if (webserverclients[i].socket != socket) websocketwrite( webserverclients[i].socket,  buf, len);
 		}
 }	
@@ -379,33 +379,22 @@ void websocketlimitedbroadcast(int socket,char* buf, int len)
 ICACHE_FLASH_ATTR void websocketAccept(int wsocket,char* bufin,int buflen)
 {
 int32_t recbytes = 0;
-char *buf = NULL;
+//char *buf = NULL;
+char buf[150];
 	struct timeval timeout;      
     timeout.tv_sec = 1000; // bug *1000 for seconds
     timeout.tv_usec = 0;	
-	buf = (char *)inwmalloc(MAXDATA);	
 	bufin[buflen] = 0;
-//	printf("ws write accept request entry soc: %d\n",wsocket);
-    if (buf == NULL)
+//printf("ws write accept request entry soc: %d\n",wsocket);
+	if (setsockopt (wsocket, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
+			printf(strwSOCKET,"setsockopt",errno);
+	if ((!iswebsocket(wsocket ))&&(websocketnewclient(wsocket))) 
 	{
-		vTaskDelay(100); // wait a while and retry
-		buf = (char *)inwmalloc(MAXDATA);	
-	}
-	if (buf != NULL)
-	{
-		if (setsockopt (wsocket, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
-				printf(strwSOCKET,"setsockopt",errno);
-		if ((!iswebsocket(wsocket ))&&(websocketnewclient(wsocket))) 
-		{
-			recbytes = decodeHttpMessage (bufin, buf);
-			buf[recbytes+1] = 0;
+		recbytes = decodeHttpMessage (bufin, buf);
+		buf[recbytes] = 0;
 //printf("ws write accept request:\n \"%s\" len:%d  socket: %d\n",buf,recbytes,wsocket);
-			write(wsocket, buf, strlen(buf));  // reply to accept	
-		}
-		inwfree(buf,"websAccept");
-	} 
-//else printf("ws write accept request fails\n");
-		
+		write(wsocket, buf, recbytes);  // reply to accept	
+	}		
 }
 
 ICACHE_FLASH_ATTR int websocketRead(int conn)

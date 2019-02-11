@@ -1,3 +1,7 @@
+#ifndef __INTERFACE_H__
+#define __INTERFACE_H__
+
+
 #undef PSTR
 #undef PROGMEM
 //#define PROGMEM   ICACHE_RODATA_ATTR
@@ -7,7 +11,7 @@
 
 
 #define RELEASE "1.8"
-#define REVISION "1"
+#define REVISION "2"
 
 
 extern unsigned short adcdiv;	
@@ -19,6 +23,8 @@ char* webInfo();
 char* webList(int id);
 void setHostname(char* s);
 
+int kasprintf(char *str, const char *format, ...);
+
 #define kprintf(fmt, ...) do {    \
         printf(fmt, ##__VA_ARGS__);   \
 		telnetWrite(2*MAXDATAT,fmt, ##__VA_ARGS__); \
@@ -28,5 +34,8 @@ void setHostname(char* s);
         printf(fmt, ##__VA_ARGS__);   \
 		telnetWrite(1024,fmt, ##__VA_ARGS__); \
 	} while (0)
-		
+	
+
+
+#endif		
 		

@@ -9,6 +9,7 @@
 #include "stdio.h"
 #include "string.h"
 #include "stdlib.h"
+#include <stdarg.h>
 #include "eeprom.h"
 #include "ntp.h"
 char parslashquote[] = {"(\""};
@@ -16,11 +17,11 @@ char parquoteslash[] = {"\")"};
 char msgsys[] = {"##SYS."};
 char msgcli[] = {"##CLI."};
 
-const char stritWIFISTATUS[] STORE_ATTR ICACHE_RODATA_ATTR = {"#WIFI.STATUS#\nStatus: %d\nIP: %d.%d.%d.%d\nMask: %d.%d.%d.%d\nGateway: %d.%d.%d.%d\n##WIFI.STATUS#\n"};
-const char stritWIFISTATION[] STORE_ATTR ICACHE_RODATA_ATTR = {"\n#WIFI.STATION#\n%s\n%s\n##WIFI.STATION#\n"};
-const char stritPATCH[] STORE_ATTR ICACHE_RODATA_ATTR = {"\n##VS1053 Patch will be %s after power Off and On#\n"};
-const char stritCMDERROR[] STORE_ATTR ICACHE_RODATA_ATTR = {"##CMD_ERROR#\n"};
-const char stritHELP0[] STORE_ATTR ICACHE_RODATA_ATTR = {" \
+const char stritWIFISTATUS[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#WIFI.STATUS#\nStatus: %d\nIP: %d.%d.%d.%d\nMask: %d.%d.%d.%d\nGateway: %d.%d.%d.%d\n##WIFI.STATUS#\n"};
+const char stritWIFISTATION[] ICACHE_RODATA_ATTR STORE_ATTR  = {"\n#WIFI.STATION#\n%s\n%s\n##WIFI.STATION#\n"};
+const char stritPATCH[] ICACHE_RODATA_ATTR STORE_ATTR  = {"\n##VS1053 Patch will be %s after power Off and On#\n"};
+const char stritCMDERROR[] ICACHE_RODATA_ATTR STORE_ATTR  = {"##CMD_ERROR#%c"};
+const char stritHELP0[] ICACHE_RODATA_ATTR STORE_ATTR  = {" \
 Commands:\n\
 ---------\n\
  Wifi related commands\n\
@@ -43,7 +44,7 @@ cli.play(\"xxx\"): play the xxx recorded station in the list (0 = stop)\n\
 cli.prev (or cli.previous): select the previous station in the list and play it\n\
 cli.next: select the next station in the list and play it%c"};
 
-const char stritHELP1[] STORE_ATTR ICACHE_RODATA_ATTR = {" \
+const char stritHELP1[] ICACHE_RODATA_ATTR STORE_ATTR  = {" \
 cli.stop: stop the playing station or instant\n\
 cli.list: list all recorded stations\n\
 cli.list(\"x\"): list only one of the recorded stations. Answer with #CLI.LISTINFO#: followed by infos\n\
@@ -60,7 +61,7 @@ sys.uart(\"x\"): Change the baudrate of the uart on the next reset.\n\
  Valid x are: 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 76880, 115200, 230400\n\
 sys.i2s: Display the current I2S speed%c"};
 
-const char stritHELP2[] STORE_ATTR ICACHE_RODATA_ATTR = {" \
+const char stritHELP2[] ICACHE_RODATA_ATTR STORE_ATTR  = {" \
 sys.i2s(\"x\"): Change and record the I2S clock speed of the vs1053 GPIO5 MCLK for the i2s interface to external dac.\n\
 : 0=48kHz, 1=96kHz, 2=192kHz, other equal 0\n\
 sys.erase: erase all recorded configuration and stations.\n\
@@ -78,7 +79,7 @@ sys.version: Display the Release and Revision numbers\n\
 sys.tzo(\"xx\"): Set the timezone offset of your country.%c"\
 };
 
-const char stritHELP3[] STORE_ATTR ICACHE_RODATA_ATTR = {" \
+const char stritHELP3[] ICACHE_RODATA_ATTR STORE_ATTR  = {" \
 sys.tzo: Display the timezone offset\n\
 sys.date: Send a ntp request and Display the current locale time\n\
 : Format ISO-8601 local time   https://www.w3.org/TR/NOTE-datetime\n\
@@ -125,6 +126,32 @@ void setVolumew(char* vol)
 	setVolume(vol);	
 	wsVol(vol);
 }	
+int kasprintf(char *dest, const char *fmt, ...)
+{
+	char* flash;
+	char iflash[51];
+	int i = 0;
+	if (strlen(fmt) >50)
+	{
+		do {
+			flash= malloc(strlen(fmt)+16);
+			if (!flash) vTaskDelay(100);
+			i++;
+			if (i >=3) return 0;
+		}
+		while  (!flash);
+	} else flash = iflash;
+	flashRead(flash,(int)fmt,strlen(fmt));
+	flash[strlen(fmt)] = 0;
+	int ret;
+	va_list ap;
+	va_start(ap, fmt);
+		ret = vsprintf(dest, flash, ap);	
+	va_end(ap);
+	if (flash != iflash) free (flash);
+	return ret;
+}
+
 
 unsigned short adcdiv;	
 void setHostname(char* s)
@@ -164,7 +191,7 @@ void chostname(char* s)
 	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		free(device);
 		return;
     }
@@ -238,7 +265,7 @@ void switchCommand() {
 		else if ((adc >278) && (adc < 380)) //start
 		{
 			inside = true;
-			sprintf(Vol,"%d",currentStation);
+			kasprintf(Vol,PSTR("%d"),currentStation);
 			playStation	(Vol);
 		}
 		else if ((adc >830) && (adc < 920)) // station+
@@ -267,17 +294,17 @@ ICACHE_FLASH_ATTR void printInfo(char* s)
 {
 	kprintf(PSTR("#INFO:\"%s\"#\n"), s);
 }
-char msg[] = {"#WIFI.LIST#"};
+
+const char msgScan[] = {"#WIFI.LIST#"};
 
 ICACHE_FLASH_ATTR void wifiScanCallback(void *arg, STATUS status)
 {
 	if(status == OK)
 	{
 		int i = MAX_WIFI_STATIONS;
-//		char msg[] = {"#WIFI.LIST#"};
 		char* buf;
 		struct bss_info *bss_link = (struct bss_info *) arg;
-//		kprintf(PSTR("\n%s"),msg);
+//		kprintf(PSTR("\n%s"),msgScan);
 		buf = malloc(128);
 		if (buf == NULL) return;
 		while(i > 0)
@@ -285,10 +312,10 @@ ICACHE_FLASH_ATTR void wifiScanCallback(void *arg, STATUS status)
 			i--;
 			bss_link = bss_link->next.stqe_next;
 			if(bss_link == NULL) break;
-			sprintf(buf, "\n%s;%d;%d;%d", bss_link->ssid, bss_link->channel, bss_link->rssi, bss_link->authmode);
+			kasprintf(buf, PSTR("\n%s;%d;%d;%d"), bss_link->ssid, bss_link->channel, bss_link->rssi, bss_link->authmode);
 			kprintf(PSTR("%s\n"),buf);
 		}
-		kprintf(PSTR("\n#%s"),msg);
+		kprintf(PSTR("\n#%s"),msgScan);
 		free(buf);
 	}
 }
@@ -307,14 +334,14 @@ ICACHE_FLASH_ATTR void wifiConnect(char* cmd)
 	char *t = strstr(cmd, parslashquote);
 	if(t == 0)
 	{
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		free(devset);
 		return;
 	}
 	char *t_end  = strstr(t, "\",\"");
 	if(t_end == 0)
 	{
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		free(devset);
 		return;
 	}
@@ -325,7 +352,7 @@ ICACHE_FLASH_ATTR void wifiConnect(char* cmd)
 	t_end = strstr(t, parquoteslash);
 	if(t_end == 0)
 	{
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		free(devset);
 		return;
 	}
@@ -397,13 +424,13 @@ ICACHE_FLASH_ATTR void clientParseUrl(char* s)
     char *t = strstr(s, parslashquote);
 	if(t == 0)
 	{
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		return;
 	}
 	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		return;
     }
     char *url = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -422,14 +449,14 @@ ICACHE_FLASH_ATTR void clientParsePath(char* s)
     char *t = strstr(s, parslashquote);
 	if(t == 0)
 	{
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		return;
 	}
 //	kprintf(PSTR("cli.path: %s\n"),t);
 	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		return;
     }
     char *path = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -449,13 +476,13 @@ ICACHE_FLASH_ATTR void clientParsePort(char *s)
     char *t = strstr(s, parslashquote);
 	if(t == 0)
 	{
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		return;
 	}
 	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		return;
     }
     char *port = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -476,13 +503,13 @@ ICACHE_FLASH_ATTR void clientPlay(char *s)
     char *t = strstr(s, parslashquote);
 	if(t == 0)
 	{
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		return;
 	}
 	char *t_end  = strstr(t, parquoteslash)-2;
     if(t_end <= 0)
     {
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		return;
     }
    char *id = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -537,7 +564,7 @@ char* tmpend ;
 char url[200];
 
 	si = malloc(sizeof(struct shoutcast_info));	
-	if (si == NULL) { kprintf("##CLI.EDIT#: ERROR MEM#") ; return;}
+	if (si == NULL) { kprintf(PSTR("##CLI.EDIT#: ERROR MEM#")) ; return;}
 	memset(si->domain, 0, sizeof(si->domain));
     memset(si->file, 0, sizeof(si->file));
     memset(si->name, 0, sizeof(si->name));
@@ -571,18 +598,18 @@ char url[200];
 	if (id < 0xff) {
 		if (si->domain[0]==0) {si->port = 0;si->file[0] = 0;}
 		saveStation(si, id); 
-		kprintf("##CLI.EDIT#: OK (%d)\n",id);
+		kprintf(PSTR("##CLI.EDIT#: OK (%d)\n"),id);
 	}
 	else
-		kprintf("##CLI.EDIT#: ERROR\n");	
+		kprintf(PSTR("##CLI.EDIT#: ERROR%c"),0x0d);	
 	
 }
 
-const char strilLIST[] STORE_ATTR ICACHE_RODATA_ATTR = {"##CLI.LIST#%c"};
-const char strilINFOND[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTINFO#: %3d: not defined\n"};
-//const char strilINFO[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTINFO#: %3d: %s, %s:%d%s\n"};
-const char strilINFO1[] STORE_ATTR ICACHE_RODATA_ATTR = {"#CLI.LISTNUM#: %3d: %s, %s:%d%s%%%d\n"};
-const char strilDINFO[] STORE_ATTR ICACHE_RODATA_ATTR = {"\n#CLI.LIST#%c"};
+const char strilLIST[] ICACHE_RODATA_ATTR STORE_ATTR  = {"##CLI.LIST#%c"};
+const char strilINFOND[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTINFO#: %3d: not defined\n"};
+//const char strilINFO[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTINFO#: %3d: %s, %s:%d%s\n"};
+const char strilINFO1[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTNUM#: %3d: %s, %s:%d%s%%%d\n"};
+const char strilDINFO[] ICACHE_RODATA_ATTR STORE_ATTR  = {"\n#CLI.LIST#%c"};
 
 
 ICACHE_FLASH_ATTR void clientList(char *s)
@@ -597,7 +624,7 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 		char *t_end  = strstr(t, parquoteslash)-2;
 		if(t_end <= 0)
 		{
-			kprintf(stritCMDERROR);
+			kprintf(stritCMDERROR,0x0d);
 			return;
 		}	
 		i = atoi(t+2);
@@ -659,7 +686,7 @@ ICACHE_FLASH_ATTR char* webInfo()
 	{
 		if (resp != NULL)
 		{	
-			sprintf(resp,"vol: %d\nnum: %d\nstn: %s\ntit: %s\nsts: %d\n",getVolume(),currentStation,si->name,getMeta(),getState());
+			kasprintf(resp,PSTR("vol: %d\nnum: %d\nstn: %s\ntit: %s\nsts: %d\n"),getVolume(),currentStation,si->name,getMeta(),getState());
 		}
 		free(si);
 	}
@@ -675,7 +702,7 @@ ICACHE_FLASH_ATTR char* webList(int id)
 	{
 		if (resp != NULL)
 		{
-			sprintf(resp,"%s\n",si->name);
+			kasprintf(resp,PSTR("%s\n"),si->name);
 		}
 		free(si);
 	}
@@ -697,7 +724,7 @@ ICACHE_FLASH_ATTR void sysI2S(char* s)
 	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		free(device);
 		return;
     }	
@@ -737,7 +764,7 @@ ICACHE_FLASH_ATTR void sysUart(char* s)
 		speed = checkUart(speed);
 		device->uartspeed= speed;
 		saveDeviceSettings(device);	
-		kprintf("Speed: %d\n",speed);
+		kprintf(PSTR("Speed: %d\n"),speed);
 	}
 	kprintf(PSTR("\n%sUART= %d# on next reset\n"),msgsys,device->uartspeed);	
 	free(device);
@@ -755,7 +782,7 @@ ICACHE_FLASH_ATTR void clientVol(char *s)
     if(t_end <= 0)
     {
 
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		return;
     }
    char *vol = (char*) malloc((t_end-t+1)*sizeof(char));
@@ -788,7 +815,7 @@ ICACHE_FLASH_ATTR void syspatch(char* s)
 	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		free(device);
 		return;
     }	
@@ -818,7 +845,7 @@ ICACHE_FLASH_ATTR void sysled(char* s)
 	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		free(device);
 		return;
     }	
@@ -849,7 +876,7 @@ ICACHE_FLASH_ATTR void tzoffset(char* s)
 	char *t_end  = strstr(t, parquoteslash);
     if(t_end == NULL)
     {
-		kprintf(stritCMDERROR);
+		kprintf(stritCMDERROR,0x0d);
 		free(device);
 		return;
     }	

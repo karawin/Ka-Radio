@@ -12,19 +12,18 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#define stack  460
+#define stack  500
 
-
-const char strsTELNET[] STORE_ATTR ICACHE_RODATA_ATTR = {"Servers Telnet Socket fails %s errno: %d\n"};
-const char strsWEB[] STORE_ATTR ICACHE_RODATA_ATTR = {"Servers Web Socket fails %s errno: %d\n"};
-const char strsWSOCK[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer Socket fails %s errno: %d\n"};
+const char strsTELNET[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Servers Telnet Socket fails %s errno: %d\n"};
+const char strsWEB[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Servers Web Socket fails %s errno: %d\n"};
+const char strsWSOCK[] ICACHE_RODATA_ATTR STORE_ATTR  = {"WebServer Socket fails %s errno: %d\n"};
 
 fd_set readfds;
 xSemaphoreHandle semclient = NULL ;
 
-char strsocket[] = {"Socket"};
-char strbind[] = {"Bind"};
-char strlisten[] = {"Listen"};
+const char strsocket[] = {"Socket"};
+const char strbind[] = {"Bind"};
+const char strlisten[] = {"Listen"};
 
 ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 	//telnet
@@ -208,7 +207,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 								4, 
 								NULL ) != pdPASS) 
 							{								
-								kprintf(PSTR("Server low mem. Retrying...\n%c"),0x0d);
+								kprintf(PSTR("Low mem. Retrying...\n%c"),0x0d);
 								vTaskDelay(200);
 							}	
 							//vTaskDelay(1);	
@@ -219,7 +218,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 						else  // xSemaphoreTake fails
 						{
 							vTaskDelay(200); 
-							kprintf(PSTR("Server busy. Retrying...\n%c"),0x0d);
+							kprintf(PSTR("Busy. Retrying...\n%c"),0x0d);
 						}
 						
 					}
@@ -293,6 +292,6 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 		}			
 					
 	} 
-	printf("telnet task abnormal exit\n");
+	printf(PSTR("telnet task abnormal exit\n"));
 	vTaskDelete( NULL );	// never called
 }

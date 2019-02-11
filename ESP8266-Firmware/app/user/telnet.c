@@ -13,8 +13,8 @@
 
 
 //const char strtMALLOC1[] = {"Telnet %s malloc fails\n"};
-const char strtSOCKET[] STORE_ATTR ICACHE_RODATA_ATTR = {"Telnet Socket fails %s errno: %d\n"};
-const char strtWELCOME[] STORE_ATTR ICACHE_RODATA_ATTR ={"Karadio telnet\n> "};
+const char strtSOCKET[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Telnet Socket fails %s errno: %d\n"};
+const char strtWELCOME[] ICACHE_RODATA_ATTR STORE_ATTR  ={"Karadio telnet\n> "};
 
 
 int telnetclients[NBCLIENTT];

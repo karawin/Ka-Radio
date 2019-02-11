@@ -35,12 +35,12 @@ bool fdevice = false;
 struct device_settings1 device1;
 bool fdevice1 = false;
 */
-const char streMSG[]  STORE_ATTR ICACHE_RODATA_ATTR = {"Warning %s malloc low memory\n"};
-const char saveStationPos[] STORE_ATTR ICACHE_RODATA_ATTR = {"saveStation fails pos=%d\n"};
-const char getStationPos[] STORE_ATTR ICACHE_RODATA_ATTR = {"getStation fails pos=%d\n"};
-const char streERASE[] STORE_ATTR ICACHE_RODATA_ATTR = {"erase setting1 (only one time) \n"};
-const char streGETDEVICE[] STORE_ATTR ICACHE_RODATA_ATTR = {"getDeviceSetting%d fails\n"};
-const char streSETDEVICE[] STORE_ATTR ICACHE_RODATA_ATTR = {"saveDeviceSetting%d:  null\n"};
+const char streMSG[]  ICACHE_RODATA_ATTR STORE_ATTR  = {"Warning %s malloc low memory\n"};
+const char saveStationPos[] ICACHE_RODATA_ATTR STORE_ATTR  = {"saveStation fails pos=%d\n"};
+const char getStationPos[] ICACHE_RODATA_ATTR STORE_ATTR  = {"getStation fails pos=%d\n"};
+const char streERASE[] ICACHE_RODATA_ATTR STORE_ATTR  = {"erase setting1 (only one time) \n"};
+const char streGETDEVICE[] ICACHE_RODATA_ATTR STORE_ATTR  = {"getDeviceSetting%d fails\n"};
+const char streSETDEVICE[] ICACHE_RODATA_ATTR STORE_ATTR  = {"saveDeviceSetting%d:  null\n"};
 
 uint32_t Eeprom_start;
 uint32_t Eeprom_start1;
@@ -115,7 +115,7 @@ uint32_t getFlashChipRealSize(void)
 	if (fSize > 0x400000) fSize = 0x400000;
 	Eeprom_start = fSize - 0x20000;
 	Eeprom_start1 = Eeprom_start - 0x10000;
-	printf("Eeprom_start: %x\nEeprom_start1: %x\n",Eeprom_start,Eeprom_start1);
+	printf(PSTR("Eeprom_start: %x\nEeprom_start1: %x\n"),Eeprom_start,Eeprom_start1);
 	
     return (1 << ((spi_flash_get_id() >> 16) & 0xFF));
 }

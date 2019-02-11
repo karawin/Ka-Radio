@@ -11,6 +11,7 @@
 #include "esp_common.h"
 #include "lwip/mem.h"
 #include "upgrade.h"
+#include "interface.h"
 
 struct upgrade_param {
     uint32 fw_bin_addr;
@@ -83,13 +84,13 @@ system_upgrade_internal(struct upgrade_param *upgrade, uint8 *data, u32 len)
             taskENTER_CRITICAL();
 			if( OUT_OF_RANGE( upgrade->fw_bin_sec_earse) )
 			{
-				os_printf("fw_bin_sec_earse:%d, Out of range\n",upgrade->fw_bin_sec_earse);
+				printf("fw_bin_sec_earse:%d, Out of range\n",upgrade->fw_bin_sec_earse);
 				break;
 			
 			}
 			else
 			{
-//				os_printf("spi flash erase sector %d\n",upgrade->fw_bin_sec_earse);
+//				printf("spi flash erase sector %d\n",upgrade->fw_bin_sec_earse);
 				WRITE_PERI_REG(0x60000914, 0x73);
 				 spi_flash_erase_sector(upgrade->fw_bin_sec_earse);
 				 upgrade->fw_bin_sec_earse++;
@@ -97,7 +98,7 @@ system_upgrade_internal(struct upgrade_param *upgrade, uint8 *data, u32 len)
 			taskEXIT_CRITICAL();
             vTaskDelay(10 / portTICK_RATE_MS);
         }
-        os_printf("flash erase over\n");
+        printf(PSTR("flash erase over\n"));
         return true;
     }
     
@@ -113,7 +114,7 @@ system_upgrade_internal(struct upgrade_param *upgrade, uint8 *data, u32 len)
     if(upgrade->extra<=4)
         memcpy(upgrade->save, upgrade->buffer + len, upgrade->extra);
     else
-        os_printf("ERR3:arr_overflow,%u,%d\n",__LINE__,upgrade->extra);
+        printf(PSTR("ERR3:arr_overflow,%u,%d\n"),__LINE__,upgrade->extra);
 
     do {
         if (upgrade->fw_bin_addr + len >= (upgrade->fw_bin_sec + upgrade->fw_bin_sec_num) * SPI_FLASH_SEC_SIZE) {

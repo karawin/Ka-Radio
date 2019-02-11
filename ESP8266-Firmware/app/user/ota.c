@@ -52,7 +52,7 @@ Accept-Encoding: gzip,deflate,sdch\r\n\
 Cache-Control: no-cache\r\n\
 \r\n"
 
-const char strupd[] STORE_ATTR ICACHE_RODATA_ATTR = {\
+const char strupd[] ICACHE_RODATA_ATTR STORE_ATTR  = {\
 "GET /user%d.4096.%s.4.bin HTTP/1.0\r\nHost: karadio.karawin.fr:80\r\n\
 Connection: keep-alive\r\nCache-Control: no-cache\r\nUser-Agent: Karadio 1.5 \r\n\
 Accept: */*\r\nAccept-Encoding: gzip,deflate,sdch\r\n\r\n"};
@@ -70,11 +70,11 @@ void user_esp_upgrade_rsp(void *arg)
 	struct upgrade_server_info *server = (struct upgrade_server_info *)arg;
 	if(server->upgrade_flag == true){
 //		kprintf(PSTR("FW upgrade success.%c"),0x0d);
-		wsUpgrade("FW OK Refresh the page" , 0,100);
+		wsUpgrade(PSTR("FW OK Refresh the page") , 0,100);
 		system_upgrade_reboot();
 	} else {
 //		kprintf(PSTR("-ERR: FW upgrade failed.%c"),0x0d);
-		wsUpgrade("FW upgrade failed." , 0,100);
+		wsUpgrade(PSTR("FW upgrade failed.") , 0,100);
 	}
     free(server->url);
     server->url = NULL;

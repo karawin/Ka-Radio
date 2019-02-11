@@ -37,16 +37,16 @@
 
 #include "interface.h"
 
-const char striDEF0[] STORE_ATTR ICACHE_RODATA_ATTR = {"The default AP is  WifiKaRadio. Connect your wifi to it.\nThen connect a webbrowser to 192.168.4.1 and go to Setting\nMay be long to load the first time.Be patient.%c"};
-const char striDEF1[] STORE_ATTR ICACHE_RODATA_ATTR = {"Erase the database and set ssid, password and ip's field%c"};
-const char striAP[] STORE_ATTR ICACHE_RODATA_ATTR = {"AP1: %s, AP2: %s\n"};
-const char striSTA1[] STORE_ATTR ICACHE_RODATA_ATTR = {" AP1:Station Ip: %d.%d.%d.%d\n"};
-const char striSTA2[] STORE_ATTR ICACHE_RODATA_ATTR = {" AP2:Station Ip: %d.%d.%d.%d\n"};
-const char striTRY[] STORE_ATTR ICACHE_RODATA_ATTR = {"Trying %s ,  I: %d status: %d\n"};
-const char striTASK[] STORE_ATTR ICACHE_RODATA_ATTR = {"%s task: %x\n"};
-const char striHEAP[] STORE_ATTR ICACHE_RODATA_ATTR = {"Heap size: %d\n"};
-const char striUART[] STORE_ATTR ICACHE_RODATA_ATTR = {"UART READY%c"};
-const char striWATERMARK[] STORE_ATTR ICACHE_RODATA_ATTR = {"watermark %s: %d  heap:%d\n"};
+const char striDEF0[] ICACHE_RODATA_ATTR STORE_ATTR  = {"The default AP is  WifiKaRadio. Connect your wifi to it.\nThen connect a webbrowser to 192.168.4.1 and go to Setting\nMay be long to load the first time.Be patient.%c"};
+const char striDEF1[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Erase the database and set ssid, password and ip's field%c"};
+const char striAP[] ICACHE_RODATA_ATTR STORE_ATTR  = {"AP1: %s, AP2: %s\n"};
+const char striSTA1[] ICACHE_RODATA_ATTR STORE_ATTR  = {" AP1:Station Ip: %d.%d.%d.%d\n"};
+const char striSTA2[] ICACHE_RODATA_ATTR STORE_ATTR  = {" AP2:Station Ip: %d.%d.%d.%d\n"};
+const char striTRY[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Trying %s ,  I: %d status: %d\n"};
+const char striTASK[] ICACHE_RODATA_ATTR STORE_ATTR  = {"%s task: %x\n"};
+const char striHEAP[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Heap size: %d\n"};
+const char striUART[] ICACHE_RODATA_ATTR STORE_ATTR  = {"UART READY%c"};
+const char striWATERMARK[] ICACHE_RODATA_ATTR STORE_ATTR  = {"watermark %s: %d  heap:%d\n"};
 
 //ip
 static char localIp[20] = {"0.0.0.0"};
@@ -342,7 +342,7 @@ void uartInterfaceTask(void *pvParameters) {
 	
 	if (wifi_get_opmode ( ) == 1)
 	{
-		sprintf(localIp,"%d.%d.%d.%d",(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));	
+		kasprintf(localIp,PSTR("%d.%d.%d.%d"),(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));	
 		if ((strlen(device1->hostname) >= HOSTLEN) ||
 			(strlen(device1->hostname) == 0) || (device1->hostname[0] ==  0xff))
 		{

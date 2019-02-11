@@ -10,21 +10,19 @@
 
 xSemaphoreHandle semfile = NULL ;
 
-const char strsROK[] STORE_ATTR ICACHE_RODATA_ATTR =  {"HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n%s"};
 const char tryagain[] = {"try again"};
 
-const char lowmemory[] STORE_ATTR ICACHE_RODATA_ATTR = { "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nlow memory\n"};
-const char strsMALLOC[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer inmalloc fails for %d\n"};
-const char strsMALLOC1[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer %s malloc fails\n"};
-const char strsSOCKET[] STORE_ATTR ICACHE_RODATA_ATTR = {"WebServer Socket fails %s errno: %d\n"};
-const char strsID[] STORE_ATTR ICACHE_RODATA_ATTR = {"getstation, no id or Wrong id %d\n"};
-const char strsRAUTO[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"rauto\":\"%c\"}"};
-const char strsTHEME[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"theme\":\"%c\"}"};
-const char strsICY[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"curst\":\"%s\",\"descr\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\",\"meta\":\"%s\",\"vol\":\"%s\",\"treb\":\"%s\",\"bass\":\"%s\",\"tfreq\":\"%s\",\"bfreq\":\"%s\",\"spac\":\"%s\",\"auto\":\"%c\"}"};
-const char strsWIFI[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ssid2\":\"%s\",\"pasw2\":\"%s\",\
+const char strsMALLOC[] ICACHE_RODATA_ATTR STORE_ATTR = {"WebServer inmalloc fails for %d\n"};
+const char strsMALLOC1[] ICACHE_RODATA_ATTR STORE_ATTR = {"WebServer %s malloc fails\n"};
+const char strsSOCKET[] ICACHE_RODATA_ATTR STORE_ATTR = {"WebServer Socket fails %s errno: %d\n"};
+const char strsID[] ICACHE_RODATA_ATTR STORE_ATTR = {"getstation, no id or Wrong id %d\n"};
+const char strsRAUTO[] ICACHE_RODATA_ATTR STORE_ATTR  = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"rauto\":\"%c\"}"};
+const char strsTHEME[] ICACHE_RODATA_ATTR STORE_ATTR  = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:13\r\n\r\n{\"theme\":\"%c\"}"};
+const char strsICY[] ICACHE_RODATA_ATTR STORE_ATTR  = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"curst\":\"%s\",\"descr\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\",\"meta\":\"%s\",\"vol\":\"%s\",\"treb\":\"%s\",\"bass\":\"%s\",\"tfreq\":\"%s\",\"bfreq\":\"%s\",\"spac\":\"%s\",\"auto\":\"%c\"}"};
+const char strsWIFI[] ICACHE_RODATA_ATTR STORE_ATTR  = {"HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ssid2\":\"%s\",\"pasw2\":\"%s\",\
 \"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\",\"mac\":\"%s\",\"host\":\"%s\",\"tzo\":\"%s\"}"};
-const char strsGSTAT[] STORE_ATTR ICACHE_RODATA_ATTR = {"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: %d\r\n\r\n{\"Name\":\"%s\",\"URL\":\"%s\",\"File\":\"%s\",\"Port\":\"%d\",\"ovol\":\"%d\"}"};
-
+const char strsGSTAT[] ICACHE_RODATA_ATTR STORE_ATTR  = {"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: %d\r\n\r\n{\"Name\":\"%s\",\"URL\":\"%s\",\"File\":\"%s\",\"Port\":\"%d\",\"ovol\":\"%d\"}"};
+const char strsFOURD[]   = {"%d.%d.%d.%d"};
 
 
 os_timer_t sleepTimer;
@@ -73,37 +71,27 @@ ICACHE_FLASH_ATTR struct servFile* findFile(char* name)
 ICACHE_FLASH_ATTR void respOk(int conn,char* message)
 {
 	char rempty[] = {""};
-	
-	char* fmt= malloc(strlen(strsROK)+16);
-	if (fmt != NULL)
+	if (message == NULL) message = rempty;
+	char* fresp = inmalloc(120);
+	if (fresp!=NULL)
 	{
-		flashRead(fmt,(int)strsROK,strlen(strsROK));
-		fmt[strlen(strsROK)] = 0;
-		if (message == NULL) message = rempty;
-		char* fresp = inmalloc(strlen(fmt)+strlen(message)+15);
-		if (fresp!=NULL)
-		{
-			sprintf(fresp,fmt,"text/plain",strlen(message),message);
+		if(kasprintf(fresp,PSTR("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n%s"),strlen(message),message)) 
 //printf("ok %s\n",fresp);
 			write(conn, fresp, strlen(fresp));
-			infree(fresp);
-		}		
-		infree(fmt);
-	}	
+		infree(fresp);
+	}			
 //printf("respOk exit\n");
 }
 
 ICACHE_FLASH_ATTR void respKo(int conn)
 {
-	char* fmt= malloc(strlen(lowmemory)+16);
-//printf("ko\n");
-	if (fmt != NULL)
-	{
-		flashRead(fmt,(int)lowmemory,strlen(lowmemory));
-		fmt[strlen(lowmemory)] = 0;
-		write(conn, fmt, strlen(fmt));
-		infree (fmt);
-	}
+	char* fresp = inmalloc(120);
+	if (fresp!=NULL)
+	{		
+		if(kasprintf(fresp, PSTR("HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nlow memory\n")))
+			write(conn, fresp, strlen(fresp));
+		infree(fresp);
+	}			
 }
 
 ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
@@ -160,23 +148,25 @@ ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
 			}	
 		
 //printf("serveFile socket:%d,  %s. Length: %d  sliced in %d\n",conn,name,length,gpart);		
-			sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Encoding: gzip\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n", (f!=NULL ? f->type : "text/plain"), length);
-//printf("serveFile send %d bytes\n%s\n",strlen(buf),buf);	
-			vTaskDelay(2); // why i need it? Don't know. 
-			write(conn, buf, strlen(buf));
-			progress = length;
-			part = gpart;
-			if (progress <= part) part = progress;
-			while (progress > 0) 
+			if(kasprintf(buf,PSTR( "HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Encoding: gzip\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n"), (f!=NULL ? f->type : "text/plain"), length))
 			{
-//printf("serveFile socket:%d,  read at %x len: %d\n",conn,content,part);	
-				flashRead(con, (uint32_t)content, part);
-				write(conn, con, part);
-				content += part;
-				progress -= part;
+//printf("serveFile send %d bytes\n%s\n",strlen(buf),buf);	
+				vTaskDelay(2); // why i need it? Don't know. 
+				write(conn, buf, strlen(buf));
+				progress = length;
+				part = gpart;
 				if (progress <= part) part = progress;
-				vTaskDelay(1);
-			} 
+				while (progress > 0) 
+				{
+//printf("serveFile socket:%d,  read at %x len: %d\n",conn,content,part);	
+					flashRead(con, (uint32_t)content, part);
+					write(conn, con, part);
+					content += part;
+					progress -= part;
+					if (progress <= part) part = progress;
+					vTaskDelay(1);
+				} 
+			}
 			xSemaphoreGive(semfile);	
 		} else {respKo(conn); kprintf(PSTR("semfile fails%c"),0x0D);}
 		infree(con);
@@ -295,16 +285,20 @@ ICACHE_FLASH_ATTR void setRelVolume(int8_t vol) {
 	rvol = clientIvol+vol;
 	if (rvol <0) rvol = 0;
 	if (rvol > 254) rvol = 254;
-	sprintf(Vol,"%d",rvol);	
-	setVolume(Vol);
-	wsVol(Vol);
+	if (kasprintf(Vol,PSTR("%d"),rvol))
+	{
+		setVolume(Vol);
+		wsVol(Vol);
+	}
 }
 
 // send the rssi
 ICACHE_FLASH_ATTR void rssi(int socket) {
 		char answer[20];
-		sprintf(answer,"{\"wsrssi\":\"%d\"}",wifi_station_get_rssi());
-		websocketwrite(socket,answer, strlen(answer));
+		if (kasprintf(answer,PSTR("{\"wsrssi\":\"%d\"}"),wifi_station_get_rssi()))
+		{			
+			websocketwrite(socket,answer, strlen(answer));
+		}
 }
 // flip flop the theme indicator
 ICACHE_FLASH_ATTR void theme() {
@@ -372,8 +366,8 @@ void websockethandle(int socket, wsopcode_t opcode, uint8_t * payload, size_t le
 			*strstr(payload,"&")=0;
 		else return;
 //		setVolume(payload+6);
-		sprintf(answer,"{\"wsvol\":\"%s\"}",payload+6);
-		websocketlimitedbroadcast(socket,answer, strlen(answer));
+		if (kasprintf(answer,PSTR("{\"wsvol\":\"%s\"}"),payload+6))	
+			websocketlimitedbroadcast(socket,answer, strlen(answer));
 	}
 	else if (strstr(payload,"startSleep=")!= NULL)
 	{
@@ -429,8 +423,8 @@ ICACHE_FLASH_ATTR void playStationInt(int sid) {
 			}
 	}
 	infree(si);
-	sprintf(answer,"{\"wsstation\":\"%d\"}",sid);
-	websocketbroadcast(answer, strlen(answer));
+	if (kasprintf(answer,PSTR("{\"wsstation\":\"%d\"}"),sid))
+		websocketbroadcast(answer, strlen(answer));
 	device = getDeviceSettings();
 	if (device != NULL)
 	{
@@ -586,45 +580,38 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				{
 					char ibuf [6];	
 					char *buf;
-//					int i;
 					for(i = 0; i<sizeof(ibuf); i++) ibuf[i] = 0;
 					struct shoutcast_info* si;
 					si = getStation(atoi(id));
 					if (strlen(si->domain) > sizeof(si->domain)) si->domain[sizeof(si->domain)-1] = 0; //truncate if any (rom crash)
 					if (strlen(si->file) > sizeof(si->file)) si->file[sizeof(si->file)-1] = 0; //truncate if any (rom crash)
 					if (strlen(si->name) > sizeof(si->name)) si->name[sizeof(si->name)-1] = 0; //truncate if any (rom crash)
-					sprintf(ibuf, "%d%d", si->ovol,si->port);
-					int json_length = strlen(si->domain) + strlen(si->file) + strlen(si->name) + strlen(ibuf) + 50;
-					buf = inmalloc(json_length + 75);
-					char* fmt=malloc(strlen (strsGSTAT)+16);
-					if ((buf == NULL)||(fmt == NULL))
-					{	
-						printf(strsMALLOC1,"getStation");
-						//printf("getStation\n");
-						respKo(conn);
-						infree(buf);
-						infree(fmt);
-					}
-					else {				
-						
-						for(i = 0; i<sizeof(buf); i++) buf[i] = 0;
-						flashRead(fmt,(int)strsGSTAT,strlen(strsGSTAT));
-						fmt[strlen(strsGSTAT)] = 0;
-						sprintf(buf, fmt,					
-						json_length, si->name, si->domain, si->file,si->port,si->ovol);
-//				printf("getStation Buf len:%d : %s\n",strlen(buf),buf);						
-						write(conn, buf, strlen(buf));
-						infree(buf);
-						infree(fmt);
-					}
+					if (kasprintf(ibuf, PSTR("%d%d"), si->ovol,si->port))
+					{
+						int json_length = strlen(si->domain) + strlen(si->file) + strlen(si->name) + strlen(ibuf) + 50;
+						buf = inmalloc(json_length + 75);	
+						if ((buf == NULL))
+						{	
+							printf(strsMALLOC1,("getStation"));
+							//printf("getStation\n");
+							respKo(conn);
+						}
+						else {
+							for(i = 0; i<sizeof(buf); i++) buf[i] = 0;
+							kasprintf(buf, strsGSTAT,					
+							json_length, si->name, si->domain, si->file,si->port,si->ovol);
+//							printf("getStation Buf len:%d : %s\n",strlen(buf),buf);						
+							write(conn, buf, strlen(buf));
+							infree(buf);
+						}
+					} else respKo(conn);
 					infree(si);
 					return;
 				} else printf(strsID,atoi(id));
 //				infree (id);
 			} 			
 		}
-	} else if(strcmp(name, "/setStation") == 0) 
-	{
+	} else if(strcmp(name, "/setStation") == 0) {
 		if(data_size > 0) {
 //printf("data:%s\n",data);
 			char nb[6] ;
@@ -724,39 +711,39 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 		char *buf = inmalloc( strlen(strsRAUTO)+16);
 		if (buf == NULL)
 		{	
-			printf(strsMALLOC1,"post rauto");
-			respOk(conn,"nok");
+			printf(strsMALLOC1,("post rauto"));
+			respKo(conn);
 		}
 		else {			
 			device = getDeviceSettings();
 			if (device != NULL)
 			{
-				flashRead(buf,(int)strsRAUTO,strlen(strsRAUTO));
-				buf[strlen(strsRAUTO)] = 0;
-				sprintf(buf, buf,(device->autostart)?'1':'0' );
-				write(conn, buf, strlen(buf));
-				infree(buf);
+				if (kasprintf(buf,strsRAUTO,(device->autostart)?'1':'0' ))
+				{
+					write(conn, buf, strlen(buf));
+					infree(buf);
+				} else respKo(conn);
 				infree(device);	
 			}
-		}		
+		}	
 		return;		
 	} else if(strcmp(name, "/theme") == 0) {
 		char *buf = inmalloc( strlen(strsTHEME)+16);
 		if (buf == NULL)
 		{	
-			printf(strsTHEME,"post theme");
-			respOk(conn,"nok");
+			printf(strsMALLOC1,("post theme"));
+			respKo(conn);
 		}
 		else {			
 			device = getDeviceSettings();
 			if (device != NULL)
 			{
-				flashRead(buf,(int)strsTHEME,strlen(strsTHEME));
-				buf[strlen(strsTHEME)] = 0;
-				sprintf(buf, buf,(device->options & T_THEME)?'1':'0' );
-				write(conn, buf, strlen(buf));
-				infree(buf);
-				infree(device);	
+				if (kasprintf(buf, strsTHEME,(device->options & T_THEME)?'1':'0' ))
+				{
+					write(conn, buf, strlen(buf));
+					infree(buf);
+					infree(device);	
+				} else respKo(conn);
 			}
 		}		
 		return;			
@@ -771,18 +758,18 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				vTaskDelay(4);
 			}
 		}
-	} else if(strcmp(name, "/upgrade") == 0) {
+	} else if(strcmp(name, "/upgrade") == 0)
+	{
 		update_firmware("new");  // start the OTA
-	} else if(strcmp(name, "/icy") == 0)	
-	{	
+	} else if(strcmp(name, "/icy") == 0)	{	
 //		printf("icy vol \n");
-		char currentSt[5]; sprintf(currentSt,"%d",currentStation);
-		char vol[5]; sprintf(vol,"%d",(VS1053_GetVolume()));
-		char treble[5]; sprintf(treble,"%d",VS1053_GetTreble());
-		char bass[5]; sprintf(bass,"%d",VS1053_GetBass());
-		char tfreq[5]; sprintf(tfreq,"%d",VS1053_GetTrebleFreq());
-		char bfreq[5]; sprintf(bfreq,"%d",VS1053_GetBassFreq());
-		char spac[5]; sprintf(spac,"%d",VS1053_GetSpatial());
+		char currentSt[5]; kasprintf(currentSt,PSTR("%d"),currentStation);
+		char vol[5]; kasprintf(vol,PSTR("%d"),(VS1053_GetVolume()));
+		char treble[5]; kasprintf(treble,PSTR("%d"),VS1053_GetTreble());
+		char bass[5]; kasprintf(bass,PSTR("%d"),VS1053_GetBass());
+		char tfreq[5]; kasprintf(tfreq,PSTR("%d"),VS1053_GetTrebleFreq());
+		char bfreq[5]; kasprintf(bfreq,PSTR("%d"),VS1053_GetBassFreq());
+		char spac[5]; kasprintf(spac,PSTR("%d"),VS1053_GetSpatial());
 				
 		struct icyHeader *header = clientGetHeader();
 //		printf("icy start header %x\n",header);
@@ -805,13 +792,9 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 //		printf("icy start header %x  len:%d vollen:%d vol:%s\n",header,json_length,strlen(vol),vol);
 		
 		char *buf = inmalloc( json_length + 75);
-		char* fmt=malloc(strlen (strsICY)+16);
-		if ((buf == NULL) || (fmt == NULL))
+		if ((buf == NULL) )
 		{	
-			//printf("post icy\n");
 			printf(strsMALLOC1,"post icy");
-			infree(buf);
-			infree(fmt);
 			respKo(conn);
 		}
 		else 
@@ -823,10 +806,8 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				vauto = (device->autostart)?'1':'0' ;
 				infree(device);	
 			}
-			
-			flashRead(fmt,(int)strsICY,strlen(strsICY));
-			fmt[strlen(strsICY)] = 0;
-			sprintf(buf, fmt,
+
+			if (kasprintf(buf, strsICY,
 				
 //			sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"curst\":\"%s\",\"descr\":\"%s\",\"name\":\"%s\",\"bitr\":\"%s\",\"url1\":\"%s\",\"not1\":\"%s\",\"not2\":\"%s\",\"genre\":\"%s\",\"meta\":\"%s\",\"vol\":\"%s\",\"treb\":\"%s\",\"bass\":\"%s\",\"tfreq\":\"%s\",\"bfreq\":\"%s\",\"spac\":\"%s\",\"auto\":\"%c\"}",
 			json_length,
@@ -840,13 +821,13 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			(header->members.single.genre ==NULL)?"":header->members.single.genre,
 			(header->members.single.metadata ==NULL)?"":header->members.single.metadata,			
 			vol,treble,bass,tfreq,bfreq,spac,
-			vauto );
-//			printf("test: len fmt:%d %d\n%s\nfmt: %s",strlen(strsICY),strlen(fmt),buf,fmt);
-			infree(fmt);
-			write(conn, buf, strlen(buf));
-			infree(buf);
-			wsMonitor();
-			
+			vauto ))
+			{
+//				printf("test: len fmt:%d %d\n%s\nfmt: %s",strlen(strsICY),strlen(fmt),buf,fmt);
+				write(conn, buf, strlen(buf));
+				infree(buf);
+				wsMonitor();
+			} else respKo (conn);			
 		}		
 		return;
 		
@@ -935,7 +916,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 					if ((strcmp(device1->hostname,host) != 0)&&(strcmp(host,"undefined") != 0))
 					{
 						strncpy(device1->hostname,host,HOSTLEN-1);
-						printf("HOSTAME  %s. Need to restart\n",device1->hostname);
+						printf(PSTR("HOSTAME  %s. Need to restart\n"),device1->hostname);
 //						setHostname(device1->hostname);
 						changed = true;
 					}	
@@ -946,8 +927,8 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			if (tzo==NULL) 
 			{
 				tzo= inmalloc(10); 
-				sprintf(tmptzo,"%d",device->tzoffset);
-				strcpy(tzo,tmptzo);
+				kasprintf(tmptzo,PSTR("%d"),device->tzoffset);
+				strcpy(tzo,tmptzo); 
 			}
 			else if (strlen(tzo) ==0)
 			{
@@ -985,33 +966,28 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			strlen(device1->pass2) +
 			strlen(device->ua)+
 			strlen(device1->hostname)+
-			sprintf(tmptzo,"%d",device->tzoffset)+
-			sprintf(tmpip,"%d.%d.%d.%d",device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3])+
-			sprintf(tmpmsk,"%d.%d.%d.%d",device->mask[0], device->mask[1],device->mask[2], device->mask[3])+
-			sprintf(tmpgw,"%d.%d.%d.%d",device->gate[0], device->gate[1],device->gate[2], device->gate[3])+
-			sprintf(adhcp,"%d",device->dhcpEn)+
-			sprintf(macstr,MACSTR,MAC2STR(macaddr));
+			kasprintf(tmptzo,PSTR("%d"),device->tzoffset)+
+			kasprintf(tmpip,strsFOURD,device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3])+
+			kasprintf(tmpmsk,strsFOURD,device->mask[0], device->mask[1],device->mask[2], device->mask[3])+
+			kasprintf(tmpgw,strsFOURD,device->gate[0], device->gate[1],device->gate[2], device->gate[3])+
+			kasprintf(adhcp,PSTR("%d"),device->dhcpEn)+
+			kasprintf(macstr,MACSTR,MAC2STR(macaddr));
 
 			char *buf = inmalloc( json_length + 95);
-			char* fmt=malloc(strlen (strsWIFI)+16);
-			if ((buf == NULL) || (fmt == NULL))
+			if ((buf == NULL) )
 			{	
-				//printf("post wifi\n");
-				printf(strsMALLOC1,"post wifi");
+				printf(strsMALLOC1,("post wifi"));
 				respKo(conn);
-				infree(buf);
-				infree(fmt);
 			}
 			else {			
-				flashRead(fmt,(int)strsWIFI,strlen(strsWIFI));
-				fmt[strlen(strsWIFI)] = 0;		
-				sprintf(buf, fmt,
+				if (kasprintf(buf, strsWIFI,
 				json_length,
-				device->ssid,device->pass,device->ssid2,device1->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp,macstr,device1->hostname,tmptzo);
+				device->ssid,device->pass,device->ssid2,device1->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp,macstr,device1->hostname,tmptzo))
+				{
 //printf(PSTR("wifi Buf len:%d\n%s\nfmt:%s\n"),strlen(buf),buf,fmt);
-				write(conn, buf, strlen(buf));
+					write(conn, buf, strlen(buf));
+				}
 				infree(buf);
-				infree(fmt);
 			}
 			
 			infree(device);
@@ -1042,8 +1018,8 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 //kprintfl("GET socket:%d str:\n%s\n",conn,buf);
 		if( ((d = strstr(buf,"Connection:")) !=NULL)&& ((d = strstr(d," Upgrade")) != NULL))
 		{  // a websocket request
-			websocketAccept(conn,buf,buflen);	
 //printf ("websocketAccept socket: %d\n",conn);
+			websocketAccept(conn,buf,buflen);	
 			return false;
 		} else
 		{
@@ -1103,9 +1079,11 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 					char* vr = malloc(30);
 					if (vr != NULL)
 					{
-						sprintf(vr,"Release: %s, Revision: %s\n",RELEASE,REVISION);
-						respOk(conn,vr); 
-						infree(vr);
+						if (kasprintf(vr,PSTR("Release: %s, Revision: %s\n"),RELEASE,REVISION))
+						{
+							respOk(conn,vr); 
+							infree(vr);
+						} else respKo(conn);
 						return true;
 					}
 				}
@@ -1181,10 +1159,10 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 
 //kprintf("Client entry  socket:%x  reclen:%d\n",client_sock,reclen);
 	
-	if (buf == NULL)
+	while (buf == NULL)
 	{
 		vTaskDelay(100);
-		kprintf("Client entry Buff null\n");
+		kprintf(PSTR("SC Buff null\n"));
 		buf = (char *)inmalloc(reclen); // second chance
 	}
 //kprintf("Client entry 1 socket:%x  reclen:%d\n",client_sock,reclen);
@@ -1230,7 +1208,7 @@ ICACHE_FLASH_ATTR void serverclientTask(void *pvParams) {
 						if ((bend - buf +cl)> recbytes)
 						{	
 //kprintf ("Server: try receive more:%d bytes. reclen = %d, must be %d\n", recbytes,reclen,bend - buf +cl);
-							while(((recb = read(client_sock , buf+recbytes, cl))==0)){vTaskDelay(1);printf(".");}
+							while(((recb = read(client_sock , buf+recbytes, cl))==0)){vTaskDelay(1);printf(PSTR("."));}
 							buf[recbytes+recb] = 0;
 //printf ("Server: received more now: %d bytes, rec:\n%s\nEnd\n", recbytes+recb,buf);
 							if (recb < 0) {

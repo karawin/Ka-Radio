@@ -11,6 +11,7 @@
 #include "lwip/ip_addr.h"
 #include "lwip/mem.h"
 #include <stdlib.h>
+#include "interface.h"
 
 #define BUFSIZE     512
 #define CRC_BLOCK_SIZE 512
@@ -32,7 +33,7 @@ init_crc_table(void)
 
 	crc_table = (unsigned int*)zalloc(256 * 4);
 	if(crc_table == NULL){
-		os_printf("malloc crc table failed\n");
+		printf(PSTR("malloc crc table failed\n"));
 		return -1;
 	}
 	for (i = 0; i < 256; i++) {
@@ -68,7 +69,7 @@ calc_img_crc(unsigned int sumlength,unsigned int *img_crc)
 	uint8 error = 0;
 	unsigned char *buf = (char *)zalloc(BUFSIZE);
 	if(buf == NULL){
-		os_printf("malloc crc buf failed\n");
+		printf("malloc crc buf failed\n");
 		free(crc_table);
 		return -1;
     }
@@ -81,7 +82,7 @@ calc_img_crc(unsigned int sumlength,unsigned int *img_crc)
 		if ( 0 != (error = spi_flash_read(start_sec * SPI_FLASH_SEC_SIZE + i * CRC_BLOCK_SIZE ,(uint32 *)buf, BUFSIZE))){
 				free(crc_table);
 				free(buf);
-				os_printf("spi_flash_read error %d\n",error);
+				printf(PSTR("spi_flash_read error %d\n"),error);
 				return -1;
 		}
 		crc = crc32(crc, buf, BUFSIZE);		
@@ -90,7 +91,7 @@ calc_img_crc(unsigned int sumlength,unsigned int *img_crc)
 		if (0 != (error = spi_flash_read(start_sec * SPI_FLASH_SEC_SIZE + i * CRC_BLOCK_SIZE, (uint32 *)buf, sec_last))){
 			free(crc_table);
 			free(buf);
-			os_printf("spi_flash_read error %d\n",error);
+			printf(PSTR("spi_flash_read error %d\n"),error);
 			return -1;
 		}
 		crc = crc32(crc, buf, sec_last);
@@ -116,9 +117,9 @@ upgrade_crc_check(uint16 fw_bin_sec ,unsigned int sumlength)
 		return false;
 	}
 	img_crc = abs(img_crc);
-	os_printf("img_crc = %u\n",img_crc);
+	printf(PSTR("img_crc = %u\n"),img_crc);
 	spi_flash_read(start_sec * SPI_FLASH_SEC_SIZE + sumlength - 4,&flash_crc, 4);
-    os_printf("flash_crc = %u\n",flash_crc);
+    printf(PSTR("flash_crc = %u\n"),flash_crc);
 	if(img_crc == flash_crc) {
 	    return 0;
 	} else {
