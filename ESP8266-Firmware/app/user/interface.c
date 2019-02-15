@@ -17,6 +17,7 @@ char parquoteslash[] = {"\")"};
 char msgsys[] = {"##SYS."};
 char msgcli[] = {"##CLI."};
 
+
 const char stritWIFISTATUS[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#WIFI.STATUS#\nStatus: %d\nIP: %d.%d.%d.%d\nMask: %d.%d.%d.%d\nGateway: %d.%d.%d.%d\n##WIFI.STATUS#\n"};
 const char stritWIFISTATION[] ICACHE_RODATA_ATTR STORE_ATTR  = {"\n#WIFI.STATION#\n%s\n%s\n##WIFI.STATION#\n"};
 const char stritPATCH[] ICACHE_RODATA_ATTR STORE_ATTR  = {"\n##VS1053 Patch will be %s after power Off and On#\n"};
@@ -733,8 +734,8 @@ ICACHE_FLASH_ATTR void sysI2S(char* s)
 
 	device->i2sspeed = speed;
 	saveDeviceSettings(device);	
-	kprintf(PSTR("\n##I2S speed: %d, 0=48kHz, 1=96kHz, 2=192kHz#\n"),speed);
 	free(device);
+	sysI2S((char*)"");
 }
 ICACHE_FLASH_ATTR void sysUart(char* s)
 {
@@ -856,9 +857,9 @@ ICACHE_FLASH_ATTR void sysled(char* s)
 	{device->options &= NT_LED; ledStatus =true;} // options:0 = ledStatus true = Blink mode
 	
 	saveDeviceSettings(device);	
-	kprintf(PSTR("##LED is in %s mode#\n"),((device->options & T_LED)== 0)?"Blink":"Play");
 	free(device);
-	
+
+	sysled((char*) "");		
 }
 
 ICACHE_FLASH_ATTR void tzoffset(char* s)
@@ -883,8 +884,8 @@ ICACHE_FLASH_ATTR void tzoffset(char* s)
 	uint8_t value = atoi(t+2);
 	device->tzoffset = value;	
 	saveDeviceSettings(device);	
-	kprintf(PSTR("##SYS.TZO#: %d\n"),device->tzoffset);
-	free(device);		
+	free(device);
+	tzoffset((char*) "");	
 }
 
 ICACHE_FLASH_ATTR void heapSize()

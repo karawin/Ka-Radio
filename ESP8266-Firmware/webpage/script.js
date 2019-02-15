@@ -1,12 +1,12 @@
 var content = "Content-type",
 	ctype = "application/x-www-form-urlencoded",
 	cjson = "application/json";
-var auto,intervalid, intervalrssi  ,recrssi = 0, timeid, websocket,urlmonitor , e, moniPlaying = false,editPlaying = false, curtab = "tab-content1",stchanged = false,maxStation = 255,themeIn = "0";
+var auto,intervalid, intervalrssi  , timeid, websocket,urlmonitor , e, moniPlaying = false,editPlaying = false, curtab = "tab-content1",stchanged = false,maxStation = 255,themeIn = "0";
 const karadio = "Karadio";
 const working = "Working.. Please Wait";
 
 function openwebsocket(){	
-	autoplay(); //to force the server socket to accept and open the web server client.
+//	autoplay(); //to force the server socket to accept and open the web server client.
 	websocket = new WebSocket("ws://"+window.location.host+"/");
 	console.log("url:"+"ws://"+window.location.host+"/");
 
@@ -26,7 +26,7 @@ function openwebsocket(){
 		if (arr["wssound"]) soundResp(arr["wssound"]); 
 		if (arr["monitor"]) playMonitor(arr["monitor"]); 
 		if (arr["wsstation"]) wsplayStation(arr["wsstation"]); 
-		if (arr["wsrssi"]) {document.getElementById('rssi').innerHTML = arr["wsrssi"]+' dBm';recrssi = 0;}
+		if (arr["wsrssi"]) {document.getElementById('rssi').innerHTML = arr["wsrssi"]+' dBm';setTimeout(wsaskrssi,5000);}		
 		if (arr["upgrade"]) {document.getElementById('updatefb').innerHTML = arr["upgrade"];}
 	} catch(e){ console.log("error"+e);}
 }
@@ -34,10 +34,11 @@ function openwebsocket(){
 	websocket.onopen = function (event) {
 		console.log("Open, url:"+"ws://"+window.location.host+"/");
 		if(window.timerID){ /* a setInterval has been fired */
-		window.clearInterval(window.timerID);
-		window.timerID=0;}
-		refresh();
-		
+			window.clearInterval(window.timerID);
+			window.timerID=0;	
+		}
+		setTimeout(wsaskrssi, 5000); // start the rssi display
+		websocket.send("opencheck");
 	}
 	websocket.onclose = function (event) {
 		console.log("onclose code: "+event.code);
@@ -61,9 +62,8 @@ function changeTitle($arr) {
 // ask for the rssi and restart the timer
 function wsaskrssi(){
 	try{
-	if (recrssi ==0) websocket.send("wsrssi");	
-	recrssi = 1;
-	} catch(e){ console.log("error"+e);}
+			websocket.send("wsrssi   &");	
+	} catch(e){ console.log("error wsaskrssi"+e);}
 }
 
 function wsplayStation($arr){
@@ -282,7 +282,10 @@ function stopWake(){
 
 function promptworking(label) {
 	document.getElementById('meta').innerHTML = label;
-	if (label == "") {document.getElementById('meta').innerHTML = karadio; refresh();}
+	if (label == "") {
+		document.getElementById('meta').innerHTML = karadio;
+//		refresh();
+	}
 }
 
 function saveTextAsFile()
@@ -631,7 +634,7 @@ function atheme() {
 		}
 	}
 	try{		
-		xhr.open("POST","theme",false); // request auto state
+		xhr.open("POST","theme",false); // request 
 		xhr.setRequestHeader(content,ctype);
 		xhr.send("&");		
 	} catch(e){console.log("error"+e);}	
@@ -831,8 +834,6 @@ function clearList() {
 
 function upgrade()
 {
-//	if (websocket.readyState == websocket.OPEN) websocket.send("upgrade");	
-//	alert("Rebooting to the new release\nPlease refresh the page in few seconds.");
 	try{
 		xhr = new XMLHttpRequest();
 		xhr.open("POST","upgrade",false);
@@ -1290,16 +1291,15 @@ document.addEventListener("DOMContentLoaded", function() {
 	intervalid = 0;
 	if (timeid != 0)  window.clearInterval(timeid);
 	timeid = window.setInterval(dtime,1000);
-	loadStationsList(maxStation);
+	if (window.location.hostname != "192.168.4.1")
+		loadStationsList(maxStation);
+	else document.getElementById("tab3").click();
 	checkwebsocket();
+	promptworking("");
 	refresh();
 	wifi(0) ;
 	autostart();
 	atheme();
 	checkversion();
 	setMainHeight(curtab);
-	promptworking("");
-   	if (intervalrssi != 0)  window.clearTimeout(intervalrssi);
-	intervalrssi = 0;
-	intervalrssi = window.setInterval(wsaskrssi,5000 );
 });

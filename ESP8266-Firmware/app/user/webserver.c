@@ -292,7 +292,7 @@ ICACHE_FLASH_ATTR void setRelVolume(int8_t vol) {
 
 // send the rssi
 ICACHE_FLASH_ATTR void rssi(int socket) {
-		char answer[20];
+		char answer[25];
 		if (kasprintf(answer,PSTR("{\"wsrssi\":\"%d\"}"),wifi_station_get_rssi()))
 		{			
 			websocketwrite(socket,answer, strlen(answer));
