@@ -36,11 +36,6 @@
 
 #include "ssl/ssl_os_port.h"
 #include "lwip/sockets.h"
-
-#ifdef MEMLEAK_DEBUG
-static const char mem_debug_file[] ICACHE_RODATA_ATTR STORE_ATTR = __FILE__;
-#endif
-
 #ifdef WIN32
 /**
  * gettimeofday() not in Win32 
@@ -304,7 +299,7 @@ void report_mem_leak(void)
 	
 }
 
-
+#endif
 /*
 void exit_now(const char *format, ...)
 {
@@ -332,7 +327,6 @@ EXP_FUNC void STDCALL gettimeofday(struct timeval* t, void* timezone)
     t->tv_usec = 0; /* 1ms precision */
 #endif
 }
-#endif
 
 unsigned int def_private_key_len = 0;
 unsigned char *def_private_key = NULL;

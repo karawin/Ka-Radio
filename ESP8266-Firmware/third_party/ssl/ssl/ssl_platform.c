@@ -38,10 +38,6 @@
 #include "ssl/ssl_platform.h"
 #include "lwip/err.h"
 
-#ifdef MEMLEAK_DEBUG
-static const char mem_debug_file[] ICACHE_RODATA_ATTR STORE_ATTR = __FILE__;
-#endif
-
 /******************************************************************************
  * FunctionName : esp_EVP_DigestInit
  * Description  : sent data for client or server
@@ -282,7 +278,7 @@ SSL_CTX *ICACHE_FLASH_ATTR esp_ssl_CTX_new(ssl_func_type_t meth)
 	uint32_t options;
 	options = SSL_SERVER_VERIFY_LATER | SSL_DISPLAY_CERTS | SSL_NO_DEFAULT_KEY;
     SSL_CTX *ssl_ctx = ssl_ctx_new(options, SSL_DEFAULT_CLNT_SESS);
-    ssl_ctx->bonus_attr = os_malloc(sizeof(PLATOM_CTX));
+    ssl_ctx->bonus_attr = malloc(sizeof(PLATOM_CTX));
     PLATOM_CTX_ATTR->ssl_func_type = meth;
     return ssl_ctx;
 }
@@ -311,7 +307,7 @@ int ICACHE_FLASH_ATTR esp_ssl_CTX_set_option(SSL_CTX *ssl_ctx, uint32_t options)
 *******************************************************************************/
 void ICACHE_FLASH_ATTR esp_ssl_CTX_free(SSL_CTX *ssl_ctx)
 {
-    os_free(ssl_ctx->bonus_attr);
+    free(ssl_ctx->bonus_attr);
     ssl_ctx_free(ssl_ctx);
 }
 
@@ -361,35 +357,6 @@ int ICACHE_FLASH_ATTR esp_ssl_set_fd(SSL *s, int fd)
     return 1;   /* always succeeds */
 }
 
-/*
- * Do the handshaking from the beginning.
- */
-int ICACHE_FLASH_ATTR do_server_accept(SSL *ssl)
-{
-    int ret = SSL_OK;
-	
-    ssl->bm_read_index = 0;
-    ssl->next_state = HS_CLIENT_HELLO;
-    ssl->hs_status = SSL_NOT_OK;            /* not connected */
-
-    /* sit in a loop until it all looks good */
-    if (!IS_SET_SSL_FLAG(SSL_CONNECT_IN_PARTS))
-    {
-        while (ssl->hs_status != SSL_OK)
-        {
-            ret = ssl_read(ssl, NULL);
- 
-            if (ret < SSL_OK)
-                break;
-        }
-
-        ssl->hs_status = ret;            /* connected? */    
-    }
-
-    return ret;
-}
-
-
 /******************************************************************************
  * FunctionName : esp_ssl_set_fd
  * Description  : sent data for client or server
@@ -400,7 +367,13 @@ int ICACHE_FLASH_ATTR do_server_accept(SSL *ssl)
 *******************************************************************************/
 int ICACHE_FLASH_ATTR esp_ssl_accept(SSL *ssl)
 {
-    return do_server_accept(ssl) == SSL_OK ? 1 : -1;
+    while (ssl_read(ssl, NULL) == SSL_OK)
+    {
+        if (ssl->next_state == HS_CLIENT_HELLO)
+            return 1;   /* we're done */
+    }
+
+    return -1;
 }
 
 #ifdef CONFIG_SSL_ENABLE_CLIENT

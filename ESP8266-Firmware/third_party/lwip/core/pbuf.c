@@ -79,10 +79,6 @@
 
 #include <string.h>
 
-#ifdef MEMLEAK_DEBUG
-static const char mem_debug_file[] ICACHE_RODATA_ATTR STORE_ATTR = __FILE__;
-#endif
-
 #ifdef EBUF_LWIP
 #define EP_OFFSET       36
 #else
@@ -392,11 +388,6 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
   /* set flags */
   p->flags = 0;
   LWIP_DEBUGF(PBUF_DEBUG | LWIP_DBG_TRACE, ("pbuf_alloc(length=%"U16_F") == %p\n", length, (void *)p));
-
-  if ((int)p > 0x40000000) {
-      pbuf_free(p);
-      p = NULL;
-  }
   return p;
 }
 

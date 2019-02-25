@@ -11,14 +11,10 @@
 #endif
 #include "netif/wlan_lwip_if.h"
 
-#ifdef MEMLEAK_DEBUG
-static const char mem_debug_file[] ICACHE_RODATA_ATTR STORE_ATTR = __FILE__;
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////////
 //static const uint8_t xid[4] = {0xad, 0xde, 0x12, 0x23};
 //static u8_t old_xid[4] = {0};
-static const u32_t magic_cookie ICACHE_RODATA_ATTR STORE_ATTR = 0x63538263;
+static const u32_t magic_cookie  STORE_ATTR = 0x63538263;
 static struct udp_pcb *pcb_dhcps = NULL;
 static struct ip_addr broadcast_dhcps;
 static struct ip_addr server_address;
@@ -88,12 +84,10 @@ void node_remove_from_list(list_node **phead, list_node* pdelete)
 	} else {
 		if (plist == pdelete){
 			*phead = plist->pnext;
-            pdelete->pnext = NULL;
 		} else {
 			while (plist != NULL) {
 				if (plist->pnext == pdelete){
 					plist->pnext = pdelete->pnext;
-                    pdelete->pnext = NULL;
 				}
 				plist = plist->pnext;
 			}
@@ -267,9 +261,7 @@ static void create_msg(struct dhcps_msg *m)
         memset((char *) m->file, 0, sizeof(m->file));
 
         memset((char *) m->options, 0, sizeof(m->options));
-
-		u32_t magic_cookie1 = magic_cookie;
-        memcpy((char *) m->options, &magic_cookie1, sizeof(magic_cookie1));
+        memcpy((char *) m->options, &magic_cookie, sizeof(magic_cookie));
 }
 ///////////////////////////////////////////////////////////////////////////////////
 /*
@@ -576,7 +568,6 @@ static u8_t parse_options(u8_t *optptr, s16_t len)
 ///////////////////////////////////////////////////////////////////////////////////
 static s16_t parse_msg(struct dhcps_msg *m, u16_t len)
 {
-	u32_t lease_timer = (dhcps_lease_time * 60)/DHCPS_COARSE_TIMER_SECS;
 		if(memcmp((char *)m->options,
               &magic_cookie,
               sizeof(magic_cookie)) == 0){
@@ -624,7 +615,6 @@ static s16_t parse_msg(struct dhcps_msg *m, u16_t len)
 //							addr_tmp.addr =  htonl(client_address_plus.addr);
 //							addr_tmp.addr++;
 //							client_address_plus.addr = htonl(addr_tmp.addr);
-						if (plist != NULL){
 						for (pback_node = plist; pback_node != NULL;pback_node = pback_node->pnext) {
 							pdhcps_pool = pback_node->pnode;
 							if (memcmp(pdhcps_pool->mac, m->chaddr, sizeof(pdhcps_pool->mac)) == 0){
@@ -633,7 +623,7 @@ static s16_t parse_msg(struct dhcps_msg *m, u16_t len)
 								    renew = true;
 								}
 								client_address.addr = pdhcps_pool->ip.addr;
-								pdhcps_pool->lease_timer = lease_timer;
+								pdhcps_pool->lease_timer = DHCPS_LEASE_TIMER;
 								pnode = pback_node;
 								goto POOL_CHECK;
 							} else if (pdhcps_pool->ip.addr == client_address_plus.addr){
@@ -655,10 +645,6 @@ static s16_t parse_msg(struct dhcps_msg *m, u16_t len)
                                 }
 							}
 						}
-						}else{
-							client_address.addr = dhcps_lease.start_ip.addr;
-						}
-
 						if (client_address_plus.addr > dhcps_lease.end_ip.addr) {
 						    client_address.addr = first_address.addr;
 						}
@@ -667,11 +653,11 @@ static s16_t parse_msg(struct dhcps_msg *m, u16_t len)
 						    pdhcps_pool = NULL;
 						    pnode = NULL;
 						} else {
-						pdhcps_pool = (struct dhcps_pool *)os_zalloc(sizeof(struct dhcps_pool));
+						pdhcps_pool = (struct dhcps_pool *)zalloc(sizeof(struct dhcps_pool));
 						pdhcps_pool->ip.addr = client_address.addr;
 						memcpy(pdhcps_pool->mac, m->chaddr, sizeof(pdhcps_pool->mac));
-						pdhcps_pool->lease_timer = lease_timer;
-						pnode = (list_node *)os_zalloc(sizeof(list_node ));
+						pdhcps_pool->lease_timer = DHCPS_LEASE_TIMER;
+						pnode = (list_node *)zalloc(sizeof(list_node ));
 						pnode->pnode = pdhcps_pool;
 						    pnode->pnext = NULL;
 						    node_insert_to_list(&plist,pnode);
@@ -688,12 +674,12 @@ static s16_t parse_msg(struct dhcps_msg *m, u16_t len)
 						if ((client_address.addr > dhcps_lease.end_ip.addr) || (ip_addr_isany(&client_address))){
 						    if(pnode != NULL) {
 						        node_remove_from_list(&plist,pnode);
-						        os_free(pnode);
+						        free(pnode);
 						        pnode = NULL;
 						    }
 
 						    if (pdhcps_pool != NULL) {
-						        os_free(pdhcps_pool);
+						        free(pdhcps_pool);
 						        pdhcps_pool = NULL;
 						    }
 //							client_address_plus.addr = dhcps_lease.start_ip.addr;
@@ -705,12 +691,12 @@ static s16_t parse_msg(struct dhcps_msg *m, u16_t len)
 						if(ret == DHCPS_STATE_RELEASE) {
 						    if(pnode != NULL) {
 						        node_remove_from_list(&plist,pnode);
-						        os_free(pnode);
+						        free(pnode);
 						        pnode = NULL;
 						    }
 
 						    if (pdhcps_pool != NULL) {
-						        os_free(pdhcps_pool);
+						        free(pdhcps_pool);
 						        pdhcps_pool = NULL;
 						    }
 						    memset(&client_address,0x0,sizeof(client_address));
@@ -763,7 +749,7 @@ static void handle_dhcp(void *arg,
 #endif
 	    if (p==NULL) return;
 
-	    pmsg_dhcps = (struct dhcps_msg *)os_zalloc(sizeof(struct dhcps_msg));
+	    pmsg_dhcps = (struct dhcps_msg *)zalloc(sizeof(struct dhcps_msg));
 	    if (NULL == pmsg_dhcps){
 	    	pbuf_free(p);
 	    	return;
@@ -840,7 +826,7 @@ static void handle_dhcp(void *arg,
     	os_printf("dhcps: handle_dhcp-> pbuf_free(p)\n");
 #endif
         pbuf_free(p);
-        os_free(pmsg_dhcps);
+        free(pmsg_dhcps);
         pmsg_dhcps = NULL;
 }
 ///////////////////////////////////////////////////////////////////////////////////
@@ -931,9 +917,9 @@ void dhcps_stop(void)
 		pback_node = pnode;
 		pnode = pback_node->pnext;
 		node_remove_from_list(&plist, pback_node);
-		os_free(pback_node->pnode);
+		free(pback_node->pnode);
 		pback_node->pnode = NULL;
-		os_free(pback_node);
+		free(pback_node);
 		pback_node = NULL;
 	}
 }
@@ -1033,9 +1019,9 @@ static void kill_oldest_dhcps_pool(void)
 		p = p->pnext;
 	}
 	minpre->pnext = minp->pnext;
-	os_free(minp->pnode);
+	free(minp->pnode);
 	minp->pnode = NULL;
-	os_free(minp);
+	free(minp);
 	minp = NULL;
 }
 
@@ -1053,9 +1039,9 @@ void dhcps_coarse_tmr(void)
 			pback_node = pnode;
 			pnode = pback_node->pnext;
 			node_remove_from_list(&plist,pback_node);
-			os_free(pback_node->pnode);
+			free(pback_node->pnode);
 			pback_node->pnode = NULL;
-			os_free(pback_node);
+			free(pback_node);
 			pback_node = NULL;
 		} else {
 			pnode = pnode ->pnext;

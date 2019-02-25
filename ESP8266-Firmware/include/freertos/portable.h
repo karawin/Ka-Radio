@@ -363,15 +363,8 @@ extern "C" {
 /*
  * Map to the memory management routines required for the port.
  */
-/* for freeRTOS, MEMLEAK_DEBUG must be enabled. */
-#if 0
 void *pvPortMalloc( size_t xSize ) PRIVILEGED_FUNCTION;
 void vPortFree( void *pv ) PRIVILEGED_FUNCTION;
-#else
-void *pvPortMalloc( size_t xSize, const char *file, unsigned line, bool use_iram) PRIVILEGED_FUNCTION;
-void vPortFree( void *pv, const char * file, unsigned line) PRIVILEGED_FUNCTION;
-#endif
-
 void vPortInitialiseBlocks( void ) PRIVILEGED_FUNCTION;
 size_t xPortGetFreeHeapSize( void ) PRIVILEGED_FUNCTION;
 

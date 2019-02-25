@@ -18,13 +18,15 @@ PROVIDE ( lldesc_set_owner = 0x4000507c );
 PROVIDE(PIN_OUT = 0x60000300);
 PROVIDE(PIN_OUT_SET = 0x60000304);
 PROVIDE(PIN_OUT_CLEAR = 0x60000308);
+ 
 PROVIDE(PIN_DIR = 0x6000030C);
 PROVIDE(PIN_DIR_OUTPUT = 0x60000310);
 PROVIDE(PIN_DIR_INPUT = 0x60000314);
+ 
 PROVIDE(PIN_IN = 0x60000318);
+ 
 PROVIDE(PIN_0 = 0x60000328);
 PROVIDE(PIN_2 = 0x60000330);
-
 PROVIDE ( __adddf3 = 0x4000c538 );
 PROVIDE ( __addsf3 = 0x4000c180 );
 PROVIDE ( __divdf3 = 0x4000cb94 );
@@ -50,19 +52,15 @@ PROVIDE ( __umoddi3 = 0x4000d770 );
 PROVIDE ( __umodsi3 = 0x4000e268 );
 PROVIDE ( __umulsidi3 = 0x4000dcf0 );
 
-PROVIDE ( bzero = 0x4000de84 );
-PROVIDE ( memcmp = 0x4000dea8 );
-PROVIDE ( memcpy = 0x4000df48 );
-PROVIDE ( memmove = 0x4000e04c );
-PROVIDE ( memset = 0x4000e190 );
+PROVIDE ( bzero = 0x40002ae8 );
+PROVIDE ( memcmp = 0x400018d4 );
+PROVIDE ( memcpy = 0x400018b4 );
+PROVIDE ( memmove = 0x400018c4 );
+PROVIDE ( memset = 0x400018a4 );
 
-PROVIDE ( strcmp = 0x4000bdc8 );
-PROVIDE ( strcpy = 0x4000bec8 );
-PROVIDE ( strlen = 0x4000bf4c );
-PROVIDE ( strncmp = 0x4000bfa8 );
-PROVIDE ( strncpy = 0x4000c0a0 );
-PROVIDE ( strstr = 0x4000e1e0 );
-
-PROVIDE ( gpio_input_get = 0x40004cf0 );
-PROVIDE ( gpio_pin_wakeup_disable = 0x40004ed4 );
-PROVIDE ( gpio_pin_wakeup_enable = 0x40004e90 );
+PROVIDE ( strcmp = 0x40002aa8 );
+PROVIDE ( strcpy = 0x40002a88 );
+PROVIDE ( strlen = 0x40002ac8 );
+PROVIDE ( strncmp = 0x40002ab8 );
+PROVIDE ( strncpy = 0x40002a98 );
+PROVIDE ( strstr = 0x40002ad8 );
