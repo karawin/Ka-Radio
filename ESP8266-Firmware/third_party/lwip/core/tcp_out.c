@@ -60,6 +60,10 @@
 
 #include <string.h>
 
+#ifdef MEMLEAK_DEBUG
+static const char mem_debug_file[] ICACHE_RODATA_ATTR STORE_ATTR = __FILE__;
+#endif
+
 /* Define some copy-macros for checksum-on-copy so that the code looks
    nicer by preventing too many ifdef's. */
 #if TCP_CHECKSUM_ON_COPY
@@ -460,6 +464,7 @@ tcp_write(struct tcp_pcb *pcb, const void *arg, u16_t len, u8_t apiflags)
     LWIP_ASSERT("inconsistend oversize vs. len", (oversize == 0) || (pos == len));
 #endif /* TCP_OVERSIZE */
 
+#if !LWIP_NETIF_TX_SINGLE_PBUF
     /*
      * Phase 2: Chain a new pbuf to the end of pcb->unsent.
      *
@@ -509,6 +514,7 @@ tcp_write(struct tcp_pcb *pcb, const void *arg, u16_t len, u8_t apiflags)
       pos += seglen;
       queuelen += pbuf_clen(concat_p);
     }
+#endif /* !LWIP_NETIF_TX_SINGLE_PBUF */
   } else {
 #if TCP_OVERSIZE
     LWIP_ASSERT("unsent_oversize mismatch (pcb->unsent is NULL)",
@@ -967,7 +973,8 @@ tcp_output(struct tcp_pcb *pcb)
 #endif /* TCP_CWND_DEBUG */
   /* data available and window allows it to be sent? */
   while (seg != NULL &&
-         ntohl(seg->tcphdr->seqno) - pcb->lastack + seg->len <= wnd) {
+         ntohl(seg->tcphdr->seqno) - pcb->lastack + seg->len <= wnd
+		 && (seg->p->ref<2) ) {
     LWIP_ASSERT("RST not expected here!", 
                 (TCPH_FLAGS(seg->tcphdr) & TCP_RST) == 0);
     /* Stop sending if the nagle algorithm would prevent it
@@ -1252,46 +1259,10 @@ void
 tcp_rexmit_rto(struct tcp_pcb *pcb)
 {
   struct tcp_seg *seg;
-  struct tcp_seg *t0_head = NULL, *t0_tail = NULL; /* keep in unacked */
-  struct tcp_seg *t1_head = NULL, *t1_tail = NULL; /* link to unsent */
-  bool t0_1st = true, t1_1st = true;
 
   if (pcb->unacked == NULL) {
     return;
   }
-
-#if 1 /* by Snake: resolve the bug of pbuf reuse */
-  seg = pcb->unacked;
-  while (seg != NULL) {
-	if (seg->p->eb) {
-		if (t0_1st) {
-			t0_head = t0_tail = seg;
-			t0_1st = false;
-		} else {
-			t0_tail->next = seg;
-			t0_tail = seg;
-		}
-		seg = seg->next;
-		t0_tail->next = NULL;
-	} else {
-		if (t1_1st) {
-			t1_head = t1_tail = seg;
-			t1_1st = false;
-		} else {
-			t1_tail->next = seg;
-			t1_tail = seg;
-		}
-		seg = seg->next;
-		t1_tail->next = NULL;
-	}
-  }
-  if (t1_head && t1_tail) {
-	t1_tail->next = pcb->unsent;
-	pcb->unsent = t1_head;
-  }
-  pcb->unacked = t0_head;
-
-#else
 
   /* Move all unacked segments to the head of the unsent queue */
   for (seg = pcb->unacked; seg->next != NULL; seg = seg->next);
@@ -1301,7 +1272,6 @@ tcp_rexmit_rto(struct tcp_pcb *pcb)
   pcb->unsent = pcb->unacked;
   /* unacked queue is now empty */
   pcb->unacked = NULL;
-#endif
   /* last unsent hasn't changed, no need to reset unsent_oversize */
 
   /* increment number of retransmissions */
