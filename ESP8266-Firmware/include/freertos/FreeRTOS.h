@@ -546,11 +546,11 @@ typedef portBASE_TYPE (*pdTASK_HOOK_CODE)( void * );
 #endif
 
 #ifndef pvPortMallocAligned
-	#define pvPortMallocAligned( x, puxStackBuffer ) ( ( ( puxStackBuffer ) == NULL ) ? ( os_malloc( ( x ) ) ) : ( puxStackBuffer ) )
+	#define pvPortMallocAligned( x, puxStackBuffer ) ( ( ( puxStackBuffer ) == NULL ) ? ( pvPortMalloc( ( x ) ) ) : ( puxStackBuffer ) )
 #endif
 
 #ifndef vPortFreeAligned
-	#define vPortFreeAligned( pvBlockToFree ) os_free( pvBlockToFree )
+	#define vPortFreeAligned( pvBlockToFree ) vPortFree( pvBlockToFree )
 #endif
 
 #ifndef portSUPPRESS_TICKS_AND_SLEEP

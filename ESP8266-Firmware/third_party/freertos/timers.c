@@ -88,10 +88,6 @@ of this file.  If you want to include software timer functionality then ensure
 configUSE_TIMERS is set to 1 in FreeRTOSConfig.h. */
 #if ( configUSE_TIMERS == 1 )
 
-#ifdef MEMLEAK_DEBUG
-static const char mem_debug_file[] ICACHE_RODATA_ATTR STORE_ATTR = __FILE__;
-#endif
-
 /* Misc definitions. */
 #define tmrNO_DELAY		( portTickType ) 0U
 
@@ -243,7 +239,7 @@ xTIMER *pxNewTimer;
 	}
 	else
 	{
-		pxNewTimer = ( xTIMER * ) os_malloc( sizeof( xTIMER ) );
+		pxNewTimer = ( xTIMER * ) pvPortMalloc( sizeof( xTIMER ) );
 		if( pxNewTimer != NULL )
 		{
 			/* Ensure the infrastructure used by the timer service task has been
@@ -591,7 +587,7 @@ portTickType xTimeNow;
 			case tmrCOMMAND_DELETE :
 				/* The timer has already been removed from the active list,
 				just free up the memory. */
-				os_free( pxTimer );
+				vPortFree( pxTimer );
 				break;
 
 			default	:
