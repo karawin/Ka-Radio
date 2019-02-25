@@ -103,10 +103,6 @@ privileged Vs unprivileged linkage and placement. */
  */
 #define tskIDLE_STACK_SIZE	384
 
-#ifdef MEMLEAK_DEBUG
-static const char mem_debug_file[] ICACHE_RODATA_ATTR STORE_ATTR = __FILE__;
-#endif
-
 /*
  * Task control block.  A task control block (TCB) is allocated for each task,
  * and stores task state information, including a pointer to the task's context
@@ -2486,7 +2482,7 @@ tskTCB *pxNewTCB;
 
 	/* Allocate space for the TCB.  Where the memory comes from depends on
 	the implementation of the port malloc function. */
-	pxNewTCB = ( tskTCB * ) os_malloc_iram( sizeof( tskTCB ) );
+	pxNewTCB = ( tskTCB * ) pvPortMalloc( sizeof( tskTCB ) );
 
 	if( pxNewTCB != NULL )
 	{
@@ -2497,7 +2493,7 @@ tskTCB *pxNewTCB;
 		if( pxNewTCB->pxStack == NULL )
 		{
 			/* Could not allocate the stack.  Delete the allocated TCB. */
-			os_free( pxNewTCB );
+			vPortFree( pxNewTCB );
 			pxNewTCB = NULL;
 		}
 		else
@@ -2641,7 +2637,7 @@ tskTCB *pxNewTCB;
 		/* Free up the memory allocated by the scheduler for the task.  It is up to
 		the task to free any memory allocated at the application level. */
 		vPortFreeAligned( pxTCB->pxStack );
-		os_free( pxTCB );
+		vPortFree( pxTCB );
 	}
 
 #endif /* INCLUDE_vTaskDelete */
@@ -2849,7 +2845,7 @@ PortDisableInt_NoNest();
 		uxArraySize = uxCurrentNumberOfTasks;
 
 		/* Allocate an array index for each task. */
-		pxTaskStatusArray = os_malloc( uxCurrentNumberOfTasks * sizeof( xTaskStatusType ) );
+		pxTaskStatusArray = pvPortMalloc( uxCurrentNumberOfTasks * sizeof( xTaskStatusType ) );
 
 		if( pxTaskStatusArray != NULL )
 		{
@@ -2884,7 +2880,7 @@ PortDisableInt_NoNest();
 			}
 
 			/* Free the array again. */
-			os_free( pxTaskStatusArray );
+			vPortFree( pxTaskStatusArray );
 		}
 	}
 
@@ -2933,7 +2929,7 @@ PortDisableInt_NoNest();
 		uxArraySize = uxCurrentNumberOfTasks;
 
 		/* Allocate an array index for each task. */
-		pxTaskStatusArray = os_malloc( uxCurrentNumberOfTasks * sizeof( xTaskStatusType ) );
+		pxTaskStatusArray = pvPortMalloc( uxCurrentNumberOfTasks * sizeof( xTaskStatusType ) );
 
 		if( pxTaskStatusArray != NULL )
 		{
@@ -2990,7 +2986,7 @@ PortDisableInt_NoNest();
 			}
 
 			/* Free the array again. */
-			os_free( pxTaskStatusArray );
+			vPortFree( pxTaskStatusArray );
 		}
 	}
 

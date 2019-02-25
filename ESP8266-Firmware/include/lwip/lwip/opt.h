@@ -129,7 +129,7 @@
  * a lot of data that needs to be copied, this should be set high.
  */
 #ifndef MEM_SIZE
-#define MEM_SIZE                        1600
+#define MEM_SIZE                        1600  //jpc 1600
 #endif
 
 /**
@@ -240,7 +240,7 @@
  * (requires the LWIP_UDP option)
  */
 #ifndef MEMP_NUM_UDP_PCB
-#define MEMP_NUM_UDP_PCB                4
+#define MEMP_NUM_UDP_PCB                2
 #endif
 
 /**
@@ -293,7 +293,7 @@
  * (requires the ARP_QUEUEING option)
  */
 #ifndef MEMP_NUM_ARP_QUEUE
-#define MEMP_NUM_ARP_QUEUE              30
+#define MEMP_NUM_ARP_QUEUE              15
 #endif
 
 /**
@@ -875,15 +875,11 @@
 #define LWIP_UDP                        1
 #endif
 
-#ifndef LWIP_SO_LINGER
-#define LWIP_SO_LINGER                  1
-#endif
-
 /**
  * LWIP_UDPLITE==1: Turn on UDP-Lite. (Requires LWIP_UDP)
  */
 #ifndef LWIP_UDPLITE
-#define LWIP_UDPLITE                    0
+#define LWIP_UDPLITE                    1
 #endif
 
 /**
@@ -924,7 +920,7 @@
  * (2 * TCP_MSS) for things to work well
  */
 #ifndef TCP_WND
-#define TCP_WND                         (4 * TCP_MSS)
+#define TCP_WND                         (2 * TCP_MSS)
 #endif 
 
 /**
@@ -957,7 +953,7 @@
  * an upper limit on the MSS advertised by the remote host.
  */
 #ifndef TCP_MSS
-#define TCP_MSS                         536
+#define TCP_MSS                         1460
 #endif
 
 /**
@@ -1054,7 +1050,7 @@
  * TCP_MSS/4: Try to create 4 fragments or less per TCP packet.
  */
 #ifndef TCP_OVERSIZE
-#define TCP_OVERSIZE                    TCP_MSS
+#define TCP_OVERSIZE                   TCP_MSS 
 #endif
 
 /**
@@ -1069,7 +1065,15 @@
  * explicit window update
  */
 #ifndef TCP_WND_UPDATE_THRESHOLD
-#define TCP_WND_UPDATE_THRESHOLD   (TCP_WND / 4)
+//#define TCP_WND_UPDATE_THRESHOLD   (TCP_WND / 4)
+//jpc
+//#define TCP_WND_UPDATE_THRESHOLD   LWIP_MIN((TCP_WND / 4), (TCP_MSS * 4))
+#define TCP_WND_UPDATE_THRESHOLD (TCP_MSS )
+//#if (TCP_WND < (TCP_MSS * 4)) && (TCP_WND >= (TCP_MSS * 2))
+//#define TCP_WND_UPDATE_THRESHOLD (TCP_MSS * 2)
+//#else
+//#define TCP_WND_UPDATE_THRESHOLD (TCP_WND / 4)
+//#endif 
 #endif
 
 /**

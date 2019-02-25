@@ -39,7 +39,7 @@
 #ifndef __NOPOLL_PRIVATE_H__
 #define __NOPOLL_PRIVATE_H__
 
-#include "openssl/ssl.h"
+#include "ssl/ssl_compat-1.0.h"
 #include <nopoll_handlers.h>
 
 typedef struct _noPollCertificate {
