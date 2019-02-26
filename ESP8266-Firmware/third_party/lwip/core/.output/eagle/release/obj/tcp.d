@@ -24,9 +24,9 @@
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/types.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/stdio.h \
  ../../../include/lwip/lwip/def.h ../../../include/lwip/lwip/mem.h \
- ../../../include/lwip/lwip/memp.h ../../../include/lwip/lwip/memp_std.h \
- ../../../include/lwip/lwip/mem.h ../../../include/lwip/lwip/snmp.h \
- ../../../include/lwip/lwip/ip_addr.h \
+ ../../../include/espressif/esp_libc.h ../../../include/lwip/lwip/memp.h \
+ ../../../include/lwip/lwip/memp_std.h ../../../include/lwip/lwip/mem.h \
+ ../../../include/lwip/lwip/snmp.h ../../../include/lwip/lwip/ip_addr.h \
  ../../../include/lwip/ipv4/lwip/ip4_addr.h \
  ../../../include/lwip/ipv6/lwip/ip6_addr.h \
  ../../../include/lwip/lwip/tcp.h ../../../include/lwip/lwip/pbuf.h \

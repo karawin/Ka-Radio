@@ -29,7 +29,7 @@
  ../../../include/lwip/ipv4/lwip/ip4_addr.h \
  ../../../include/lwip/ipv6/lwip/ip6_addr.h \
  ../../../include/lwip/lwip/memp.h ../../../include/lwip/lwip/memp_std.h \
- ../../../include/lwip/lwip/mem.h \
+ ../../../include/lwip/lwip/mem.h ../../../include/espressif/esp_libc.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/string.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/cdefs.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/string.h

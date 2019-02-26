@@ -39,6 +39,7 @@
  ../../../../include/lwip/lwip/memp.h \
  ../../../../include/lwip/lwip/memp_std.h \
  ../../../../include/lwip/lwip/mem.h \
+ ../../../../include/espressif/esp_libc.h \
  ../../../../include/lwip/lwip/stats.h \
  ../../../../include/lwip/lwip/mem.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/string.h \

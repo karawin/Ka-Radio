@@ -47,4 +47,5 @@
  ../../../include/freertos/mpu_wrappers.h \
  ../../../include/freertos/task.h ../../../include/freertos/list.h \
  ../../../include/freertos/queue.h ../../../include/freertos/semphr.h \
- ../../../include/freertos/queue.h ../../../include/lwip/lwip/mem.h
+ ../../../include/freertos/queue.h ../../../include/lwip/lwip/mem.h \
+ ../../../include/espressif/esp_libc.h

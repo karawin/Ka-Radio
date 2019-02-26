@@ -608,7 +608,7 @@ char url[200];
 
 const char strilLIST[] ICACHE_RODATA_ATTR STORE_ATTR  = {"##CLI.LIST#%c"};
 const char strilINFOND[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTINFO#: %3d: not defined\n"};
-//const char strilINFO[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTINFO#: %3d: %s, %s:%d%s\n"};
+const char strilINFO[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTINFO#: %3d: %s, %s:%d%s\n"};
 const char strilINFO1[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTNUM#: %3d: %s, %s:%d%s%%%d\n"};
 const char strilDINFO[] ICACHE_RODATA_ATTR STORE_ATTR  = {"\n#CLI.LIST#%c"};
 
@@ -617,7 +617,7 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 {
 	struct shoutcast_info* si;
 	uint16_t i = 0,j = 255;
-//	bool onlyOne = false;
+	bool onlyOne = false;
 	
 	char *t = strstr(s, parslashquote);
 	if(t != NULL) // a number specified
@@ -631,7 +631,7 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 		i = atoi(t+2);
 		if (i>254) i = 0;
 		j = i+1;
-//		onlyOne = true;
+		onlyOne = true;
 		
 	} 
 	{	
@@ -652,8 +652,8 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 			{
 				if(si->port !=0)
 				{	
-//					if (onlyOne)
-	//					kprintf(strilINFO,i,si->name,si->domain,si->port,si->file);	
+					if (onlyOne)
+						kprintf(strilINFO,i,si->name,si->domain,si->port,si->file);	
 //					else
 						kprintf(strilINFO1,i,si->name,si->domain,si->port,si->file,si->ovol);
 				}

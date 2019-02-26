@@ -80,5 +80,6 @@
  ../../../include/lwip/lwip/netif.h ../../../include/lwip/lwip/ip.h \
  ../../../include/lwip/ipv4/lwip/ip4.h \
  ../../../include/lwip/ipv6/lwip/ip6.h ../../../include/lwip/lwip/mem.h \
+ ../../../include/espressif/esp_libc.h \
  ../../../include/lwip/lwip/dhcpserver.h \
  ../../../include/lwip/netif/wlan_lwip_if.h

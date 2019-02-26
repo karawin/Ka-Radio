@@ -37,7 +37,9 @@
  ../../../../include/lwip/lwip/inet_chksum.h \
  ../../../../include/lwip/lwip/snmp.h \
  ../../../../include/lwip/lwip/stats.h \
- ../../../../include/lwip/lwip/mem.h ../../../../include/lwip/lwip/memp.h \
+ ../../../../include/lwip/lwip/mem.h \
+ ../../../../include/espressif/esp_libc.h \
+ ../../../../include/lwip/lwip/memp.h \
  ../../../../include/lwip/lwip/memp_std.h \
  ../../../../include/lwip/lwip/mem.h \
  ../../../../include/lwip/ipv4/lwip/icmp.h \

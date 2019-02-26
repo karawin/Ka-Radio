@@ -925,6 +925,7 @@
  */
 #ifndef TCP_WND
 #define TCP_WND                         (4 * TCP_MSS)
+//#define TCP_WND                         (2 * TCP_MSS)
 #endif 
 
 /**
@@ -957,7 +958,8 @@
  * an upper limit on the MSS advertised by the remote host.
  */
 #ifndef TCP_MSS
-#define TCP_MSS                         536
+//#define TCP_MSS                         536
+#define TCP_MSS                         1460
 #endif
 
 /**
@@ -978,7 +980,7 @@
  * To achieve good performance, this should be at least 2 * TCP_MSS.
  */
 #ifndef TCP_SND_BUF
-#define TCP_SND_BUF                     (2 * TCP_MSS)
+#define TCP_SND_BUF                     (3 * TCP_MSS)
 #endif
 
 /**
@@ -1069,6 +1071,7 @@
  * explicit window update
  */
 #ifndef TCP_WND_UPDATE_THRESHOLD
+//#define TCP_WND_UPDATE_THRESHOLD (TCP_MSS )
 #define TCP_WND_UPDATE_THRESHOLD   (TCP_WND / 4)
 #endif
 

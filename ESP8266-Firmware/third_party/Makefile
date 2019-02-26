@@ -12,8 +12,8 @@
 #     a generated lib/image xxx.a ()
 #
 TARGET = eagle
-FLAVOR = release
-#FLAVOR = debug
+#FLAVOR = release
+FLAVOR = debug
 
 #EXTRA_CCFLAGS += -u
 
@@ -67,10 +67,7 @@ LINKFLAGS_eagle.app.v6 = \
 	-lwpa	\
 	-lmain	\
 	-lfreertos	\
-	_lupgrade	\
 	-llwip	\
-	-lplatform \
-	-lmdns \
 	$(DEP_LIBS_eagle.app.v6)					\
 	-Wl,--end-group
 
@@ -92,11 +89,7 @@ DEPENDS_eagle.app.v6 = \
 #	-DTXRX_TXBUF_DEBUG
 #	-DTXRX_RXBUF_DEBUG
 #	-DWLAN_CONFIG_CCX
-CONFIGURATION_DEFINES =	-DICACHE_FLASH  \
-			            -D_POSIX_SOURCE \
-			            -DLWIP_OPEN_SRC	\
-			            -DPBUF_RSV_FOR_WLAN	\
-			            -DEBUF_LWIP
+CONFIGURATION_DEFINES = -DMEMLEAK_DEBUG
 
 DEFINES +=				\
 	$(UNIVERSAL_TARGET_DEFINES)	\

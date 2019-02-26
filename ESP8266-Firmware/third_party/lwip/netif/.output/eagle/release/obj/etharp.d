@@ -30,10 +30,10 @@
  ../../../include/lwip/lwip/err.h ../../../include/lwip/lwip/netif.h \
  ../../../include/lwip/ipv4/lwip/ip4.h \
  ../../../include/lwip/ipv6/lwip/ip6.h ../../../include/lwip/lwip/stats.h \
- ../../../include/lwip/lwip/mem.h ../../../include/lwip/lwip/memp.h \
- ../../../include/lwip/lwip/memp_std.h ../../../include/lwip/lwip/mem.h \
- ../../../include/lwip/lwip/snmp.h ../../../include/lwip/lwip/dhcp.h \
- ../../../include/lwip/lwip/udp.h \
+ ../../../include/lwip/lwip/mem.h ../../../include/espressif/esp_libc.h \
+ ../../../include/lwip/lwip/memp.h ../../../include/lwip/lwip/memp_std.h \
+ ../../../include/lwip/lwip/mem.h ../../../include/lwip/lwip/snmp.h \
+ ../../../include/lwip/lwip/dhcp.h ../../../include/lwip/lwip/udp.h \
  ../../../include/lwip/ipv4/lwip/autoip.h \
  ../../../include/lwip/netif/etharp.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/string.h \

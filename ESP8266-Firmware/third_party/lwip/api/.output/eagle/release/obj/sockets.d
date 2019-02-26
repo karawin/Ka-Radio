@@ -54,10 +54,11 @@
  ../../../include/freertos/queue.h ../../../include/lwip/lwip/sockets.h \
  ../../../include/lwip/ipv4/lwip/inet.h \
  ../../../include/lwip/ipv6/lwip/inet6.h \
+ ../../../include/lwip/lwip/multi-threads/sockets_mt.h \
  ../../../include/lwip/ipv4/lwip/igmp.h \
  ../../../include/lwip/lwip/netif.h ../../../include/lwip/lwip/tcp.h \
- ../../../include/lwip/lwip/mem.h ../../../include/lwip/lwip/ip.h \
- ../../../include/lwip/ipv4/lwip/ip4.h \
+ ../../../include/lwip/lwip/mem.h ../../../include/espressif/esp_libc.h \
+ ../../../include/lwip/lwip/ip.h ../../../include/lwip/ipv4/lwip/ip4.h \
  ../../../include/lwip/ipv6/lwip/ip6.h \
  ../../../include/lwip/ipv4/lwip/icmp.h \
  ../../../include/lwip/ipv6/lwip/icmp6.h ../../../include/lwip/lwip/raw.h \
@@ -67,4 +68,5 @@
  ../../../include/lwip/lwip/timers.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/string.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/cdefs.h \
- /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/string.h
+ /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/string.h \
+ multi-threads/sockets_mt.c

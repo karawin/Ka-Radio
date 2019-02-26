@@ -29,7 +29,8 @@
  ../../../include/lwip/lwip/netif.h ../../../include/lwip/lwip/err.h \
  ../../../include/lwip/lwip/pbuf.h ../../../include/lwip/lwip/tcp_impl.h \
  ../../../include/lwip/lwip/tcp.h ../../../include/lwip/lwip/mem.h \
- ../../../include/lwip/lwip/ip.h ../../../include/lwip/ipv4/lwip/ip4.h \
+ ../../../include/espressif/esp_libc.h ../../../include/lwip/lwip/ip.h \
+ ../../../include/lwip/ipv4/lwip/ip4.h \
  ../../../include/lwip/ipv6/lwip/ip6.h \
  ../../../include/lwip/ipv4/lwip/icmp.h \
  ../../../include/lwip/ipv6/lwip/icmp6.h \

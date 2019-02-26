@@ -35,6 +35,8 @@
 #define LWIP_ESP8266
 
 #define SOCKETS_MT
+#define ESP_GRATUITOUS_ARP 1
+#define GARP_TMR_INTERVAL 10000
 
 //#define SOCKETS_TCP_TRACE
 /*
@@ -256,7 +258,7 @@
  * TCP_QUEUE_OOSEQ==1: TCP will queue segments that arrive out of order.
  * Define to 0 if your device is low on memory.
  */
-#define TCP_QUEUE_OOSEQ                 0
+#define TCP_QUEUE_OOSEQ                 1
 
 /*
  *     LWIP_EVENT_API==1: The user defines lwip_tcp_event() to receive all

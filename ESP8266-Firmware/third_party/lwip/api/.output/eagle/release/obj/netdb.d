@@ -28,8 +28,10 @@
  ../../../include/lwip/ipv4/lwip/ip4_addr.h \
  ../../../include/lwip/ipv6/lwip/ip6_addr.h \
  ../../../include/lwip/lwip/sockets.h \
- ../../../include/lwip/ipv6/lwip/inet6.h ../../../include/lwip/lwip/err.h \
- ../../../include/lwip/lwip/mem.h ../../../include/lwip/lwip/memp.h \
+ ../../../include/lwip/ipv6/lwip/inet6.h \
+ ../../../include/lwip/lwip/multi-threads/sockets_mt.h \
+ ../../../include/lwip/lwip/err.h ../../../include/lwip/lwip/mem.h \
+ ../../../include/espressif/esp_libc.h ../../../include/lwip/lwip/memp.h \
  ../../../include/lwip/lwip/memp_std.h ../../../include/lwip/lwip/mem.h \
  ../../../include/lwip/lwip/api.h ../../../include/lwip/lwip/netbuf.h \
  ../../../include/lwip/lwip/pbuf.h ../../../include/lwip/lwip/sys.h \

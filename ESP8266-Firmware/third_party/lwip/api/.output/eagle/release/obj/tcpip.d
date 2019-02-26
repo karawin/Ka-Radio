@@ -49,8 +49,9 @@
  ../../../include/freertos/queue.h ../../../include/freertos/semphr.h \
  ../../../include/freertos/queue.h ../../../include/lwip/lwip/memp.h \
  ../../../include/lwip/lwip/memp_std.h ../../../include/lwip/lwip/mem.h \
- ../../../include/lwip/lwip/mem.h ../../../include/lwip/lwip/pbuf.h \
- ../../../include/lwip/lwip/tcpip.h ../../../include/lwip/lwip/api_msg.h \
+ ../../../include/espressif/esp_libc.h ../../../include/lwip/lwip/mem.h \
+ ../../../include/lwip/lwip/pbuf.h ../../../include/lwip/lwip/tcpip.h \
+ ../../../include/lwip/lwip/api_msg.h \
  ../../../include/lwip/lwip/ip_addr.h ../../../include/lwip/lwip/def.h \
  ../../../include/lwip/ipv4/lwip/ip4_addr.h \
  ../../../include/lwip/ipv6/lwip/ip6_addr.h \

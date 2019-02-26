@@ -57,7 +57,8 @@
  ../../../include/lwip/lwip/netif.h ../../../include/lwip/lwip/netifapi.h \
  ../../../include/lwip/lwip/timers.h ../../../include/lwip/lwip/memp.h \
  ../../../include/lwip/lwip/memp_std.h ../../../include/lwip/lwip/mem.h \
- ../../../include/lwip/lwip/ip.h ../../../include/lwip/ipv4/lwip/ip4.h \
+ ../../../include/espressif/esp_libc.h ../../../include/lwip/lwip/ip.h \
+ ../../../include/lwip/ipv4/lwip/ip4.h \
  ../../../include/lwip/ipv6/lwip/ip6.h ../../../include/lwip/lwip/raw.h \
  ../../../include/lwip/lwip/udp.h ../../../include/lwip/lwip/tcp.h \
  ../../../include/lwip/lwip/mem.h ../../../include/lwip/ipv4/lwip/icmp.h \

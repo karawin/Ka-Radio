@@ -25,6 +25,7 @@
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/types.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/stdio.h \
  ../../../../include/lwip/lwip/def.h ../../../../include/lwip/lwip/mem.h \
+ ../../../../include/espressif/esp_libc.h \
  ../../../../include/lwip/lwip/netif.h \
  ../../../../include/lwip/lwip/err.h \
  ../../../../include/lwip/lwip/ip_addr.h \

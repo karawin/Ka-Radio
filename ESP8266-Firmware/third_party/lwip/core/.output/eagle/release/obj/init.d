@@ -24,10 +24,10 @@
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/types.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/stdio.h \
  ../../../include/lwip/lwip/init.h ../../../include/lwip/lwip/stats.h \
- ../../../include/lwip/lwip/mem.h ../../../include/lwip/lwip/memp.h \
- ../../../include/lwip/lwip/memp_std.h ../../../include/lwip/lwip/mem.h \
- ../../../include/lwip/lwip/sys.h ../../../include/lwip/lwip/err.h \
- ../../../include/lwip/arch/sys_arch.h \
+ ../../../include/lwip/lwip/mem.h ../../../include/espressif/esp_libc.h \
+ ../../../include/lwip/lwip/memp.h ../../../include/lwip/lwip/memp_std.h \
+ ../../../include/lwip/lwip/mem.h ../../../include/lwip/lwip/sys.h \
+ ../../../include/lwip/lwip/err.h ../../../include/lwip/arch/sys_arch.h \
  ../../../include/freertos/FreeRTOS.h \
  ../../../include/freertos/projdefs.h \
  ../../../include/freertos/FreeRTOSConfig.h \
@@ -57,8 +57,9 @@
  ../../../include/lwip/ipv6/lwip/ip6_addr.h \
  ../../../include/lwip/lwip/sockets.h \
  ../../../include/lwip/ipv4/lwip/inet.h \
- ../../../include/lwip/ipv6/lwip/inet6.h ../../../include/lwip/lwip/ip.h \
- ../../../include/lwip/ipv4/lwip/ip4.h \
+ ../../../include/lwip/ipv6/lwip/inet6.h \
+ ../../../include/lwip/lwip/multi-threads/sockets_mt.h \
+ ../../../include/lwip/lwip/ip.h ../../../include/lwip/ipv4/lwip/ip4.h \
  ../../../include/lwip/ipv6/lwip/ip6.h ../../../include/lwip/lwip/raw.h \
  ../../../include/lwip/lwip/udp.h ../../../include/lwip/lwip/tcp_impl.h \
  ../../../include/lwip/lwip/tcp.h ../../../include/lwip/ipv4/lwip/icmp.h \

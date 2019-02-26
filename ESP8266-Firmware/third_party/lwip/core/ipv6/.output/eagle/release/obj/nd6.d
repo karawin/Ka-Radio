@@ -32,7 +32,9 @@
  ../../../../include/lwip/lwip/netif.h \
  ../../../../include/lwip/lwip/ip_addr.h \
  ../../../../include/lwip/ipv4/lwip/ip4_addr.h \
- ../../../../include/lwip/lwip/mem.h ../../../../include/lwip/lwip/memp.h \
+ ../../../../include/lwip/lwip/mem.h \
+ ../../../../include/espressif/esp_libc.h \
+ ../../../../include/lwip/lwip/memp.h \
  ../../../../include/lwip/lwip/memp_std.h \
  ../../../../include/lwip/lwip/mem.h \
  ../../../../include/lwip/lwip/inet_chksum.h \
