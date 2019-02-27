@@ -15,8 +15,10 @@ Found it at
 https://play.google.com/store/apps/details?id=com.serasidis.karadio.rc
 
 Thanks Vassilis.
-### Release 1.8 R0 - Built on 2019/01/31
+### Release 1.9 R0 - Built on 2019/02/27
+-  New RTOS-SDK 2.0.0  
 
+### Release 1.8 R0 - Built on 2019/01/31
 -  New edit panel with play/stop control  
 -  New volume control on web with Ctrl arrow keys  
 -  New upgrade indication on telnet, serial and web  
