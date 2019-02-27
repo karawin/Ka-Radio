@@ -34,7 +34,6 @@
  ../../../include/lwip/ipv6/lwip/ip6.h ../../../include/lwip/lwip/raw.h \
  ../../../include/lwip/lwip/tcp_impl.h ../../../include/lwip/lwip/tcp.h \
  ../../../include/lwip/lwip/mem.h ../../../include/lwip/ipv4/lwip/icmp.h \
- ../../../include/lwip/ipv6/lwip/icmp6.h \
  ../../../include/lwip/ipv4/lwip/igmp.h ../../../include/lwip/lwip/api.h \
  ../../../include/lwip/lwip/netbuf.h ../../../include/lwip/lwip/sys.h \
  ../../../include/lwip/arch/sys_arch.h \

@@ -42,7 +42,7 @@ uint32_t extramRead(uint32_t size, uint32_t address, uint8_t *buffer) {
 		buffer[i] = SPIGetChar();
 	}
 	gpio16_output_set(1);
-	spi_clock(HSPI, 4, 10); //2MHz
+//	spi_clock(HSPI, 4, 10); //2MHz
 	spi_give_semaphore();
 	return i;
 }
@@ -60,7 +60,7 @@ uint32_t extramWrite(uint32_t size, uint32_t address, uint8_t *data) {
 		SPIPutChar(data[i]);
 	}
 	gpio16_output_set(1);
-	spi_clock(HSPI, 4, 10); //2MHz
+//	spi_clock(HSPI, 4, 10); //2MHz
 	spi_give_semaphore();
 	return i;
 }

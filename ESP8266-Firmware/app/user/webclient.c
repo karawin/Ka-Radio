@@ -1004,8 +1004,8 @@ if (l > 80) dump(inpdata,len);
 // ---------------			
 		if (!playing )
 		{
-//printf("test memory: %d  on size %d\n",	(BUFFER_SIZE == BIGMEMORY)?(7*BIGMEMORY/10):(BUFFER_SIZE/2),BUFFER_SIZE);		
-			if ( (getBufferFree() < ((BUFFER_SIZE == BIGMEMORY)?(7*BIGMEMORY/10):(BUFFER_SIZE/2))) ||(once ==1)) 
+//printf("test memory: %d  on size %d\n",	(BUFFER_SIZE == BIGMEMORY)?(6*BIGMEMORY/10):(BUFFER_SIZE/2),BUFFER_SIZE);		
+			if ( (getBufferFree() < ((BUFFER_SIZE == BIGMEMORY)?(6*BIGMEMORY/10):(BUFFER_SIZE/2))) ||(once ==1)) 
 			{
 				volume = VS1053_GetVolume();
 				VS1053_SetVolume(0);
@@ -1019,7 +1019,7 @@ if (l > 80) dump(inpdata,len);
 	}
 }
 
-#define VSTASKBUF	1024
+#define VSTASKBUF	2048 //1024
 uint8_t b[VSTASKBUF];
 IRAM_ATTR void vsTask(void *pvParams) { 
 //	portBASE_TYPE uxHighWaterMark;

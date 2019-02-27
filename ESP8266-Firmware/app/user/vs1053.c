@@ -146,7 +146,7 @@ ICACHE_FLASH_ATTR void VS1053_WriteRegister(uint8_t addressbyte, uint8_t highbyt
 	SPIPutChar(lowbyte);
 	while(VS1053_checkDREQ() == 0);
 	SCI_ChipSelect(RESET);
-	VS1053_SPI_SpeedUp();
+//	VS1053_SPI_SpeedUp();
 	spi_give_semaphore();
 }
 
@@ -164,7 +164,7 @@ ICACHE_FLASH_ATTR uint16_t VS1053_ReadRegister(uint8_t addressbyte){
 	result |= SPIGetChar();
 	while(VS1053_checkDREQ() == 0);
 	SCI_ChipSelect(RESET);
-	VS1053_SPI_SpeedUp();
+//	VS1053_SPI_SpeedUp();
 	spi_give_semaphore();
 	return result;
 }

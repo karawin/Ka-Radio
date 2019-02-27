@@ -248,11 +248,6 @@
    ---------- TCP options ----------
    ---------------------------------
 */
-/**
- * TCP_WND: The size of a TCP window.  This must be at least
- * (2 * TCP_MSS) for things to work well
- */
-//#define TCP_WND                         (*(volatile uint32*)0x600011F0)
 
 /**
  * TCP_QUEUE_OOSEQ==1: TCP will queue segments that arrive out of order.
@@ -267,6 +262,12 @@
  *         for the event. This is the default.
 */
 #define TCP_MSS                         1460
+/**
+ * TCP_WND: The size of a TCP window.  This must be at least
+ * (2 * TCP_MSS) for things to work well
+ */
+//#define TCP_WND                         (*(volatile uint32*)0x600011F0)
+#define TCP_WND                     (5*TCP_MSS) //    (*(volatile uint32*)0x600011F0)
 
 /**
  * TCP_MAXRTX: Maximum number of retransmissions of data segments.
@@ -451,7 +452,7 @@
 /**
  * LWIP_IPV6==1: Enable IPv6
  */
-#define LWIP_IPV6                       1
+#define LWIP_IPV6                       0
 
 /*
    ---------------------------------------

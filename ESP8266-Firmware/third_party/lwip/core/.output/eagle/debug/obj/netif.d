@@ -31,10 +31,9 @@
  ../../../include/lwip/lwip/tcp.h ../../../include/lwip/lwip/mem.h \
  ../../../include/lwip/lwip/ip.h ../../../include/lwip/ipv4/lwip/ip4.h \
  ../../../include/lwip/ipv6/lwip/ip6.h \
- ../../../include/lwip/ipv4/lwip/icmp.h \
- ../../../include/lwip/ipv6/lwip/icmp6.h \
- ../../../include/lwip/lwip/snmp.h ../../../include/lwip/ipv4/lwip/igmp.h \
+ ../../../include/lwip/ipv4/lwip/icmp.h ../../../include/lwip/lwip/snmp.h \
+ ../../../include/lwip/ipv4/lwip/igmp.h \
  ../../../include/lwip/netif/etharp.h ../../../include/lwip/lwip/stats.h \
  ../../../include/lwip/lwip/memp.h ../../../include/lwip/lwip/memp_std.h \
  ../../../include/lwip/lwip/mem.h ../../../include/lwip/lwip/dhcp.h \
- ../../../include/lwip/lwip/udp.h ../../../include/lwip/ipv6/lwip/mld6.h
+ ../../../include/lwip/lwip/udp.h
