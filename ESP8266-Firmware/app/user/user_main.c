@@ -381,7 +381,7 @@ void uartInterfaceTask(void *pvParameters) {
 	VS1053_I2SRate(device->i2sspeed);
 	clientIvol = device->vol;
 
-	if (device->autostart ==1)
+	if ((wifi_get_opmode() == STATION_MODE)&&(device->autostart ==1))
 	{	
 		vTaskDelay(10); 
 		playStationInt(device->currentstation);

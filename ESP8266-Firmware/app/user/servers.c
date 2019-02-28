@@ -135,11 +135,12 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 			FD_SET(server_sock, &readfds);
 			max_sd = server_sock ;  
 				
-
-			//add telnetServer_sock to set (telnet)
-			FD_SET(telnetServer_sock, &readfds);
-			max_sd = telnetServer_sock > max_sd ? telnetServer_sock : max_sd;  
-
+			if (wifi_get_opmode() == STATION_MODE) // telnet only if in station mode
+			{
+				//add telnetServer_sock to set (telnet)
+				FD_SET(telnetServer_sock, &readfds);
+				max_sd = telnetServer_sock > max_sd ? telnetServer_sock : max_sd;  
+			}
 
 			//add child sockets to set (wssocket)
 			for (i = 0;i<NBCLIENT;i++) 
