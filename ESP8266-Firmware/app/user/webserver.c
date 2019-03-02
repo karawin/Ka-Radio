@@ -70,7 +70,7 @@ ICACHE_FLASH_ATTR void respOk(int conn,char* message)
 {
 	char rempty[] = {""};
 	if (message == NULL) message = rempty;
-	char* fresp = inmalloc(120);
+	char* fresp = inmalloc(120+strlen(message));
 	if (fresp!=NULL)
 	{
 		if(kasprintf(fresp,PSTR("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n%s"),strlen(message),message)) 
@@ -1090,8 +1090,10 @@ ICACHE_FLASH_ATTR bool httpServerHandleConnection(int conn, char* buf, uint16_t 
 				param = strstr(c,"infos") ;				
 				if (param != NULL) {
 					char* vr = webInfo();	
+//					printf("Infos vr:%s\n",vr);
 					respOk(conn,vr); 
 					infree(vr);
+//					printf("Infos:%s\n",param);
 					return true;
 				}		
 // list command	 ?list=1 to list the name of the station 1			
