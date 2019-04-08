@@ -11,7 +11,7 @@
 
 
 #define RELEASE "1.9"
-#define REVISION "0"
+#define REVISION "1"
 
 
 extern unsigned short adcdiv;	

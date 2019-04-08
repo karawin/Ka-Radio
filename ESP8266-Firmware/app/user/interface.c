@@ -607,10 +607,9 @@ char url[200];
 }
 
 const char strilLIST[] ICACHE_RODATA_ATTR STORE_ATTR  = {"##CLI.LIST#%c"};
-const char strilINFOND[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTINFO#: %3d: not defined\n"};
-const char strilINFO[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTINFO#: %3d: %s, %s:%d%s\n"};
-const char strilINFO1[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTNUM#: %3d: %s, %s:%d%s%%%d\n"};
-const char strilDINFO[] ICACHE_RODATA_ATTR STORE_ATTR  = {"\n#CLI.LIST#%c"};
+const char strilINFO[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTINFO#: %3d: %s, %s:%d%s%%%d\n"};
+const char strilNUM[] ICACHE_RODATA_ATTR STORE_ATTR  = {"#CLI.LISTNUM#: %3d: %s, %s:%d%s%%%d\n"};
+const char strilDLIST[] ICACHE_RODATA_ATTR STORE_ATTR  = {"\n#CLI.LIST#%c"};
 
 
 ICACHE_FLASH_ATTR void clientList(char *s)
@@ -635,7 +634,7 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 		
 	} 
 	{	
-		kprintf(strilDINFO,0x0d);	
+		if (!onlyOne) kprintf(strilDLIST,0x0d);	
 		for (i ;i <j;i++)
 		{
 			vTaskDelay(1);
@@ -643,7 +642,6 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 			
 			if ((si == NULL) || (si->port ==0))
 			{
-				//kprintf(strilINFOND,i);
 				if (si != NULL) {free(si);}
 				continue;
 			}
@@ -653,14 +651,14 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 				if(si->port !=0)
 				{	
 					if (onlyOne)
-						kprintf(strilINFO,i,si->name,si->domain,si->port,si->file);	
-//					else
-						kprintf(strilINFO1,i,si->name,si->domain,si->port,si->file,si->ovol);
+						kprintf(strilINFO,i,si->name,si->domain,si->port,si->file,si->ovol);	
+					else
+						kprintf(strilNUM,i,si->name,si->domain,si->port,si->file,si->ovol);
 				}
 				free(si);
 			}	
 		}	
-		kprintf(strilLIST,0x0d);
+		if (!onlyOne) kprintf(strilLIST,0x0d);
 	}
 }
 ICACHE_FLASH_ATTR void clientInfo()
