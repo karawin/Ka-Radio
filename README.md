@@ -15,8 +15,10 @@ Found it at
 https://play.google.com/store/apps/details?id=com.serasidis.karadio.rc
 
 Thanks Vassilis.
-### Release 1.9 R0 - Built on 2019/02/27
--  New RTOS-SDK 2.0.0  
+### Release 1.9 R1 - Built on 2019/04/08
+-  New RTOS-SDK 2.0.0
+-  Keyboard on web page correction.
+-  cli.list correction.  
 
 ### Release 1.8 R0 - Built on 2019/01/31
 -  New edit panel with play/stop control  
@@ -59,13 +61,7 @@ The binaries are on ESP8266-Firmware/bin/upgrade/
 - Karadio can be controlled by the web interface or by the uart interface or by telnet. List of commands: type help  
 - See the list of command at http://karadio.karawin.fr/Interface.txt
 
-#### Feedback
-Please tell me if you succeded or something more can be done, thanks.<br/>
-The second step will add some hardware buttons (vol + -, station + -, play ...)<br/><br/>
-
-<img src="https://github.com/karawin/ESP8266-WebRadio/blob/master/Images/webradio1mini.jpg" alt="screenshot" border=0> 
-<img src="https://github.com/karawin/ESP8266-WebRadio/blob/master/Images/webradio2mini.jpg" alt="screenshot" border=0> 
-<img src="https://github.com/karawin/ESP8266-WebRadio/blob/master/Images/webradio3mini.jpg" alt="screenshot" border=0> 
+g src="https://github.com/karawin/ESP8266-WebRadio/blob/master/Images/webradio3mini.jpg" alt="screenshot" border=0> 
 
 ### Generate Ka-Radio
 see the http://karadio.karawin.fr/readme.txt file.
