@@ -44,7 +44,6 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 	
 //	portBASE_TYPE uxHighWaterMark;
 	
-
 	struct timeval timeout;      
     timeout.tv_sec = 0; // bug *1000 for seconds
     timeout.tv_usec = 0;
@@ -64,6 +63,8 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 	websocketinit();
 	while(1)
 	{
+//printf("Server init loop\n"	);	
+		
 /////////////////////		
 // telnet socket init
 /////////////////////
@@ -127,18 +128,20 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 		
 		while (1)  //main loop
 		{
-			
+//printf("Server main loop\n"	);				
 			//clear the socket set
 			FD_ZERO(&readfds);;
 			
 			//add server_sock to set (webserver)
 			FD_SET(server_sock, &readfds);
+//printf("server_sock SD_set %d\n",server_sock);			
 			max_sd = server_sock ;  
 				
-			if (wifi_get_opmode() == STATION_MODE) // telnet only if in station mode
+//			if (wifi_get_opmode() == STATION_MODE) // telnet only if in station mode
 			{
 				//add telnetServer_sock to set (telnet)
 				FD_SET(telnetServer_sock, &readfds);
+//printf("telnetServer_sock SD_set %d\n",telnetServer_sock);				
 				max_sd = telnetServer_sock > max_sd ? telnetServer_sock : max_sd;  
 			}
 
@@ -150,7 +153,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 				if(sd != -1)
 				{	
 					FD_SET( sd , &readfds);   
-//					printf("wssocket SD_set %d\n",sd);
+//printf("wssocket SD_set %d\n",sd);
 					//highest file descriptor number, need it for the select function
 					max_sd = sd > max_sd ? sd : max_sd;
 				}				
@@ -164,17 +167,17 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 				if(sd != -1)
 				{	
 					FD_SET( sd , &readfds);   
-//					printf("SD_set %d, max_sd: %d\n",sd,max_sd);
+//printf("SD_set %d, max_sd: %d\n",sd,max_sd);
 					//highest file descriptor number, need it for the select function
 					max_sd = sd > max_sd ? sd : max_sd;
 				}				
 			}	
 			
-//			printf("ws call select. Max sd: %d\n",max_sd);
+//printf("ws call select. Max sd: %d\n",max_sd);
 
 			//wait for an activity on one of the sockets , 
 			activity = select( max_sd + 1 , &readfds , NULL , NULL , NULL);
-//			if (activity != 0) printf ("Activity %d, max_fd: %d\n",activity,max_sd);
+//if (activity != 0) printf ("Activity %d, max_fd: %d\n",activity,max_sd);
    
 			if ((activity < 0) && (errno!=EINTR) && (errno!=0)) 
 			{

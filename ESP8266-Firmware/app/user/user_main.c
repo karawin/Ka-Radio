@@ -221,8 +221,8 @@ void uartInterfaceTask(void *pvParameters) {
 	}		
 
 	wifi_station_set_auto_connect(false);
-	wifi_get_ip_info(STATION_IF, info); // ip netmask dw
-	wifi_station_get_config_default(config); //ssid passwd
+	wifi_get_ip_info(STATION_IF, info); // ip netmask gw
+//	wifi_station_get_config_default(config); //ssid passwd
 	if ((device->ssid[0] == 0xFF)&& (device->ssid2[0] == 0xFF) )  {eeEraseAll(); device = getDeviceSettings();} // force init of eeprom
 	if (device->ssid2[0] == 0xFF) {device->ssid2[0] = 0; device1->pass2[0] = 0; }
 	printf(striAP,device->ssid,device->ssid2);
@@ -236,8 +236,8 @@ void uartInterfaceTask(void *pvParameters) {
 		IPADDR2_COPY(&device->ipAddr, &info->ip);
 		IPADDR2_COPY(&device->mask, &info->netmask);
 		IPADDR2_COPY(&device->gate, &info->gw);
-		strcpy(device->ssid,config->ssid);
-		strcpy(device->pass,config->password);
+//		strcpy(device->ssid,config->ssid);
+//		strcpy(device->pass,config->password);
 		device->dhcpEn = true;
 		wifi_set_ip_info(STATION_IF, info);
 		saveDeviceSettings(device);	
@@ -263,8 +263,11 @@ void uartInterfaceTask(void *pvParameters) {
 	
 //	printf("DHCP: 0x%x\n Device: Ip: %d.%d.%d.%d\n",device->dhcpEn,device->ipAddr[0], device->ipAddr[1], device->ipAddr[2], device->ipAddr[3]);
 //	printf("\nI: %d status: %d\n",i,wifi_station_get_connect_status());
+
+
 	wifi_station_connect();
 	i = 0;
+		
 	while ((wifi_station_get_connect_status() != STATION_GOT_IP))
 	{	
 		printf(striTRY,config->ssid,i,wifi_station_get_connect_status());
@@ -302,48 +305,55 @@ void uartInterfaceTask(void *pvParameters) {
 		if (i >= 10)
 		{
 					printf(PSTR("%c"),0x0d);
-//					smartconfig_stop();
 					wifi_station_disconnect();
 					FlashOn = 10;FlashOff = 200;
-					vTaskDelay(200);
-					printf(PSTR("Config not found%c%c"),0x0d,0x0d);
+					vTaskDelay(100);
+					//printf(PSTR("Config not found%c%c"),0x0d,0x0d);
 					saveDeviceSettings(device);	
 					printf(striDEF0,0x0d);
 					printf(striDEF1,0x0d);
 					struct softap_config *apconfig;
 					apconfig = malloc(sizeof(struct softap_config));
 					wifi_set_opmode_current(SOFTAP_MODE);
+					vTaskDelay(10);
 					wifi_softap_get_config(apconfig);
+					vTaskDelay(10);
 					strcpy (apconfig->ssid,"WifiKaRadio");
-					apconfig->ssid_len = 12;					
-					wifi_softap_set_config(apconfig);
+					apconfig->ssid_len = 0;	
+//printf("passwd: %s\nhidden: %d\nmaxc: %d\nauth: %d\n",apconfig->password,apconfig->ssid_hidden,apconfig->max_connection,apconfig->authmode);					
+					if(wifi_softap_set_config(apconfig) != true)printf(PSTR("softap failed%c%c"),0x0d,0x0d);
+					vTaskDelay(1);
+					wifi_get_ip_info(1, info);
+//					printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
+					vTaskDelay(10);
 //					conn = true; 
 					free(apconfig);
 					break;
 		}//
-
 	}
+
 //	wifi_station_set_reconnect_policy(true);
 	// update device info
-	wifi_get_ip_info(STATION_IF, info);
-//	wifi_station_get_config(config);
+	if (wifi_get_opmode () == SOFTAP_MODE) wifi_get_ip_info(STATION_IF, info);
+	wifi_station_get_config(config);
+
+
 	IPADDR2_COPY(&device->ipAddr, &info->ip);
 	IPADDR2_COPY(&device->mask, &info->netmask);
 	IPADDR2_COPY(&device->gate, &info->gw);
-//	strcpy(device->ssid,config->ssid);
-//	strcpy(device->pass,config->password);
+	strcpy(device->ssid,config->ssid);
+	strcpy(device->pass,config->password);
 	saveDeviceSettings(device);	
 
+printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
 	
+	kasprintf(localIp,PSTR("%d.%d.%d.%d"),(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));	
 	
-	// set modem sleep per default
-	wifi_set_sleep_type(MODEM_SLEEP_T);	
-	
-	
-	if (wifi_get_opmode ( ) == 1)
+	if (wifi_get_opmode ( ) == SOFTAP_MODE)
 	{
-		kasprintf(localIp,PSTR("%d.%d.%d.%d"),(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));	
-		if ((strlen(device1->hostname) >= HOSTLEN) ||
+			// set modem sleep per default
+			wifi_set_sleep_type(MODEM_SLEEP_T);
+			if ((strlen(device1->hostname) >= HOSTLEN) ||
 			(strlen(device1->hostname) == 0) || (device1->hostname[0] ==  0xff))
 		{
 			strcpy(hostn,"WifiKaRadio");
@@ -534,7 +544,7 @@ void user_init(void)
 //	system_update_cpu_freq(SYS_CPU_160MHZ);
 //	system_update_cpu_freq(160); //- See more at: http://www.esp8266.com/viewtopic.php?p=8107#p8107
 	xTaskHandle pxCreatedTask;
-//    Delay(200);
+    Delay(100);
 	getFlashChipRealSize();
 	device = getDeviceSettings();
 	uspeed = device->uartspeed;
@@ -547,6 +557,7 @@ void user_init(void)
 	extramInit();
 	printf(PSTR("\nuart speed: %d\n"),uspeed);
 	initBuffer();
+
 	wifi_set_opmode_current(STATION_MODE);
 //	Delay(10);	
 	printf(PSTR("Release %s, Revision %s\n"),RELEASE,REVISION);
@@ -567,7 +578,7 @@ void user_init(void)
 	xTaskCreate(vsTask, "t2", 230, NULL,5, &pxCreatedTask); //380 230
 	printf(striTASK,"t2",pxCreatedTask);
 	xTaskCreate(clientTask, "t3", 380, NULL, 6, &pxCreatedTask); // 340
-	printf(striTASK,"t3",pxCreatedTask);
+	printf(striTASK,"t3",pxCreatedTask);	
 	xTaskCreate(serversTask, "t4", 360, NULL, 4, &pxCreatedTask); //380
 	printf(striTASK,"t4",pxCreatedTask);
 
