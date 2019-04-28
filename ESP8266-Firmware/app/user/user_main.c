@@ -323,7 +323,7 @@ void uartInterfaceTask(void *pvParameters) {
 //printf("passwd: %s\nhidden: %d\nmaxc: %d\nauth: %d\n",apconfig->password,apconfig->ssid_hidden,apconfig->max_connection,apconfig->authmode);					
 					if(wifi_softap_set_config(apconfig) != true)printf(PSTR("softap failed%c%c"),0x0d,0x0d);
 					vTaskDelay(1);
-					wifi_get_ip_info(1, info);
+//					wifi_get_ip_info(1, info);
 //					printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
 					vTaskDelay(10);
 //					conn = true; 
@@ -335,6 +335,7 @@ void uartInterfaceTask(void *pvParameters) {
 //	wifi_station_set_reconnect_policy(true);
 	// update device info
 	if (wifi_get_opmode () == SOFTAP_MODE) wifi_get_ip_info(STATION_IF, info);
+	else wifi_get_ip_info(STATION_IF, info); // ip netmask gw
 	wifi_station_get_config(config);
 
 
@@ -345,7 +346,7 @@ void uartInterfaceTask(void *pvParameters) {
 	strcpy(device->pass,config->password);
 	saveDeviceSettings(device);	
 
-printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
+	printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
 	
 	kasprintf(localIp,PSTR("%d.%d.%d.%d"),(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));	
 	

@@ -441,6 +441,10 @@ ICACHE_FLASH_ATTR void clientParseUrl(char* s)
         for(tmp=0; tmp<(t_end-t+1); tmp++) url[tmp] = 0;
         strncpy(url, t+2, (t_end-t));
         clientSetURL(url);
+		char* title = malloc(88);
+		sprintf(title,"{\"iurl\":\"%s\"}",url); 
+		websocketbroadcast(title, strlen(title));
+		free(title);	
         free(url);
     }
 }
@@ -466,8 +470,12 @@ ICACHE_FLASH_ATTR void clientParsePath(char* s)
         uint8_t tmp;
         for(tmp=0; tmp<(t_end-t+1); tmp++) path[tmp] = 0;
         strncpy(path, t+2, (t_end-t));
-	kprintf(PSTR("cli.path: %s\n"),path);
+//	kprintf(PSTR("cli.path: %s\n"),path);
         clientSetPath(path);
+		char* title = malloc(130);
+		sprintf(title,"{\"ipath\":\"%s\"}",path); 
+		websocketbroadcast(title, strlen(title));
+		free(title);		
         free(path);
     }
 }
@@ -494,6 +502,10 @@ ICACHE_FLASH_ATTR void clientParsePort(char *s)
         strncpy(port, t+2, (t_end-t));
         uint16_t porti = atoi(port);
         clientSetPort(porti);
+		char* title = malloc(130);
+		sprintf(title,"{\"iport\":\"%d\"}",porti); 
+		websocketbroadcast(title, strlen(title));
+		free(title);		
         free(port);
     }
 }
