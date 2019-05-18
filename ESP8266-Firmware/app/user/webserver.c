@@ -875,12 +875,15 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 //				char* adhcp = getSParameterFromResponse("dhcp=",4, data, data_size);				
 				changed = true;
 				ip_addr_t valu;
-				ipaddr_aton(aip, &valu);
-				memcpy(device->ipAddr,&valu,sizeof(uint32_t));
-				ipaddr_aton(amsk, &valu);
-				memcpy(device->mask,&valu,sizeof(uint32_t));
-				ipaddr_aton(agw, &valu);
-				memcpy(device->gate,&valu,sizeof(uint32_t));
+				if (aip != NULL)
+				{
+					ipaddr_aton(aip, &valu);
+					memcpy(device->ipAddr,&valu,sizeof(uint32_t));
+					ipaddr_aton(amsk, &valu);
+					memcpy(device->mask,&valu,sizeof(uint32_t));
+					ipaddr_aton(agw, &valu);
+					memcpy(device->gate,&valu,sizeof(uint32_t));
+				}
 				if (getSParameterFromResponse(adhcp,4,"dhcp=", data, data_size))
 					if (strlen(adhcp)!=0) 
 					{if (strcmp(adhcp,"true")==0) 
