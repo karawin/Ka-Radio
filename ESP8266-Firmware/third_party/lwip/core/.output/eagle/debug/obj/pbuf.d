@@ -51,6 +51,18 @@
  ../../../include/freertos/task.h ../../../include/freertos/list.h \
  ../../../include/freertos/queue.h ../../../include/freertos/semphr.h \
  ../../../include/freertos/queue.h ../../../include/lwip/arch/perf.h \
+ ../../../include/lwip/lwip/tcp_impl.h ../../../include/lwip/lwip/tcp.h \
+ ../../../include/lwip/lwip/ip.h ../../../include/lwip/lwip/ip_addr.h \
+ ../../../include/lwip/ipv4/lwip/ip4_addr.h \
+ ../../../include/lwip/ipv6/lwip/ip6_addr.h \
+ ../../../include/lwip/lwip/netif.h ../../../include/lwip/ipv4/lwip/ip4.h \
+ ../../../include/lwip/ipv6/lwip/ip6.h \
+ ../../../include/lwip/ipv4/lwip/icmp.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/string.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/cdefs.h \
- /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/string.h
+ /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/string.h \
+ ../../../include/lwip/lwip/tcpip.h ../../../include/lwip/lwip/api_msg.h \
+ ../../../include/lwip/ipv4/lwip/igmp.h ../../../include/lwip/lwip/api.h \
+ ../../../include/lwip/lwip/netbuf.h \
+ ../../../include/lwip/lwip/netifapi.h \
+ ../../../include/lwip/lwip/timers.h

@@ -23,6 +23,4 @@
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/lock.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/types.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/types.h \
- /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/stdio.h \
- ../../../../include/lwip/ipv6/lwip/ip6_addr.h \
- ../../../../include/lwip/lwip/def.h
+ /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/stdio.h

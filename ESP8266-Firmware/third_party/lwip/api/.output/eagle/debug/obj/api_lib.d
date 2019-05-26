@@ -61,7 +61,6 @@
  ../../../include/lwip/ipv6/lwip/ip6.h ../../../include/lwip/lwip/raw.h \
  ../../../include/lwip/lwip/udp.h ../../../include/lwip/lwip/tcp.h \
  ../../../include/lwip/lwip/mem.h ../../../include/lwip/ipv4/lwip/icmp.h \
- ../../../include/lwip/ipv6/lwip/icmp6.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/string.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/cdefs.h \
  /home/jp/esp-open-sdk/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/string.h

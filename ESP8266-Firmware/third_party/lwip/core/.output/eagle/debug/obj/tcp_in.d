@@ -31,10 +31,8 @@
  ../../../include/lwip/ipv6/lwip/ip6_addr.h \
  ../../../include/lwip/lwip/netif.h ../../../include/lwip/ipv4/lwip/ip4.h \
  ../../../include/lwip/ipv6/lwip/ip6.h \
- ../../../include/lwip/ipv4/lwip/icmp.h \
- ../../../include/lwip/ipv6/lwip/icmp6.h \
- ../../../include/lwip/lwip/memp.h ../../../include/lwip/lwip/memp_std.h \
- ../../../include/lwip/lwip/mem.h \
+ ../../../include/lwip/ipv4/lwip/icmp.h ../../../include/lwip/lwip/memp.h \
+ ../../../include/lwip/lwip/memp_std.h ../../../include/lwip/lwip/mem.h \
  ../../../include/lwip/lwip/inet_chksum.h \
  ../../../include/lwip/lwip/stats.h ../../../include/lwip/lwip/snmp.h \
  ../../../include/lwip/arch/perf.h ../../../include/lwip/ipv6/lwip/nd6.h

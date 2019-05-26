@@ -103,7 +103,7 @@
  * already use it.
  */
 #ifndef MEM_LIBC_MALLOC
-#define MEM_LIBC_MALLOC                 0
+#define MEM_LIBC_MALLOC                 1
 #endif
 
 /**
@@ -924,7 +924,7 @@
  * (2 * TCP_MSS) for things to work well
  */
 #ifndef TCP_WND
-#define TCP_WND                         (5 * TCP_MSS)
+#define TCP_WND                         (4 * TCP_MSS)
 #endif 
 
 /**
@@ -959,6 +959,7 @@
 #ifndef TCP_MSS
 //#define TCP_MSS                         536
 #define TCP_MSS                         1460
+//#define TCP_MSS                         1072
 #endif
 
 /**
@@ -2164,6 +2165,7 @@
  */
 #ifndef LWIP_DBG_MIN_LEVEL
 #define LWIP_DBG_MIN_LEVEL              LWIP_DBG_LEVEL_ALL
+//#define LWIP_DBG_MIN_LEVEL              LWIP_DBG_LEVEL_WARNING
 #endif
 
 /**
@@ -2171,7 +2173,7 @@
  * debug messages of certain types.
  */
 #ifndef LWIP_DBG_TYPES_ON
-#define LWIP_DBG_TYPES_ON               LWIP_DBG_ON
+#define LWIP_DBG_TYPES_ON               LWIP_DBG_OFF
 #endif
 
 /**
@@ -2192,7 +2194,7 @@
  * PBUF_DEBUG: Enable debugging in pbuf.c.
  */
 #ifndef PBUF_DEBUG
-#define PBUF_DEBUG                      LWIP_DBG_OFF
+#define PBUF_DEBUG                      LWIP_DBG_ON
 #endif
 
 /**
@@ -2213,7 +2215,7 @@
  * SOCKETS_DEBUG: Enable debugging in sockets.c.
  */
 #ifndef SOCKETS_DEBUG
-#define SOCKETS_DEBUG                   LWIP_DBG_OFF
+#define SOCKETS_DEBUG                   LWIP_DBG_ON
 #endif
 
 /**

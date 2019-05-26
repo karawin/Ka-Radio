@@ -203,6 +203,7 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 }
 ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 {
+	#define MORE	20
 //		if ((strchr(str,'"') == NULL)&&(strchr(str,'/') == NULL)) return str;
         if (len == 0) return str;
 		char* new = incmalloc(len+10);
@@ -234,9 +235,9 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 				} 
 				else new[j++] =(str)[i] ;
 				
-				if ( j+10> nlen) 
+				if ( j+MORE> nlen) 
 				{
-					nlen +=10;
+					nlen +=MORE;
 					new = realloc(new,nlen); // some room
 				}
 			}
@@ -700,6 +701,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 	char *inpdata;
 	char* inpchr;
 	uint32_t clen;
+	int bread;
 	char* t1;
 	char* t2;
 	bool  icyfound;
@@ -785,7 +787,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 						t1+= 4; 
 						if ( t2 != NULL) 
 						{
-							while (len -(t1-pdata)<8) {len += recv(sockfd, pdata+len, RECEIVE+8-len, 0); }
+							while (len -(t1-pdata)<8) {vTaskDelay(1);len += recv(sockfd, pdata+len, RECEIVE+8-len, 0); }
 							chunked = (uint32_t) strtol(t1, NULL, 16) +2;
 							if (strchr((t1),0x0A) != NULL)
 								*strchr(t1,0x0A) = 0;
@@ -803,7 +805,12 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 					t1 = NULL;
 					if (i++ > 5) {clientDisconnect("header1");break;}
 					vTaskDelay(1); //avoid watchdog is infernal loop
-					len += recvfrom(sockfd, pdata+len, RECEIVE-len, 0,NULL,NULL);
+					bread = recvfrom(sockfd, pdata+len, RECEIVE-len, 0,NULL,NULL);
+					if ( bread < 0 )
+					{
+						kprintf(PSTR("Chunk: errno: %d, read: %d, "),errno, bread);
+					}					
+					if (bread > 0) len += bread;
 				}
 			} while (t1 == NULL);
 		}
@@ -838,8 +845,15 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 					{					
 						while (lc < cchunk+9) 
 						{
-							
-							clen = recvfrom(sockfd, pdata+len, 9, 0,NULL,NULL); 
+							vTaskDelay(1);
+							bread = recvfrom(sockfd, pdata+len, 9, 0,NULL,NULL); 
+							if ( bread < 0 )
+							{
+								kprintf(PSTR("Chunk1: errno: %d, read: %d, "),errno, bread);
+							}					
+							if (bread >=0)
+								clen = bread;
+							else clen = 0;
 							lc+=clen;len+=clen;
 //	printf("more:%d, lc:%d\n",clen,lc);
 						} //security to be sure to receive the new length
@@ -1062,16 +1076,18 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 	portBASE_TYPE uxHighWaterMark;
 	struct timeval timeout; 
     timeout.tv_usec = 0;
+	timeout.tv_sec = 10000; // bug *1000 for seconds
 	int sockfd;
 	int bytes_read;
 	char *useragent;
 	struct device_settings*device;
 	struct sockaddr_in dest;
 	uint8_t *bufrec;
+	uint8_t cnterror;
 	
 	vTaskDelay(300);	
 
-	bufrec = incmalloc(RECEIVE+10);
+	bufrec = incmalloc(RECEIVE+20);
 	useragent = incmalloc(50);
 	
 	device = getDeviceSettings();
@@ -1080,7 +1096,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 		strcpy(useragent,device->ua);
 		if (strlen(useragent) == 0) 
 		{
-			strcpy(useragent,"Karadio/1.5");
+			strcpy(useragent,"Karadio/1.9");
 			strcpy(device->ua,useragent);
 		}	
 		free(device);
@@ -1111,7 +1127,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			if(connect(sockfd, (struct sockaddr*)&dest, sizeof(dest)) >= 0) 
 			{
 //				printf("WebClient Socket connected\n");
-				memset(bufrec,0, RECEIVE+10);
+				memset(bufrec,0, RECEIVE+20);
 				
 				char *t0 = strstr(clientPath, ".m3u");
 				if (t0 == NULL)  t0 = strstr(clientPath, ".pls");
@@ -1126,7 +1142,6 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			    } 
 				else 
 				{
-//					if ((strcmp(clientPath,"/") ==0)&&(cstatus != C_HEADER0)) clientSetPath("/;");
 					if (strcmp(clientURL,"stream.pcradio.biz") ==0) strcpy(useragent,"pcradio");
 //printf("sprint%d\n",7);					
 					kasprintf(bufrec,PSTR("GET %s HTTP/1.1\r\nHost: %s\r\nicy-metadata: 1\r\nUser-Agent: %s\r\n\r\n"), clientPath,clientURL,useragent); 
@@ -1135,30 +1150,46 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				xSemaphoreTake(sConnected, 0);
 				send(sockfd, bufrec, strlen(bufrec), 0);								
 ///// set timeout
-				if (once == 0)
+/*				if (once == 0)
 					timeout.tv_sec = 10000; // bug *1000 for seconds
 				else
-					timeout.tv_sec = 3000; // bug *1000 for seconds
 
+					timeout.tv_sec = 3000; // bug *1000 for seconds
+*/
 				if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
 					printf(strcSOCKET,"setsockopt",errno);
 //////				
 				do
 				{
 					bytes_read = recvfrom(sockfd, bufrec,RECEIVE, 0, NULL, NULL);	
-//if ( bytes_read < 0 )						
-//printf("Client socket: %d  read: %d  errno:%d ",sockfd, bytes_read,errno);	
 //if (bytes_read < 1000 )  
 //printf("Rec:%d\n",bytes_read);
-					
+					if ( bytes_read < 0 )
+					{
+						kprintf(PSTR("Client socket: %d  read: %d, "),sockfd, bytes_read);
+						if (errno == 11) bytes_read = 0;
+					}
+
 					if ( bytes_read > 0 )
 					{
-							clientReceiveCallback(sockfd,bufrec, bytes_read);
-					}	
+						cnterror = 0;
+						clientReceiveCallback(sockfd,bufrec, bytes_read);
+					}
+					// buffer  empty?
+					else 
+					{	
+						vTaskDelay(1);
+						if (getBufferEmpty()) cnterror++;
+						kprintf(PSTR("Errno: %d, %d%c"),errno,cnterror,0x0d);
+//						if (errno != 11) vTaskDelay(50); //timeout 
+//						else 
+							vTaskDelay(20);
+						if ((errno == 128)||(cnterror > 4)) break;
+					}
 					vTaskDelay(1);
 					if(xSemaphoreTake(sDisconnect, 0)){ clearHeaders(); break;	}
 				}
-				while ( bytes_read > 0 );
+				while (( bytes_read > 0 )||(playing && (bytes_read == 0)));
 			} else
 			{
 				printf(strcSOCKET,"connect", errno);
@@ -1171,7 +1202,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			}	
 			/*---Clean up---*/
 			if (bytes_read <= 0 )  //nothing received or error or disconnected
-			{				
+			{	
 					if ((playing)&&(once == 0))  // try restart
 					{
 						clientDisconnect(PSTR("try restart")); 

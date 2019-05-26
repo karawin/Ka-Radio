@@ -31,7 +31,6 @@
  ../../../../include/lwip/ipv4/lwip/ip4_addr.h \
  ../../../../include/lwip/ipv6/lwip/ip6_addr.h \
  ../../../../include/lwip/lwip/netif.h \
- ../../../../include/lwip/ipv6/lwip/icmp6.h \
  ../../../../include/lwip/lwip/inet_chksum.h \
  ../../../../include/lwip/lwip/ip.h \
  ../../../../include/lwip/ipv4/lwip/ip4.h \
