@@ -142,7 +142,7 @@
  * via IP_FRAG.
  */
 #define IP_REASSEMBLY                   1
-
+//jpc
 /**
  * IP_FRAG==1: Fragment outgoing IP packets if their size exceeds MTU. Note
  * that this option does not affect incoming packet sizes, which can be
@@ -259,15 +259,16 @@
  * Define to 0 if your device is low on memory.
  */
 #define TCP_QUEUE_OOSEQ                 1
-
+//jpc
 /*
  *     LWIP_EVENT_API==1: The user defines lwip_tcp_event() to receive all
  *         events (accept, sent, etc) that happen in the system.
  *     LWIP_CALLBACK_API==1: The PCB callback function is called directly
  *         for the event. This is the default.
 */
-//#define TCP_MSS                         1460
-#define TCP_MSS                         1072
+#define TCP_MSS                         1460
+//#define TCP_MSS                         1072
+//jpc
 /**
  * TCP_MAXRTX: Maximum number of retransmissions of data segments.
  */
@@ -451,7 +452,7 @@
 /**
  * LWIP_IPV6==1: Enable IPv6
  */
-#define LWIP_IPV6                       0
+#define LWIP_IPV6                       1
 
 /*
    ---------------------------------------

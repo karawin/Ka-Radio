@@ -145,8 +145,9 @@ void telnetWrite(uint32_t lenb,const char *fmt, ...)
 			rlen = vsprintf(buf,lfmt, ap);
 			if (rlen > lenb)
 			{ // big problem fatal error
-				printf(PSTR("WARNING Fatal error detected in telnetWrite. \n"));
+				printf(PSTR("WARNING Fatal error in telnetWrite. \n"));
 				free (lfmt);
+				free (buf);
 				va_end(ap);
 				return;
 			}		

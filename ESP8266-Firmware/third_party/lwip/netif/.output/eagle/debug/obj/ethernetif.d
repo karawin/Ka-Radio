@@ -31,9 +31,9 @@
  ../../../include/lwip/ipv4/lwip/ip4_addr.h \
  ../../../include/lwip/ipv6/lwip/ip6_addr.h \
  ../../../include/lwip/ipv6/lwip/ethip6.h \
- ../../../include/lwip/netif/etharp.h ../../../include/lwip/lwip/netif.h \
- ../../../include/lwip/lwip/ip.h ../../../include/lwip/ipv4/lwip/ip4.h \
- ../../../include/lwip/ipv6/lwip/ip6.h \
+ ../../../include/lwip/ipv6/lwip/ip6.h ../../../include/lwip/lwip/netif.h \
+ ../../../include/lwip/netif/etharp.h ../../../include/lwip/lwip/ip.h \
+ ../../../include/lwip/ipv4/lwip/ip4.h \
  ../../../include/lwip/netif/ppp_oe.h \
  ../../../include/espressif/esp_common.h \
  ../../../include/espressif/c_types.h \

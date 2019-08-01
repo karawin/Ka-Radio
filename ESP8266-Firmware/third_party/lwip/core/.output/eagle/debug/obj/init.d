@@ -63,6 +63,7 @@
  ../../../include/lwip/ipv6/lwip/ip6.h ../../../include/lwip/lwip/raw.h \
  ../../../include/lwip/lwip/udp.h ../../../include/lwip/lwip/tcp_impl.h \
  ../../../include/lwip/lwip/tcp.h ../../../include/lwip/ipv4/lwip/icmp.h \
+ ../../../include/lwip/ipv6/lwip/icmp6.h \
  ../../../include/lwip/lwip/snmp_msg.h ../../../include/lwip/lwip/snmp.h \
  ../../../include/lwip/lwip/snmp_structs.h \
  ../../../include/lwip/ipv4/lwip/autoip.h \

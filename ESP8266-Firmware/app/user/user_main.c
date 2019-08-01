@@ -222,7 +222,7 @@ void uartInterfaceTask(void *pvParameters) {
 
 	wifi_station_set_auto_connect(false);
 	wifi_get_ip_info(STATION_IF, info); // ip netmask gw
-//	wifi_station_get_config_default(config); //ssid passwd
+	wifi_station_get_config_default(config); //ssid passwd
 	if ((device->ssid[0] == 0xFF)&& (device->ssid2[0] == 0xFF) )  {eeEraseAll(); device = getDeviceSettings();} // force init of eeprom
 	if (device->ssid2[0] == 0xFF) {device->ssid2[0] = 0; device1->pass2[0] = 0; }
 	printf(striAP,device->ssid,device->ssid2);
@@ -236,8 +236,8 @@ void uartInterfaceTask(void *pvParameters) {
 		IPADDR2_COPY(&device->ipAddr, &info->ip);
 		IPADDR2_COPY(&device->mask, &info->netmask);
 		IPADDR2_COPY(&device->gate, &info->gw);
-//		strcpy(device->ssid,config->ssid);
-//		strcpy(device->pass,config->password);
+		strcpy(device->ssid,config->ssid);
+		strcpy(device->pass,config->password);
 		device->dhcpEn = true;
 		wifi_set_ip_info(STATION_IF, info);
 		saveDeviceSettings(device);	
@@ -276,6 +276,7 @@ void uartInterfaceTask(void *pvParameters) {
 		vTaskDelay(400);//  ms
 		if (( strlen(config->ssid) ==0)||  (wifi_station_get_connect_status() == STATION_WRONG_PASSWORD)||(wifi_station_get_connect_status() == STATION_CONNECT_FAIL)||(wifi_station_get_connect_status() == STATION_NO_AP_FOUND))
 		{ 
+//printf("STATUS OUT %d   Status %d \n",i,wifi_station_get_connect_status());	
 			// try AP2 //
 			if ((strlen(device->ssid2) > 0)&& (ap <1))
 			{
@@ -323,7 +324,7 @@ void uartInterfaceTask(void *pvParameters) {
 //printf("passwd: %s\nhidden: %d\nmaxc: %d\nauth: %d\n",apconfig->password,apconfig->ssid_hidden,apconfig->max_connection,apconfig->authmode);					
 					if(wifi_softap_set_config(apconfig) != true)printf(PSTR("softap failed%c%c"),0x0d,0x0d);
 					vTaskDelay(1);
-//					wifi_get_ip_info(1, info);
+					wifi_get_ip_info(1, info);
 //					printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
 					vTaskDelay(10);
 //					conn = true; 
@@ -332,9 +333,9 @@ void uartInterfaceTask(void *pvParameters) {
 		}//
 	}
 
-//	wifi_station_set_reconnect_policy(true);
+	wifi_station_set_reconnect_policy(true);
 	// update device info
-	if (wifi_get_opmode () == SOFTAP_MODE) wifi_get_ip_info(STATION_IF, info);
+	if (wifi_get_opmode () == SOFTAP_MODE) wifi_get_ip_info(SOFTAP_IF, info);
 	else wifi_get_ip_info(STATION_IF, info); // ip netmask gw
 	wifi_station_get_config(config);
 
@@ -380,20 +381,20 @@ void uartInterfaceTask(void *pvParameters) {
 	// read adc to see if it is a nodemcu with adc dividor
 		if (ap < 400) adcdiv = 3;
 			else adcdiv = 1;	
+		kprintf(PSTR("ADC Div: %d from adc: %d\n"),adcdiv,ap);
 	}
-	kprintf(PSTR("ADC Div: %d from adc: %d\n"),adcdiv,ap);
 	FlashOn = 190;FlashOff = 10;
 	initLed(); // start the timer for led. This will kill the ttest task to free memory
 	
 	
 //autostart	
-	kprintf(PSTR("autostart: playing:%d, currentstation:%d\n"),device->autostart,device->currentstation);
 	currentStation = device->currentstation;
 	VS1053_I2SRate(device->i2sspeed);
 	clientIvol = device->vol;
 
 	if ((wifi_get_opmode() == STATION_MODE)&&(device->autostart ==1))
 	{	
+		kprintf(PSTR("autostart: playing:%d, currentstation:%d\n"),device->autostart,device->currentstation);
 		vTaskDelay(10); 
 		playStationInt(device->currentstation);
 	}

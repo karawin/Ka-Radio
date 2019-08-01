@@ -865,8 +865,6 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char* tzo = getParameterFromResponse("tzo=", data, data_size);
 			pathParse(tzo);
 
-			
-// printf("rec:%s\nwifi received  valid:%s,val:%d, ssid:%s, pasw:%s, aip:%s, amsk:%s, agw:%s, adhcp:%s, aua:%s \n",data,valid,val,ssid,pasw,aip,amsk,agw,adhcp,aua);
 			if (val) {
 				char adhcp[4];
 				char* ssid = getParameterFromResponse("ssid=", data, data_size);
@@ -960,7 +958,8 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			{
 				saveDeviceSettings(device);	
 				saveDeviceSettings1(device1);
-			}			
+			}	
+			
 			//uint8_t *macaddr = inmalloc(10*sizeof(uint8_t));
 			uint8_t macaddr[10]; // = inmalloc(10*sizeof(uint8_t));
 			char macstr[20]; // = inmalloc(20*sizeof(char));
