@@ -136,7 +136,7 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
   char* ns; 
   char path[255] = "/";
   char url[78]; 
-  char port[5] = "80";
+  char port[6] = "80";
   int remove = 0;
   int i = 0; int j = 0;
   
@@ -171,7 +171,7 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 	
 //	printf("parse str %s\n",str);
 	
-	while ((str[i] != '/')&&(str[i] != ':')&&(str[i] != 0x0a)&&(str[i] != 0x0d)&&(j<78)) {url[j] = str[i]; i++ ;j++;}
+	while ((str[i] != '/')&&(str[i] != ':')&&(str[i] != 0x0a)&&(str[i] != 0x0d)&&(j<77)) {url[j] = str[i]; i++ ;j++;}
 	url[j] = 0;
 //	kprintf("parse str url %s\n",url);
 	j = 0;
@@ -179,11 +179,12 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 	{
 		i++;
 		while ((str[i] != '/')&&(str[i] != 0x0a)&&(str[i] != 0x0d)) {port[j] = str[i]; i++ ;j++;}
+		port[j] = 0;
 	}
 	j = 0;
-	if ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<'))
+	if ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<')&&(j<254))
 	{	
-	  while ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<')&&(j<255)) {path[j] = str[i]; i++; j++;}
+	  while ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<')&&(j<254)) {path[j] = str[i]; i++; j++;}
 	  path[j] = 0;
 	}
 	
