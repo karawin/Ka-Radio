@@ -780,8 +780,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 							metad = header.members.single.metaint;
 //	printf("t1: 0x%x, cstatus: %d, icyfound: %d  metad:%d Metaint:%d\n", t1,cstatus, icyfound,metad, header.members.single.metaint); 
 						cstatus = C_DATA;	// a stream found
-//						VS1053_flush_cancel(0);
-//						VS1053_flush_cancel(1);
+
 						t2 = strstr(pdata, "Transfer-Encoding: chunked"); // chunked stream? 
 //						t2 = NULL;
 						chunked = 0;
@@ -1246,9 +1245,8 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			if (playing)  // stop clean
 			{		
 				volume = VS1053_GetVolume();
-				bufferReset();
 				VS1053_SetVolume(0);
-				VS1053_flush_cancel(2);
+				VS1053_flush_cancel();
 				playing = 0;
 				vTaskDelay(40);	// stop without click
 				//VS1053_LowPower();
@@ -1259,7 +1257,6 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			shutdown(sockfd,SHUT_RDWR); // stop the socket
 			vTaskDelay(1);	
 			close(sockfd);
-//			printf("WebClient Socket closed\n");
 			if (cstatus == C_PLAYLIST) 			
 			{
 			  clientConnect();

@@ -46,3 +46,7 @@ Network Trash Folder
 Temporary Items
 .apdisk
 /.vs
+
+# do not save build directory
+\ESP8266-Firmware\app\user\.output\eagle\release\obj
+

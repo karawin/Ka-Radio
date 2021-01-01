@@ -96,55 +96,32 @@ ICACHE_FLASH_ATTR void SDI_ChipSelect(uint8_t State){
 	else PIN_OUT_SET = (1<<XDCS_PIN);
 }
 
-ICACHE_FLASH_ATTR uint8_t VS1053_checkDREQ() {
+ICACHE_FLASH_ATTR uint8_t checkDREQ() {
 	return (PIN_IN & (1<<DREQ_PIN));
-/*	if(PIN_IN & (1<<DREQ_PIN)) return 1;
-	else return 0;*/
 }
 
-ICACHE_FLASH_ATTR void VS1053_SineTest(){
-	ControlReset(SET);
-	VS1053_ResetChip();
-	Delay(1000);
-	SPIPutChar(0xff);
-
-	SCI_ChipSelect(RESET);
-	SDI_ChipSelect(RESET);
-	ControlReset(RESET);
-
-	Delay(500);
-
-	VS1053_WriteRegister(SPI_MODE,0x08,0x20);
-	Delay(500);
-
-	while(VS1053_checkDREQ() == 0);
-
-	SDI_ChipSelect(SET);
-	SPIPutChar(0x53);
-	SPIPutChar(0xef);
-	SPIPutChar(0x6e);
-	SPIPutChar(0x03); //0x24
-	SPIPutChar(0x00);
-	SPIPutChar(0x00);
-	SPIPutChar(0x00);
-	SPIPutChar(0x00);
-	Delay(1000);
-	SDI_ChipSelect(RESET);
-
+#define TMAX 4096
+void  WaitDREQ() {
+	uint16_t  time_out = 0;
+	while((PIN_IN & (1<<DREQ_PIN)) == 0 && time_out++ < TMAX)
+	{
+		;
+	}
 }
+
 
 ICACHE_FLASH_ATTR void VS1053_WriteRegister(uint8_t addressbyte, uint8_t highbyte, uint8_t lowbyte)
 {
 	spi_take_semaphore();
 	VS1053_SPI_SpeedDown();
 	SDI_ChipSelect(RESET);
-	while(VS1053_checkDREQ() == 0);
+	WaitDREQ();
 	SCI_ChipSelect(SET);
 	SPIPutChar(VS_WRITE_COMMAND);
 	SPIPutChar(addressbyte);
 	SPIPutChar(highbyte);
 	SPIPutChar(lowbyte);
-	while(VS1053_checkDREQ() == 0);
+	WaitDREQ();
 	SCI_ChipSelect(RESET);
 //	VS1053_SPI_SpeedUp();
 	spi_give_semaphore();
@@ -156,13 +133,13 @@ ICACHE_FLASH_ATTR uint16_t VS1053_ReadRegister(uint8_t addressbyte){
 	VS1053_SPI_SpeedDown();
 	uint16_t result;
 	SDI_ChipSelect(RESET);
-	while(VS1053_checkDREQ() == 0);
+	WaitDREQ();
 	SCI_ChipSelect(SET);
 	SPIPutChar(VS_READ_COMMAND);
 	SPIPutChar(addressbyte);
 	result = SPIGetChar() << 8;
 	result |= SPIGetChar();
-	while(VS1053_checkDREQ() == 0);
+	WaitDREQ();
 	SCI_ChipSelect(RESET);
 //	VS1053_SPI_SpeedUp();
 	spi_give_semaphore();
@@ -177,14 +154,14 @@ ICACHE_FLASH_ATTR void WriteVS10xxRegister(unsigned short addr,unsigned short va
 
 ICACHE_FLASH_ATTR void VS1053_ResetChip(){
 	ControlReset(SET);
-	Delay(500);
+	Delay(30);
 	SPIPutChar(0xff);
 	SCI_ChipSelect(RESET);
 	SDI_ChipSelect(RESET);
 	ControlReset(RESET);
-	Delay(100);
-	while(VS1053_checkDREQ() == 0);
-	Delay(100);
+	Delay(10);
+	while(checkDREQ() == 0);
+	Delay(30);
 }
 
 ICACHE_FLASH_ATTR uint16_t MaskAndShiftRight(uint16_t Source, uint16_t Mask, uint16_t Shift){
@@ -247,17 +224,29 @@ void VS1053_HighPower(){
 ICACHE_FLASH_ATTR void VS1053_Start(){
 	struct device_settings *device;
 	VS1053_ResetChip();
-	Delay(100);
-	// disable analog output
-	VS1053_DisableAnalog();
-	
+
 // these 4 lines makes board to run on mp3 mode, no soldering required anymore
 	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x17); //address of GPIO_DDR is 0xC017
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0x03); //GPIO_DDR=3
 	VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x19); //address of GPIO_ODATA is 0xC019
 	VS1053_WriteRegister(SPI_WRAM, 0x00,0x00); //GPIO_ODATA=0
-	Delay(100);
-	while(VS1053_checkDREQ() == 0);
+	
+	if (VS1053_ReadRegister(SPI_AUDATA) == 0xac45) 
+	{
+		VS1053_ResetChip();
+// these 4 lines makes board to run on mp3 mode, no soldering required anymore
+		VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x17); //address of GPIO_DDR is 0xC017
+		VS1053_WriteRegister(SPI_WRAM, 0x00,0x03); //GPIO_DDR=3
+		VS1053_WriteRegister(SPI_WRAMADDR, 0xc0,0x19); //address of GPIO_ODATA is 0xC019
+		VS1053_WriteRegister(SPI_WRAM, 0x00,0x00); //GPIO_ODATA=0
+		printf("VS1053/SPI_AUDATE= %x\n",VS1053_ReadRegister(SPI_AUDATA));
+	}	
+	
+	Delay(10);
+	// disable analog output
+	VS1053_DisableAnalog();
+	
+
 	
 	int MP3Status = VS1053_ReadRegister(SPI_STATUS);
 	vsVersion = (MP3Status >> 4) & 0x000F; //Mask out only the four version bits
@@ -272,7 +261,7 @@ ICACHE_FLASH_ATTR void VS1053_Start(){
 	
 	VS1053_SoftwareReset();
 	VS1053_WriteRegister(SPI_MODE, (SM_SDINEW|SM_LINE1)>>8, SM_LAYER12); //mode 
-	while(VS1053_checkDREQ() == 0);
+	WaitDREQ();
 	
 	VS1053_regtest();
 // enable I2C dac output
@@ -312,12 +301,12 @@ ICACHE_FLASH_ATTR int VS1053_SendMusicBytes(uint8_t* music, uint16_t quantity){
 	if(quantity ==0) return 0;
 	spi_take_semaphore();
 	int o = 0;
-	while(VS1053_checkDREQ() == 0) {vTaskDelay(1);}
+	while(checkDREQ() == 0) {vTaskDelay(1);}
 	VS1053_SPI_SpeedUp();
 	SDI_ChipSelect(SET);
 	while(quantity)
 	{
-		if(VS1053_checkDREQ()) 
+		if(checkDREQ()) 
 		{
 			int t = quantity;
 			int k;
@@ -534,45 +523,32 @@ ICACHE_FLASH_ATTR uint16_t VS1053_GetSampleRate(){
 }
 
 /* to start and stop a new stream */
-ICACHE_FLASH_ATTR void VS1053_flush_cancel(uint8_t mode) {  // 0 only fillbyte  1 before play    2 cancel play
-//  int8_t endFillByte = (int8_t) (Mp3ReadWRAM(para_endFillByte) & 0xFF);
+ICACHE_FLASH_ATTR void VS1053_flush_cancel() { 
 	int8_t endFillByte ;
 	int16_t y;
-	uint8_t buf[513];	
-	if (mode != 2)
-	{
-		VS1053_WriteRegister(SPI_WRAMADDR,MaskAndShiftRight(para_endFillByte,0xFF00,8), (para_endFillByte & 0x00FF) );		
-		endFillByte = (int8_t) VS1053_ReadRegister(SPI_WRAM) & 0xFF;
-		for (y = 0; y < 513; y++) buf[y] = endFillByte;
-	}
-
-  if (mode != 0) //set CANCEL
-  {
-//Mp3WriteRegister(SCI_MODE, (Mp3ReadRegister(SCI_MODE) | SM_CANCEL));
+	uint8_t buf[33];	
+	// set spimode with SM_CANCEL
 	uint16_t spimode = VS1053_ReadRegister(SPI_MODE)| SM_CANCEL;
   // set CANCEL
 	VS1053_WriteRegister(SPI_MODE,MaskAndShiftRight(spimode,0xFF00,8), (spimode & 0x00FF) );
 	// wait CANCEL
+	VS1053_WriteRegister(SPI_WRAMADDR, MaskAndShiftRight(para_endFillByte,0xFF00,8), (para_endFillByte & 0x00FF));
+	endFillByte = (int8_t) (VS1053_ReadRegister(SPI_WRAM) & 0xFF);
+	for (y = 0; y < 32; y++) buf[y] = endFillByte;	 
 	y = 0;
 	while (VS1053_ReadRegister(SPI_MODE)& SM_CANCEL)
 	{	  
-		if (mode == 1) VS1053_SendMusicBytes( buf, 32); //1
-		else vTaskDelay(1); //2  
-//		printf ("Wait CANCEL clear\n");
-		if (y++ > 200) 
+		VS1053_SendMusicBytes( buf, 32); 
+		if (y++ > 64) 
 		{
-			if (mode == 1) VS1053_Start();
+			printf("VS1053 Reset\n");
+//			VS1053_Start();
 			break;
 		}		
 	}	
-	VS1053_WriteRegister(SPI_WRAMADDR,MaskAndShiftRight(para_endFillByte,0xFF00,8), (para_endFillByte & 0x00FF) );
-	endFillByte = (int8_t) VS1053_ReadRegister(SPI_WRAM) & 0xFF;
-	for (y = 0; y < 513; y++) buf[y] = endFillByte;	
-	for ( y = 0; y < 4; y++)	VS1053_SendMusicBytes( buf, 513); // 4*513 = 2052
-  } else
-  {
-	for ( y = 0; y < 4; y++)	VS1053_SendMusicBytes( buf, 513); // 4*513 = 2052
-  }	  
+
+	for (y = 0; y < 64; y++) 
+		VS1053_SendMusicBytes( buf, 32); //2080 bytes  
 }
 
 

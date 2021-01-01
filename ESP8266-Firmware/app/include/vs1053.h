@@ -78,7 +78,7 @@ void 	VS1053_SoftwareReset();
 uint16_t	VS1053_GetBitrate();
 uint16_t	VS1053_GetSampleRate();
 uint16_t	VS1053_GetDecodeTime();
-void	VS1053_flush_cancel(uint8_t mode);// 0 only fillbyte  1 before play    2 close play
+void	VS1053_flush_cancel();
 
 // admix plugin control
 void VS1053_SetVolumeLine(int16_t vol);
@@ -127,10 +127,8 @@ void VS1053_ResetChip();
 
 uint16_t MaskAndShiftRight(uint16_t Source, uint16_t Mask, uint16_t Shift);
 
-uint8_t VS1053_checkWREQ();
 
 void VS1053_regtest();
-void VS1053_sine(char pitch);
 void VS1053_SPI_SpeedUp();
 void VS1053_SPI_SpeedDown();
 //void VS1053_PluginLoad();

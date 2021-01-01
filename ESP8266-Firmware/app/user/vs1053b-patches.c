@@ -651,7 +651,6 @@ const unsigned short patch[] ICACHE_STORE_ATTR ICACHE_RODATA_ATTR   = { /* Compr
 	0x000a,0x0001, /*copy 1*/
 	0x0050,
 #define PATCH_SIZE 4667
-
 };
 
 
@@ -663,12 +662,13 @@ void ICACHE_FLASH_ATTR  LoadUserCode( const unsigned short* plugin,uint16_t size
   iplugin = (unsigned short*)malloc(size+16);
   if (iplugin == NULL) 
   {
-	   kprintf(PSTR("malloc fails for plugin%c"),0x0d);
+	   kprintf(PSTR("malloc fails: plugin%c"),0x0d);
 	   return ;
   }
-  kprintf(PSTR("plugin size %d %d \n"),size,ssize);
+  kprintf(PSTR("plugin size %d %d\n"),size,ssize);
   flashRead( iplugin,(uint32_t) plugin, size );
-  kprintf(PSTR("plugin start: %x %x %x %x\n"),*iplugin,*(iplugin+1),*(iplugin+2),*(iplugin+3));
+//  if (flashRead( iplugin,(uint32_t) plugin, size ) != 0) kprintf(PSTR("plugin read error\n")) ;
+  kprintf(PSTR("plugin start: %x %x %x\n"),*iplugin,*(iplugin+1),*(iplugin+2));
   while (i<ssize) {
     unsigned short addr, n, val;
     addr = iplugin[i++];
@@ -678,19 +678,25 @@ void ICACHE_FLASH_ATTR  LoadUserCode( const unsigned short* plugin,uint16_t size
       val = iplugin[i++];
       while (n--) {
         WriteVS10xxRegister(addr, val);
+//		kprintf(PSTR("write %x at %x \n"),val,addr);
       }
     } else {           /* Copy run, copy n samples */
       while (n--) {
         val = iplugin[i++];
         WriteVS10xxRegister(addr, val);
+//		kprintf(PSTR("write %x at %x \n"),val,addr);
       }
     }
+//	kprintf(PSTR("write %x at %x \n"),val,addr);
   }
   free(iplugin);
 }
 void ICACHE_FLASH_ATTR  LoadUserCodes(void)
 {
 	LoadUserCode(patch,PATCH_SIZE);
+//	LoadUserCode(patch,sizeof(patch)/sizeof(patch[0]));
+//	LoadUserCode(patch1,sizeof(patch1)/sizeof(patch1[0]));
+	Delay(200);
 	LoadUserCode(admix,ADMIX_SIZE);
 }
 
