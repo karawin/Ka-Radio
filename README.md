@@ -5,7 +5,7 @@ See also the esp32 version at https://github.com/karawin/Ka-Radio32</br>
 
 ## Basic informations<BR/>
 ### New
-A new android application is born  
+A new android application is born
   
 - KaRadio Remote Control by Vassilis Serasidis on google Play.
 
@@ -14,37 +14,25 @@ With this android app you can select the WebRadio station you want to play, set 
 Found it at
 https://play.google.com/store/apps/details?id=com.serasidis.karadio.rc
 
-Thanks Vassilis.
-### Release 1.9 R1 - Built on 2019/04/08
--  New RTOS-SDK 2.0.0
--  Keyboard on web page correction.
--  cli.list correction.  
+Thanks Vassilis.  
+###  
+### Release 1.9 R8 - Built on 2021/01/01
 
-### Release 1.8 R0 - Built on 2019/01/31
--  New edit panel with play/stop control  
--  New volume control on web with Ctrl arrow keys  
--  New upgrade indication on telnet, serial and web  
--  Web page look changed (a bit),  
--  Added the TZO on the setting page  
--  Added the mDNS hostname on the setting page  
+#### Add On: add a lcd, a remote control, and other goodies: see https://github.com/karawin/Karadio-addons 
 
-
-
-###Add On: add a lcd, a remote control, and other goodies: see https://github.com/karawin/Karadio-addons <br/>
-<br/>
-Attention:<br/>
-The optional led is now on GPIO2. The blue led on the ESP8266 is blinking at the same rate.<BR/>
+#### Attention:
+The optional led is now on GPIO2. The blue led on the ESP8266 is blinking at the same rate.  
 GPIO16 is now the Chip select for the external ram if any.<BR/>
-The external ram is detected at boot time if present.<BR/><BR/>
-To load this release, please flash <BR/>
-boot_v1.6.bin at 0x0000,<BR/>
-user1.4096.new.4.bin at 0x1000 ,<BR/>
-user2.4096.new.4.bin at 0X81000,<BR/>
-esp_init_data_default.bin at 0x3FC000 <BR/>
-and blank.bin at	0x3fe000 <BR/>
-After that, all next updates are done with the On The Air (OTA) feature.<BR/>
-<BR/><BR/>
-See also https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053 <br/>
+The external ram is detected at boot time if present.    
+To load this release, please flash   
+boot_v1.6.bin at 0x0000,  
+user1.4096.new.4.bin at 0x1000 ,  
+user2.4096.new.4.bin at 0X81000,  
+esp_init_data_default.bin at 0x3FC000   
+and blank.bin at	0x3fe000   
+After that, all next updates are done with the On The Air (OTA) feature.  
+<BR/>  
+See also https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053   
 
 
 #### Loading the esp8266

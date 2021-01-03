@@ -477,7 +477,7 @@ void ICACHE_FLASH_ATTR  LoadUserCode( const unsigned short* plugin,uint16_t size
 	   return ;
   }
   kprintf(PSTR("plugin size %d %d \n"),size,ssize);
-  flashRead( iplugin,(uint32_t) plugin, size );
+  if (flashRead( iplugin,(uint32_t) plugin, size ) != 0) kprintf(PSTR("plugin read error") ;
   kprintf(PSTR("plugin start: %x %x %x %x\n"),*iplugin,*(iplugin+1),*(iplugin+2),*(iplugin+3));
   while (i<ssize) {
     unsigned short addr, n, val;
