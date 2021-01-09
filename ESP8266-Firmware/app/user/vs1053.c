@@ -261,7 +261,7 @@ ICACHE_FLASH_ATTR void VS1053_InitVS()
 ICACHE_FLASH_ATTR void VS1053_Start(){
 	struct device_settings *device;
 	VS1053_ResetChip();
-	if (VS1053_ReadRegister(SPI_AUDATA) == 0xac45) // midi mode?
+//	if (VS1053_ReadRegister(SPI_AUDATA) == 0xac45) // midi mode?
 		VS1053_GPIO1();	// patch if GPIO1 is not wired to gnd
 	if (VS1053_ReadRegister(SPI_AUDATA) == 0xac45) // try again
 	{
