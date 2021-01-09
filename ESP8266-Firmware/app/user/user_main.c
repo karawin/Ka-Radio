@@ -577,7 +577,7 @@ void user_init(void)
 	printf(striTASK,"t0",pxCreatedTask);
 	xTaskCreate(uartInterfaceTask, "t1", 370, NULL, 2, &pxCreatedTask); // 350
 	printf(striTASK, "t1",pxCreatedTask);
-	xTaskCreate(vsTask, "t2", 230, NULL,5, &pxCreatedTask); //380 230
+	xTaskCreate(vsTask, "t2", 240, NULL,5, &pxCreatedTask); //380 230
 	printf(striTASK,"t2",pxCreatedTask);
 	xTaskCreate(clientTask, "t3", 380, NULL, 6, &pxCreatedTask); // 340
 	printf(striTASK,"t3",pxCreatedTask);	

@@ -1246,6 +1246,7 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 			{		
 				volume = VS1053_GetVolume();
 				VS1053_SetVolume(0);
+				bufferReset();
 				VS1053_flush_cancel();
 				playing = 0;
 				vTaskDelay(40);	// stop without click
@@ -1253,10 +1254,10 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 				VS1053_SetVolume(volume);
 			}	
 
-			bufferReset();
 			shutdown(sockfd,SHUT_RDWR); // stop the socket
 			vTaskDelay(1);	
 			close(sockfd);
+			bufferReset();
 			if (cstatus == C_PLAYLIST) 			
 			{
 			  clientConnect();

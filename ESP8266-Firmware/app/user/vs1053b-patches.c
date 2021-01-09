@@ -694,9 +694,7 @@ void ICACHE_FLASH_ATTR  LoadUserCode( const unsigned short* plugin,uint16_t size
 void ICACHE_FLASH_ATTR  LoadUserCodes(void)
 {
 	LoadUserCode(patch,PATCH_SIZE);
-//	LoadUserCode(patch,sizeof(patch)/sizeof(patch[0]));
-//	LoadUserCode(patch1,sizeof(patch1)/sizeof(patch1[0]));
-	Delay(200);
+	Delay(100);
 	LoadUserCode(admix,ADMIX_SIZE);
 }
 
