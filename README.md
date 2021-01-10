@@ -45,7 +45,7 @@ The binaries are on ESP8266-Firmware/bin/upgrade/
 - Validate. The equipment restart to the new configuration. Connect your wifi to your AP and browse to the ip given in configuration.
 - Congratulation, you can edit your own station list. Dont forget to save your stations list in case of problem or for new equipments.
 - if the AP is already know by the esp8266, the default ip is given by dhcp.
-- a sample of stations list is on https://github.com/karawin/ESP8266-WebRadio/blob/master/ESP8266-Firmware/WebStations.txt . Can be uploaded via the web page.   
+- a sample of stations list is on https://github.com/karawin/Ka-Radio/blob/master/ESP8266-Firmware/WebStations.txt . Can be uploaded via the web page.   
 - Karadio can be controlled by the web interface or by the uart interface or by telnet. List of commands: type help  
 - See the list of command at http://karadio.karawin.fr/Interface.txt
 
