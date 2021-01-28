@@ -200,6 +200,18 @@ function dtime() {
 	if ((!isNaN(eltw.innerHTML))&&(eltw.innerHTML == 0)) eltw.innerHTML = "0";
 }
 
+// return the timezone (+/-x)
+function timezone() {
+    var offset = new Date().getTimezoneOffset();
+    var minutes = Math.abs(offset);
+    var hours = Math.floor(minutes / 60);
+    var prefix = offset < 0 ? "+" : "-";
+	document.getElementById('atzo').innerHTML = prefix+hours;	
+//    return prefix+hours;
+}
+
+
+
 function labelSleep(label){
 	document.getElementById('sminutes').innerHTML = label;	
 }
@@ -856,6 +868,27 @@ function parseEditURL()
 	document.getElementById('add_path').value = a.pathname+a.search+a.hash;	 
 }
 
+function parseInstantURL()
+{
+	 var a = document.createElement('a');	 
+	 a.href = document.getElementById('instant_URL').value;
+	 if (a.href.toLowerCase() !=location.hostname)
+	 {
+			document.getElementById('instant_url').value = a.hostname;	  
+	 }
+	 else
+	 { 	 
+		a.href = document.getElementById('instant_URL').value;
+		document.getElementById('instant_url').value = a.hostname;
+	 }
+	 if (a.port == "") 
+			document.getElementById('instant_port').value= "80";
+	 else document.getElementById('instant_port').value = a.port;
+	 document.getElementById('instant_path').value = a.pathname+a.search+a.hash;	 
+}
+
+
+
 function refreshList() {
 	promptworking(working);
 	intervalid =window.setTimeout(refreshListtemp, 10);
@@ -1307,6 +1340,7 @@ document.addEventListener("DOMContentLoaded", function() {
 			curtab = "tab-content3";
 			wifi(0) ;
 			checkversion();
+			timezone();			
 			setMainHeight(curtab);	
 	});
 	window.addEventListener("keydown", function (event)

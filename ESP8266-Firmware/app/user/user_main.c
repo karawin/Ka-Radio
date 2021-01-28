@@ -351,11 +351,11 @@ void uartInterfaceTask(void *pvParameters) {
 	
 	kasprintf(localIp,PSTR("%d.%d.%d.%d"),(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));	
 	
-	if (wifi_get_opmode ( ) == SOFTAP_MODE)
+//	if (wifi_get_opmode ( ) == SOFTAP_MODE)
 	{
-			// set modem sleep per default
-			wifi_set_sleep_type(MODEM_SLEEP_T);
-			if ((strlen(device1->hostname) >= HOSTLEN) ||
+		// set modem sleep per default
+		wifi_set_sleep_type(MODEM_SLEEP_T);
+		if ((strlen(device1->hostname) >= HOSTLEN) ||
 			(strlen(device1->hostname) == 0) || (device1->hostname[0] ==  0xff))
 		{
 			strcpy(hostn,"WifiKaRadio");
@@ -579,7 +579,7 @@ void user_init(void)
 	printf(striTASK, "t1",pxCreatedTask);
 	xTaskCreate(vsTask, "t2", 240, NULL,5, &pxCreatedTask); //380 230
 	printf(striTASK,"t2",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 380, NULL, 6, &pxCreatedTask); // 340
+	xTaskCreate(clientTask, "t3", 520, NULL, 6, &pxCreatedTask); // 340
 	printf(striTASK,"t3",pxCreatedTask);	
 	xTaskCreate(serversTask, "t4", 360, NULL, 4, &pxCreatedTask); //380
 	printf(striTASK,"t4",pxCreatedTask);

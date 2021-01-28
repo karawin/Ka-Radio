@@ -48,7 +48,7 @@
 
 			<div class="LEFT"><img title="Click on the logo to change the theme" onClick= "theme()" src="logo.png"></div>
 			<div class="RIGHT">
-			<a href="https://github.com/karawin/Ka-Radio" target="_blank">V1.9 R9</a><br/>
+			<a href="https://github.com/karawin/Ka-Radio" target="_blank">V2.0 R0</a><br/>
 			<a href="http://www.karawin.fr" target="_blank" >By KaraWin</a><br/>
 			<div id="rssi" >0 dBm</div><br/>
 <!--			<a href="https://github.com/PiotrSperka/ESP8266-WebRadio" style="font-size:8px" target="_blank">From PiotrSperka</a> -->
@@ -132,7 +132,7 @@
 				<h1>Instant play &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="button"   onClick="editInstantStation()" value="Add & Edit"></h1>
 					<p>
 					<span class=bold1>Full URL: </span>
-					<input type=text style="width:350px;" id=instant_URL name=URL onkeyup="parseURL()" onmouseup="parseEditURL()"><br/>
+					<input type=text style="width:350px;" id=instant_URL name=URL onkeyup="parseInstantURL()" onmouseup="parseInstantURL()"><br/>
 					or<br/> 
 					<span class="bold1">Url: </span><input type="text" id="instant_url" name="url" onkeyup="buildURL()"><br>
 					<span class="bold1">Port: </span><input type="text" id="instant_port" name="port" value="80" onkeyup="buildURL()"><br>
@@ -159,7 +159,7 @@
 						<input type="button" id="refresh" title="This will reload the stations from the WebRadio" onClick="refreshList()"  value="Refresh locale list(i)">
 						<input type="button" id="stsave" disabled="true" style="margin:0px auto" title="This will save all stations to the WebRadio" onClick="stChanged()"  value="Save the list(i)">
 						<input type="button" style="margin:0px auto" id="clear" title="Warning: This will erase all stations.\n Be sure to save them before." onClick="clearList()"  value="Erase all(i)">				
-						<input type="button" style="margin:0px auto" id="clear" title="Print the list" onClick="printList()"  value="Print all(i)"><br/>				
+						<input type="button" style="margin:0px auto" id="clear" title="Print the list" onClick="printList()"  value="Print all(i)"><br/>
 						</h1>
 						<span >You can Drag/Drop each line to sort the list</span><br/>
 						<table id = "stationsTable" style="table-layout: fixed; width: 100%;">
@@ -182,8 +182,7 @@
 						<span class="bold">Treble frequency: </span><input type="range" id="treblefreq_range" name="treblefreq"  onChange="onRangeChangeFreqTreble('treblefreq_range', 'treblefreq_span', 1, false)" min=1 max=15 > <span id="treblefreq_span"></span><br>
 						<span class="bold">  Bass enhance: </span><input type="range"  id="bass_range" name="bass"  onChange="onRangeChange('bass_range', 'bass_span', 1, false)" min=0 max=15 > <span id="bass_span"></span><br>
 						<span class="bold">  Bass frequency: </span><input type="range"  id="bassfreq_range" name="bassfreq"  onChange="onRangeChangeFreqBass('bassfreq_range', 'bassfreq_span', 10, false)" min=2 max=15 > <span id="bassfreq_span"></span><br>
-						<span class="bold">  Spacialization: </span><input type="range"  id="spacial_range" name="spacial"  onChange="onRangeChangeSpatial('spacial_range', 'spacial_span')" min=0 max=3 > <span id="spacial_span"></span><br>
-						<br/>
+						<span class="bold">  Spacialization: </span><input type="range"  id="spacial_range" name="spacial"  onChange="onRangeChangeSpatial('spacial_range', 'spacial_span')" min=0 max=3 > <span id="spacial_span"></span><br><br/>
 						<span class="bold">Volume: </span><input type="range" id="vol_range" name="vol"  onChange="onRangeVolChange(this.value,true)" value=100 min=0 max=254 > <span id="vol_span"></span><br>
 						</p>
 						<h1>Stations Save & Restore</h1>
@@ -209,8 +208,9 @@
 						<input id="passwd" type="password"  /> <input id="passwd2" type="password"  />
 						</p>
 						<p>
-						<span class="bold"> Mac Address:</span><span id="Mac"></span><br/>
-						<span class="bold"> Use DHCP:</span><input id="dhcp" type=checkbox onclick="clickdhcp()" /><br/>
+						<span class="bold"> Mac Address:</span><span id="Mac"></span><br/>		   
+						<span class="bold"> Use DHCP:</span>
+						<input id="dhcp" type=checkbox onclick="clickdhcp()" /><br/>
 						<span class="bold">Ip:</span>
 						<input  id="ip" type="text" oninput="chkip(this)" />
 						<br/>
@@ -227,7 +227,8 @@
 						<input id="host" type="text" value="" />
 						<span class="bold">.local</span><br/>
 						<span class="bold">Time Zone Offset:</span>
-						<input id="tzo" type="text" value="" />						
+						<input id="tzo" type="text" value="" />	
+						<span class="bold">Suggested: </span><span class="bold" id="atzo"> </span><br/>			
 						</p>
 						<h1>Update to: <span id="newrelease"></span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type=button value="Update now" onclick="upgrade()" />  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="updatefb"></span><br/>	</h1>
 						<p>

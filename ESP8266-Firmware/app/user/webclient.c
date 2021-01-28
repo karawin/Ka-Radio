@@ -43,17 +43,15 @@ const char strcMALLOC1[] ICACHE_RODATA_ATTR STORE_ATTR  = {"%s malloc fails\n"};
 const char strcWEBSOCKET[] ICACHE_RODATA_ATTR STORE_ATTR  = {"WebClient webSocket fails %s errno: %d\n"};
 const char strcSOCKET[] ICACHE_RODATA_ATTR STORE_ATTR  = {"WebClient Socket fails %s errno: %d\n"};
 
-/* TODO:
-	- METADATA HANDLING
-	- IP SETTINGS
-	- VS1053 - DELAY USING vTaskDelay
-*/
-struct icyHeader header = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
+#define URLMAX	256
+#define PATHMAX	512
 
-char metaint[10];
-char clientURL[256]= {0,0};
-char clientPath[256] = {0,0};
-uint16_t clientPort = 80;
+static struct icyHeader header = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL};
+
+static char metaint[10];
+static char clientURL[URLMAX]= {0,0};
+static char clientPath[PATHMAX] = {0,0};
+static uint16_t clientPort = 80;
 
 
 struct hostent *server = NULL;
@@ -125,7 +123,7 @@ ICACHE_FLASH_ATTR void dump(uint8_t* from, uint32_t len )
 }
 
 ICACHE_FLASH_ATTR struct icyHeader* clientGetHeader()
-{	
+{
 	return &header;
 }
 
@@ -134,8 +132,8 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 {
   char* str;
   char* ns; 
-  char path[255] = "/";
-  char url[78]; 
+  char path[PATHMAX] = "/";
+  char url[URLMAX] = "";
   char port[6] = "80";
   int remove = 0;
   int i = 0; int j = 0;
@@ -182,9 +180,9 @@ ICACHE_FLASH_ATTR bool clientParsePlaylist(char* s)
 		port[j] = 0;
 	}
 	j = 0;
-	if ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<')&&(j<254))
+	if ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<')&&(j<PATHMAX))
 	{	
-	  while ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<')&&(j<254)) {path[j] = str[i]; i++; j++;}
+	  while ((str[i] != 0x0a)&&(str[i] != 0x0d)&&(str[i] != 0)&&(str[i] != '"')&&(str[i] != '<')&&(j<PATHMAX)) {path[j] = str[i]; i++; j++;}
 	  path[j] = 0;
 	}
 	
@@ -207,8 +205,8 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 	#define MORE	20
 //		if ((strchr(str,'"') == NULL)&&(strchr(str,'/') == NULL)) return str;
         if (len == 0) return str;
-		char* new = incmalloc(len+10);
-		int nlen = len+10;
+		char* new = incmalloc(len+MORE);
+		int nlen = len+MORE;
 		if (new != NULL)
 		{
 //			printf("stringify: enter: len:%d  \"%s\"\n",len,str);
@@ -229,11 +227,11 @@ ICACHE_FLASH_ATTR char* stringify(char* str,int len)
 					new[j++] = '\\';
 					new[j++] =(str)[i] ;
 				}				
-				else	// pseudo ansi utf8 convertion
+/*				else	// pseudo ansi utf8 convertion
 					if ((str[i] > 192) && (str[i+1] < 0x80)){ // 128 = 0x80
 					new[j++] = 195; // 192 = 0xC0   195 = 0xC3
 					new[j++] =(str)[i]-64 ; // 64 = 0x40
-				} 
+				} */
 				else new[j++] =(str)[i] ;
 				
 				if ( j+MORE> nlen) 
@@ -280,7 +278,7 @@ ICACHE_FLASH_ATTR void removePartOfString(char* origine, char* remove)
 			strcpy(copy,origine);
 			strcat(copy,t_end+(strlen(remove)));
 			strcpy(origine,copy);
-		}	
+		}
 		incfree(copy,"removePt");
 	}
 }
@@ -340,7 +338,7 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 				t_end = strstr(t,"||");
 				if (t_end !=NULL)
 				*t_end = 0;
-			}	
+			}
 			
 		}
 		else
@@ -363,21 +361,18 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 		}
 		if  ((header.members.mArr[METADATA] == NULL)||((header.members.mArr[METADATA] != NULL)&&(t!= NULL)&&(strcmp(tt,header.members.mArr[METADATA]) != 0)))
 		{
-		
+			incfree(tt,"");		
 			if (header.members.mArr[METADATA] != NULL)
 				incfree(header.members.mArr[METADATA],"metad");
 			header.members.mArr[METADATA] = (char*)incmalloc((len+3)*sizeof(char));
 			if(header.members.mArr[METADATA] == NULL) 
 			{	printf(strcMALLOC1);
-				incfree(tt,"");
 				return;
 			}
 
 			strcpy(header.members.mArr[METADATA], t);
 //			dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
 			header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],len);
-//			dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
-
 			clientPrintMeta(); 
 			while ((header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == ' ')||
 				(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\r')||
@@ -385,12 +380,12 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 			)
 			{
 				header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] = 0; // avoid blank at end
-			}	
+			}
 
 // send station name if no metadata
-			if (strlen(header.members.mArr[METADATA])!=0)			
+			if (strlen(header.members.mArr[METADATA])!=0)
 				t_end = header.members.mArr[METADATA];
-			else	
+			else
 				t_end = (header.members.single.name ==NULL)?"":header.members.single.name;
 		
 			char* title = incmalloc(strlen(t_end)+15);
@@ -402,7 +397,8 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 				incfree(title,"title");
 			} else printf(strcMALLOC1,"Title"); 
 		}
-		incfree(tt,"");
+		
+		printf("clientSaveMetadata: %s\n",header.members.mArr[METADATA]);
 }	
 
 // websocket: next station
@@ -453,13 +449,21 @@ ICACHE_FLASH_ATTR void wsVol(char* vol)
 // websocket: broadcast monitor url
 ICACHE_FLASH_ATTR void wsMonitor()
 {
-		char answer[300];
-		memset(answer,0,300);
-		if ((clientPath[0]!= 0))
+		char *answer;
+		uint16_t len;
+		len = strlen(clientURL)+strlen(clientPath)+30;
+		answer= malloc(len);
+		if (answer)
 		{
+			memset(answer,0,len);
+			if ((clientPath[0]!= 0))
+			{
 //printf("sprint%d\n",3);
-			if (kasprintf(answer,PSTR("{\"monitor\":\"http://%s:%d%s\"}"),clientURL,clientPort,clientPath))
+				if (kasprintf(answer,PSTR("{\"monitor\":\"http://%s:%d%s\"}"),clientURL,clientPort,clientPath))
 				websocketbroadcast(answer, strlen(answer));
+//printf("answer: %s\n",answer);
+			}
+			free(answer);
 		}
 }						
 //websocket: broadcast all icy and meta info to web client.
@@ -603,7 +607,10 @@ ICACHE_FLASH_ATTR bool clientParseHeader(char* s)
 			}
 		}
 	}
-	if (ret == true) {wsHeaders();wsMonitor();}
+	if (ret == true) {
+		wsHeaders();
+//		wsMonitor();
+	}
 	xSemaphoreGive(sHeader);
 		return ret;
 }
@@ -624,7 +631,6 @@ ICACHE_FLASH_ATTR void clientSetURL(char* url)
 
 ICACHE_FLASH_ATTR void clientSetPath(char* path)
 {
-	int l = strlen(path)+1;
 	if (path[0] == 0xff) return; // wrong path
 	strcpy(clientPath, path);
 	kprintf(PSTR("##CLI.PATHSET#: %s\n"),clientPath);
@@ -707,7 +713,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 	char* t2;
 	bool  icyfound;
 
-//	if (cstatus != C_DATA) {printf("cstatus= %d\n",cstatus);  printf("Len=%d, Byte_list = %s\n",len,pdata);}
+//if (cstatus != C_DATA) {printf("cstatus= %d\n",cstatus);  printf("Len=%d, Byte_list = %s\n",len,pdata);}
 	if (cstatus != C_DATA)
 	{
 		t1 = strstr(pdata, "404"); 
@@ -759,7 +765,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 			cstatus = C_HEADER1;
 			do {
 				t1 = strstr(pdata, "\r\n\r\n"); // END OF HEADER
-//	printf("Header len: %d,  Header: %s\n",len,pdata);
+//printf("Header len: %d,  Header: %s\n",len,pdata);
 				if ((t1 != NULL) && (t1 <= pdata+len-4)) 
 				{
 						t2 = strstr(pdata, "Internal Server Error"); 
@@ -771,7 +777,7 @@ IRAM_ATTR void clientReceiveCallback(int sockfd, char *pdata, int len)
 							
 						}
 						icyfound = clientParseHeader(pdata);
-						wsMonitor();											
+//						wsMonitor();											
 /*						if(header.members.single.bitrate != NULL) 
 							if (strcmp(header.members.single.bitrate,"320")==0)
 								 system_update_cpu_freq(SYS_CPU_160MHZ);
@@ -1158,7 +1164,9 @@ ICACHE_FLASH_ATTR void clientTask(void *pvParams) {
 */
 				if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
 					printf(strcSOCKET,"setsockopt",errno);
-//////				
+//////			
+				wsMonitor();
+				cnterror = 0;		
 				do
 				{
 					bytes_read = recvfrom(sockfd, bufrec,RECEIVE, 0, NULL, NULL);	
