@@ -398,7 +398,7 @@ ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 			} else printf(strcMALLOC1,"Title"); 
 		}
 		
-		printf("clientSaveMetadata: %s\n",header.members.mArr[METADATA]);
+//		printf("clientSaveMetadata: %s\n",header.members.mArr[METADATA]);
 }	
 
 // websocket: next station

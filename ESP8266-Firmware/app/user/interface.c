@@ -649,7 +649,7 @@ ICACHE_FLASH_ATTR void clientList(char *s)
 		if (!onlyOne) kprintf(strilDLIST,0x0d);	
 		for (i ;i <j;i++)
 		{
-			vTaskDelay(1);
+			vTaskDelay(2);
 			si = getStation(i);
 			
 			if ((si == NULL) || (si->port ==0))
@@ -964,13 +964,13 @@ ICACHE_FLASH_ATTR void checkCommand(int size, char* s)
 	{
 		if(strcmp(tmp, "help") == 0)
 		{
-			kprintfl(stritHELP0,0x0d);
+			kprintf(stritHELP0,0x0d);
 			vTaskDelay(1);
-			kprintfl(stritHELP1,0x0d);
+			kprintf(stritHELP1,0x0d);
 			vTaskDelay(1);
-			kprintfl(stritHELP2,0x0d);
+			kprintf(stritHELP2,0x0d);
 			vTaskDelay(1);
-			kprintfl(stritHELP3,0x0d);
+			kprintf(stritHELP3,0x0d);
 		}
 		else printInfo(tmp);
 	}	

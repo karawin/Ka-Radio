@@ -398,7 +398,7 @@ system_upgrade_start(struct upgrade_server_info *server)
     portBASE_TYPE ret = 0;
     wsUpgrade( "",0,100);
     if(NULL == pxCreatedTask){
-        ret = xTaskCreate(upgrade_task, "upgrade_task", 360, server, 5, pxCreatedTask);//224   1024, 890 left
+        ret = xTaskCreate(upgrade_task, "upgrade_task", 360, server, 8, pxCreatedTask);//224   1024, 890 left
 
         if(pdPASS == ret){
             os_timer_disarm(&upgrade_timer);

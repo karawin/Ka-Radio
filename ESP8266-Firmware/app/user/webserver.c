@@ -7,11 +7,12 @@
 #include "serv-fs.h"
 #include "interface.h"
 #include "servers.h"
-
+static char apMode[]= {"*Hidden*"};								   
 xSemaphoreHandle semfile = NULL ;
 
-const char tryagain[] = {"try again"};
-
+const char tryagain[] ICACHE_RODATA_ATTR STORE_ATTR= {"try again"};
+const char strsROK[]  ICACHE_RODATA_ATTR STORE_ATTR=  {"HTTP/1.1 200 OK\r\nContent-Type: %s\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n%s"};
+const char lowmemory[] ICACHE_RODATA_ATTR STORE_ATTR  = { "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nlow memory\n"};
 const char strsMALLOC[] ICACHE_RODATA_ATTR STORE_ATTR = {"WebServer inmalloc fails for %d\n"};
 const char strsMALLOC1[] ICACHE_RODATA_ATTR STORE_ATTR = {"WebServer %s malloc fails\n"};
 const char strsSOCKET[] ICACHE_RODATA_ATTR STORE_ATTR = {"WebServer Socket fails %s errno: %d\n"};
@@ -35,22 +36,18 @@ void *inmalloc(size_t n)
 	void* ret;
 //printf ("server Malloc of %d %d,  Heap size: %d\n",n,((n / 32) + 1) * 32,xPortGetFreeHeapSize( ));
 	ret = malloc(n);
-/*	if (ret == NULL)//
-	{
-		//printf(strsMALLOC,n);
-		char* test = malloc(10);
-		if (test != NULL) free(test);
-		ret = malloc(n);
-	}	
-*/		
+	
 //	printf ("server Malloc of %x : %d bytes Heap size: %d\n",ret,n,xPortGetFreeHeapSize( ));
 //	if (n <4) printf("Server: incmalloc size:%d\n",n);	
 	return ret;
 }	
 void infree(void *p)
 {
-//	printf ("server free of   %x,            Heap size: %d\n",p,xPortGetFreeHeapSize( ));
-	if (p != NULL)free(p);
+	if (p != NULL)
+	{	free(p);
+//		printf("server free of %x,  Heap size: %d",(int)p,xPortGetFreeHeapSize( ));
+					   
+	}
 }	
 
 
@@ -70,26 +67,17 @@ ICACHE_FLASH_ATTR void respOk(int conn,char* message)
 {
 	char rempty[] = {""};
 	if (message == NULL) message = rempty;
-	char* fresp = inmalloc(120+strlen(message));
-	if (fresp!=NULL)
-	{
-		if(kasprintf(fresp,PSTR("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n%s"),strlen(message),message)) 
+	char fresp[strlen(strsROK)+strlen(message)+15]; // = inmalloc(strlen(strsROK)+strlen(message)+15);
+	if(kasprintf(fresp,PSTR("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: %d\r\nConnection: keep-alive\r\n\r\n%s"),strlen(message),message)) 
 //printf("ok %s\n",fresp);
 			write(conn, fresp, strlen(fresp));
-		infree(fresp);
-	}			
+
 //printf("respOk exit\n");
 }
 
 ICACHE_FLASH_ATTR void respKo(int conn)
 {
-	char* fresp = inmalloc(120);
-	if (fresp!=NULL)
-	{		
-		if(kasprintf(fresp, PSTR("HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/plain\r\nContent-Length: 11\r\n\r\nlow memory\n")))
-			write(conn, fresp, strlen(fresp));
-		infree(fresp);
-	}			
+	write(conn, lowmemory, strlen(lowmemory));		
 }
 
 ICACHE_FLASH_ATTR void serveFile(char* name, int conn)
@@ -475,6 +463,8 @@ ICACHE_FLASH_ATTR void pathParse(char* str)
 		}
 	}
 }
+
+
 
 ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int conn) {
 //printf("HandlePost %s\n",name);
@@ -896,15 +886,21 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 					device->dhcpEn = 1; else device->dhcpEn = 0;}
 //				if (adhcp!= NULL) if (strlen(adhcp)!=0) if (strcmp(adhcp,"true")==0)device->dhcpEn = 1; else device->dhcpEn = 0;
 				strcpy(device->ssid,(ssid==NULL)?"":ssid);
-				strcpy(device->pass,(pasw==NULL)?"":pasw);
 				strcpy(device->ssid2,(ssid2==NULL)?"":ssid2);
-				strcpy(device1->pass2,(pasw2==NULL)?"":pasw2);	
-				infree(ssid);infree(pasw);infree(ssid2); infree(pasw2);  
+				
+				if (pasw != NULL) {
+					if (strcmp(pasw,apMode)!=0) strcpy(device->pass,pasw);
+				}
+				if (pasw2 != NULL){
+					if (strcmp(pasw2,apMode)!=0) strcpy(device->pass2,pasw2);
+				}						
+
+				infree(ssid);infree(pasw);infree(ssid2); infree(pasw2);
 				infree(aip);infree(amsk);infree(agw); 
 			}
 			if ((device->ua!= NULL)&&(strlen(device->ua)==0))
 			{
-				if (aua==NULL) {aua= inmalloc(12); strcpy(aua,"Karadio/1.5");}
+				if (aua==NULL) {aua= inmalloc(12); strcpy(aua,"Karadio/2.1");}
 			}	
 			if (aua!=NULL) 
 			{
@@ -966,12 +962,13 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 			char adhcp[4];
 			//char* macstr = inmalloc(20*sizeof(char));
 			wifi_get_macaddr ( 0, macaddr );			
+			
 			int json_length ;
 			json_length =95+ 19+
 			strlen(device->ssid) +
-			strlen(device->pass) +
+//			strlen(ipass11) +
 			strlen(device->ssid2) +
-			strlen(device1->pass2) +
+//			strlen(ipass22) +
 			strlen(device->ua)+
 			strlen(device1->hostname)+
 			kasprintf(tmptzo,PSTR("%d"),device->tzoffset)+
@@ -991,7 +988,7 @@ ICACHE_FLASH_ATTR void handlePOST(char* name, char* data, int data_size, int con
 				if (kasprintf(buf, PSTR("HTTP/1.1 200 OK\r\nContent-Type:application/json\r\nContent-Length:%d\r\n\r\n{\"ssid\":\"%s\",\"pasw\":\"%s\",\"ssid2\":\"%s\",\"pasw2\":\"%s\",\
 \"ip\":\"%s\",\"msk\":\"%s\",\"gw\":\"%s\",\"ua\":\"%s\",\"dhcp\":\"%s\",\"mac\":\"%s\",\"host\":\"%s\",\"tzo\":\"%s\"}"),
 				json_length,
-				device->ssid,device->pass,device->ssid2,device1->pass2,tmpip,tmpmsk,tmpgw,device->ua,adhcp,macstr,device1->hostname,tmptzo))
+				device->ssid,"",device->ssid2,"",tmpip,tmpmsk,tmpgw,device->ua,adhcp,macstr,device1->hostname,tmptzo))
 				{
 //printf(PSTR("wifi Buf len:%d\n%s\nfmt:%s\n"),strlen(buf),buf,fmt);
 					write(conn, buf, strlen(buf));

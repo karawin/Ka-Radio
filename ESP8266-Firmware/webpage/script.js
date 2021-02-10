@@ -26,7 +26,7 @@ function openwebsocket(){
 		if (arr["wssound"]) soundResp(arr["wssound"]); 
 		if (arr["monitor"]) playMonitor(arr["monitor"]); 
 		if (arr["wsstation"]) wsplayStation(arr["wsstation"]); 
-		if (arr["wsrssi"]) {document.getElementById('rssi').innerHTML = arr["wsrssi"]+' dBm';setTimeout(wsaskrssi,5000);}		
+		if (arr["wsrssi"]) {document.getElementById('rssi').innerHTML = arr["wsrssi"]+' dBm';setTimeout(wsaskrssi,5000);}
 		if (arr["upgrade"]) {document.getElementById('updatefb').innerHTML = arr["upgrade"];}
 		if (arr["iurl"]) {document.getElementById('instant_url').value  = arr["iurl"];buildURL();}
 		if (arr["ipath"]) {document.getElementById('instant_path').value = arr["ipath"];buildURL();}
@@ -38,7 +38,7 @@ function openwebsocket(){
 		console.log("Open, url:"+"ws://"+window.location.host+"/");
 		if(window.timerID){ /* a setInterval has been fired */
 			window.clearInterval(window.timerID);
-			window.timerID=0;	
+			window.timerID=0;
 		}
 		setTimeout(wsaskrssi, 5000); // start the rssi display
 		websocket.send("opencheck");
@@ -65,7 +65,7 @@ function changeTitle($arr) {
 // ask for the rssi and restart the timer
 function wsaskrssi(){
 	try{
-			websocket.send("wsrssi   &");	
+			websocket.send("wsrssi &");	
 	} catch(e){ console.log("error wsaskrssi"+e);}
 }
 
@@ -391,7 +391,7 @@ function icyResp(arr) {
 				document.getElementById('lgenre').style.display = "none";
 			else 	document.getElementById('lgenre').style.display = "inline-block";	
 			document.getElementById('genre').innerHTML = arr["genre"].replace(/\\/g,"");
-			if (arr["url1"] =="")
+			if ((arr["url1"] =="")||(arr["url1"] ==" "))
 			{	
 				document.getElementById('lurl').style.display = "none";
 				document.getElementById('icon').style.display = "none";
@@ -529,9 +529,9 @@ function wifi(valid) {
 		if (xhr.readyState == 4 && xhr.status == 200) {	
 			var arr = JSON.parse(xhr.responseText);
 			document.getElementById('ssid').value = arr["ssid"];
-			document.getElementById('passwd').value = arr["pasw"];
+			document.getElementById('passwd').value = "*Hidden*";
 			document.getElementById('ssid2').value = arr["ssid2"];
-			document.getElementById('passwd2').value = arr["pasw2"];
+			document.getElementById('passwd2').value ="*Hidden*";
 			document.getElementById('ip').value = arr["ip"];
 			chkip(document.getElementById('ip'));
 			document.getElementById('mask').value = arr["msk"];
@@ -551,11 +551,12 @@ function wifi(valid) {
 	}
 	xhr.open("POST","wifi",false);
 	xhr.setRequestHeader(content,ctype);
+ 
 	xhr.send("valid=" + valid 
 	+"&ssid=" + encodeURIComponent(document.getElementById('ssid').value )
-	+ "&pasw=" + encodeURIComponent(document.getElementById('passwd').value) 
+	+ "&pasw=" + encodeURIComponent( document.getElementById('passwd').value)
 	+"&ssid2=" + encodeURIComponent(document.getElementById('ssid2').value) 
-	+ "&pasw2=" + encodeURIComponent(document.getElementById('passwd2').value) 
+	+ "&pasw2=" + encodeURIComponent(document.getElementById('passwd2').value)
 	+ "&ip=" + document.getElementById('ip').value
 	+"&msk=" + document.getElementById('mask').value
 	+"&gw=" + document.getElementById('gw').value
@@ -924,6 +925,8 @@ function upgrade()
 		xhr.setRequestHeader(content,ctype);
 		xhr.send();
 	} catch(e){console.log("error"+e);}	
+	
+//	alert("Rebooting to the new release\nPlease refresh the page in few seconds.");
 }
 function checkhistory()
 {
@@ -1008,7 +1011,7 @@ function downloadStations()
 				}				
 				xhr.open("POST","setStation",false);
 				xhr.setRequestHeader(content,ctype);
-				console.log("post "+tosend);
+//				console.log("post "+tosend);
 				xhr.send(tosend);
 				} catch (e){console.log("error "+e+" "+tosend);}
 //			}
@@ -1261,7 +1264,6 @@ function loadStationsList(max) {
 					} catch(e){console.log("error"+e);}
 					localStorage.setItem(idstr,xhr.responseText);
 					foundNull = cploadStationsList(id,arr);
-
 				}
 			}
 			xhr.open("POST","getStation",false);

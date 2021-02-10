@@ -10,7 +10,7 @@
 #define MAXDATAT	 256
 
 
-#define RELEASE "2.0"
+#define RELEASE "2.1"
 #define REVISION "0"
 
 
@@ -26,15 +26,21 @@ void setHostname(char* s);
 int kasprintf(char *str, const char *format, ...);
 
 #define kprintf(fmt, ...) do {    \
+		telnetWrite(printf(fmt, ##__VA_ARGS__),fmt, ##__VA_ARGS__); \
+	} while (0)
+
+//		vTaskDelay(0); \
+
+//#define kprintf(fmt, ...) do {    \
         printf(fmt, ##__VA_ARGS__);   \
 		telnetWrite(2*MAXDATAT,fmt, ##__VA_ARGS__); \
 	} while (0)
-		
+/*		
 #define kprintfl(fmt, ...) do {    \
         printf(fmt, ##__VA_ARGS__);   \
 		telnetWrite(1024,fmt, ##__VA_ARGS__); \
 	} while (0)
-	
+*/	
 
 
 #endif		

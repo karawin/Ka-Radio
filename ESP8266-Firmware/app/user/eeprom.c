@@ -1,3 +1,10 @@
+/******************************************************************************
+ * 
+ * Copyright 2017 karawin (http://www.karawin.fr)
+ * il ne faut pas decoder KaRadio
+ *
+*******************************************************************************/
+
 #include "eeprom.h"
 #include "flash.h"
 #include "spi.h"
@@ -44,70 +51,6 @@ const char streSETDEVICE[] ICACHE_RODATA_ATTR STORE_ATTR  = {"saveDeviceSetting%
 
 uint32_t Eeprom_start;
 uint32_t Eeprom_start1;
-
-//uint32_t eebuf[1024];
-/*
-ICACHE_FLASH_ATTR uint8_t eeGetByte(uint32_t address) { // address = number of 1-byte parts from beginning
-	uint8_t t = 0;
-	spi_flash_read(Eeprom_start + address, (uint32 *)&t, 1);
-	return t;
-}
-ICACHE_FLASH_ATTR void eeSetByte(uint32_t address, uint8_t data) {
-	uint32_t addr = (Eeprom_start + address) & 0xFFF000;
-	spi_flash_read(addr, (uint32 *)eebuf, 4096);
-	spi_flash_erase_sector(addr >> 12);
-	eebuf[address & 0xFFF] = data;
-	spi_flash_write(addr, (uint32 *)eebuf, 4096);
-}
-ICACHE_FLASH_ATTR uint32_t eeGet4Byte(uint32_t address) { // address = number of 4-byte parts from beginning
-	address *= 4;
-	uint32_t t = 0;
-	spi_flash_read(Eeprom_start + address, (uint32 *)&t, 4);
-	return t;
-}
-ICACHE_FLASH_ATTR void eeSet4Byte(uint32_t address, uint32_t data) {
-	address *= 4;
-	uint32_t addr = (Eeprom_start + address) & 0xFFF000;
-	spi_flash_read(addr, (uint32 *)eebuf, 4096);
-	spi_flash_erase_sector(addr >> 12);
-	eebuf[(address/4) & 0xFFF] = data;
-	spi_flash_write(addr, (uint32 *)eebuf, 4096);
-}
-*/
-
-/*
-ICACHE_FLASH_ATTR void eeGetOldData(int address, void* buffer, int size) { // address, size in BYTES !!!!
-int result;
-	result = spi_flash_read(EEPROM_OLDSTART + address, (uint32 *)buffer, size);
-}
-ICACHE_FLASH_ATTR void eeSetOldData(int address, void* buffer, int size) { // address, size in BYTES !!!!
-	uint8_t* inbuf = buffer;
-int result;
-uint32_t* eebuf= malloc(4096);
-	if (eebuf != NULL)
-	{
-	while(1) {
-		uint32_t sector = (EEPROM_OLDSTART + address) & 0xFFF000;
-		spi_flash_read(sector, (uint32 *)eebuf, 4096);
-		spi_flash_erase_sector(sector >> 12);
-		
-		uint8_t* eebuf8 = (uint8_t*)eebuf;
-		uint16_t startaddr = address & 0xFFF;
-		uint16_t maxsize = 4096 - startaddr;
-		uint16_t i;
-		
-		for(i=0; (i<size && i<maxsize); i++) eebuf8[i+startaddr] = inbuf[i];
-		result = spi_flash_write(sector, (uint32 *)eebuf, 4096);
-		if(maxsize >= size) break;
-		
-		address += i;
-		inbuf += i;
-		size -= i;
-	}
-	free (eebuf);
-	} else printf(streMSG,"eebuf");
-}
-*/
 
 uint32_t getFlashChipRealSize(void)
 {

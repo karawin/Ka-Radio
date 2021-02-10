@@ -179,26 +179,18 @@ void initMDNS(char* host,uint32_t ip)
 	mdns_start(mdns);
 }
 
-void uartInterfaceTask(void *pvParameters) {
-	char tmp[255];
-//	bool conn = false;
-	uint16 ap = 0;
-	int i = 0;	
-	uint8 maxap;
-	
 
-/*	int uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	printf("watermark uartInterfaceTask: %d  %d\n","uartInterfaceTask",uxHighWaterMark,xPortGetFreeHeapSize( ));
-*/
-	int t = 0;
-	for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
-	t = 0;
-	uart_rx_init();
-	printf(striUART,0x0d);
-	
+
+//-------------------------
+// Wifi  management
+//-------------------------
+void initWifi()
+{
 //-------------------------
 // AP Connection management
 //-------------------------
+	uint16 ap = 0;
+	int i = 0;	
 	char hostn[HOSTLEN];
 	struct ip_info *info;
 	struct device_settings *device;
@@ -258,14 +250,13 @@ void uartInterfaceTask(void *pvParameters) {
 		wifi_set_ip_info(STATION_IF, info);
 	} 
 	printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
+	wifi_station_connect();
 //----------------
 	
 	
 //	printf("DHCP: 0x%x\n Device: Ip: %d.%d.%d.%d\n",device->dhcpEn,device->ipAddr[0], device->ipAddr[1], device->ipAddr[2], device->ipAddr[3]);
 //	printf("\nI: %d status: %d\n",i,wifi_station_get_connect_status());
 
-
-	wifi_station_connect();
 	i = 0;
 		
 	while ((wifi_station_get_connect_status() != STATION_GOT_IP))
@@ -275,28 +266,27 @@ void uartInterfaceTask(void *pvParameters) {
 
 		vTaskDelay(400);//  ms
 		if (( strlen(config->ssid) ==0)||  (wifi_station_get_connect_status() == STATION_WRONG_PASSWORD)||(wifi_station_get_connect_status() == STATION_CONNECT_FAIL)||(wifi_station_get_connect_status() == STATION_NO_AP_FOUND))
-		{ 
-//printf("STATUS OUT %d   Status %d \n",i,wifi_station_get_connect_status());	
+		{ 	
 			// try AP2 //
 			if ((strlen(device->ssid2) > 0)&& (ap <1))
 			{
 				i = -1;
 				wifi_station_disconnect();
+// set for AP2 //
+//-------------//
 				IP4_ADDR(&(info->ip), device->ipAddr[0], device->ipAddr[1],device->ipAddr[2], device->ipAddr[3]);
 				IP4_ADDR(&(info->netmask), device->mask[0], device->mask[1],device->mask[2], device->mask[3]);
 				IP4_ADDR(&(info->gw), device->gate[0], device->gate[1],device->gate[2], device->gate[3]);
-				
 				strcpy(config->ssid,device->ssid2);
 				strcpy(config->password,device1->pass2);
 				wifi_station_set_config(config);
-				
 				if (!device->dhcpEn) {
 					wifi_station_dhcpc_stop();
 					wifi_set_ip_info(STATION_IF, info);
-				} 	
-				
+				} 					
 				wifi_station_connect();
-				printf(striSTA2,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));		
+				printf(striSTA2,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));	
+//----------------				
 				ap++;
 			}
 			else i = 10; // go to SOFTAP_MODE
@@ -304,32 +294,32 @@ void uartInterfaceTask(void *pvParameters) {
 		i++;
 	
 		if (i >= 10)
-		{
-					printf(PSTR("%c"),0x0d);
-					wifi_station_disconnect();
-					FlashOn = 10;FlashOff = 200;
-					vTaskDelay(100);
-					//printf(PSTR("Config not found%c%c"),0x0d,0x0d);
-					saveDeviceSettings(device);	
-					printf(striDEF0,0x0d);
-					printf(striDEF1,0x0d);
-					struct softap_config *apconfig;
-					apconfig = malloc(sizeof(struct softap_config));
-					wifi_set_opmode_current(SOFTAP_MODE);
-					vTaskDelay(10);
-					wifi_softap_get_config(apconfig);
-					vTaskDelay(10);
-					strcpy (apconfig->ssid,"WifiKaRadio");
-					apconfig->ssid_len = 0;	
+		{	// AP mode
+			printf(PSTR("%c"),0x0d);
+			wifi_station_disconnect();
+			FlashOn = 10;FlashOff = 200;
+			vTaskDelay(100);
+			//printf(PSTR("Config not found%c%c"),0x0d,0x0d);
+			saveDeviceSettings(device);	
+			printf(striDEF0,0x0d);
+			printf(striDEF1,0x0d);
+			struct softap_config *apconfig;
+			apconfig = malloc(sizeof(struct softap_config));
+			wifi_set_opmode_current(SOFTAP_MODE);
+			vTaskDelay(10);
+			wifi_softap_get_config(apconfig);
+			vTaskDelay(10);
+			strcpy (apconfig->ssid,"WifiKaRadio");
+			apconfig->ssid_len = 0;	
 //printf("passwd: %s\nhidden: %d\nmaxc: %d\nauth: %d\n",apconfig->password,apconfig->ssid_hidden,apconfig->max_connection,apconfig->authmode);					
-					if(wifi_softap_set_config(apconfig) != true)printf(PSTR("softap failed%c%c"),0x0d,0x0d);
-					vTaskDelay(1);
-					wifi_get_ip_info(1, info);
+			if(wifi_softap_set_config(apconfig) != true)printf(PSTR("softap failed%c%c"),0x0d,0x0d);
+			vTaskDelay(1);
+			wifi_get_ip_info(1, info);
 //					printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
-					vTaskDelay(10);
-//					conn = true; 
-					free(apconfig);
-					break;
+			vTaskDelay(10);
+//			conn = true; 
+			free(apconfig);
+			break;
 		}//
 	}
 
@@ -338,7 +328,6 @@ void uartInterfaceTask(void *pvParameters) {
 	if (wifi_get_opmode () == SOFTAP_MODE) wifi_get_ip_info(SOFTAP_IF, info);
 	else wifi_get_ip_info(STATION_IF, info); // ip netmask gw
 	wifi_station_get_config(config);
-
 
 	IPADDR2_COPY(&device->ipAddr, &info->ip);
 	IPADDR2_COPY(&device->mask, &info->netmask);
@@ -351,22 +340,44 @@ void uartInterfaceTask(void *pvParameters) {
 	
 	kasprintf(localIp,PSTR("%d.%d.%d.%d"),(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));	
 	
-//	if (wifi_get_opmode ( ) == SOFTAP_MODE)
+	// set modem sleep per default
+	wifi_set_sleep_type(MODEM_SLEEP_T);
+	if ((strlen(device1->hostname) >= HOSTLEN) ||
+		(strlen(device1->hostname) == 0) || (device1->hostname[0] ==  0xff))
 	{
-		// set modem sleep per default
-		wifi_set_sleep_type(MODEM_SLEEP_T);
-		if ((strlen(device1->hostname) >= HOSTLEN) ||
-			(strlen(device1->hostname) == 0) || (device1->hostname[0] ==  0xff))
-		{
-			strcpy(hostn,"WifiKaRadio");
-			strcpy(device1->hostname,hostn);
-			saveDeviceSettings1(device1);	
-		}
-		else strcpy(hostn,device1->hostname);
-		printf(PSTR("HOSTNAME: %s\nLocal IP: %s\n"),hostn,localIp);
-		initMDNS(hostn,info->ip.addr);
-	}	
+		strcpy(hostn,"WifiKaRadio");
+		strcpy(device1->hostname,hostn);
+		saveDeviceSettings1(device1);	
+	}
+	else strcpy(hostn,device1->hostname);
+	printf(PSTR("HOSTNAME: %s\nLocal IP: %s\n"),hostn,localIp);
+	initMDNS(hostn,info->ip.addr);
+	
+	free(info);
+	free(device);
+	free(device1);
+	free(config);
 
+}
+void uartInterfaceTask(void *pvParameters) {
+	char tmp[255];
+	struct device_settings *device;
+
+	initWifi();
+	
+	uint16 ap = 0;
+	int i = 0;	
+	uint8 maxap;
+
+/*	int uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+	printf("watermark uartInterfaceTask: %d  %d\n","uartInterfaceTask",uxHighWaterMark,xPortGetFreeHeapSize( ));
+*/
+	int t = 0;
+	for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
+	t = 0;
+
+	uart_rx_init();
+	printf(striUART,0x0d);
 
 	ap = 0;
 	ap =system_adc_read();
@@ -385,9 +396,9 @@ void uartInterfaceTask(void *pvParameters) {
 	}
 	FlashOn = 190;FlashOff = 10;
 	initLed(); // start the timer for led. This will kill the ttest task to free memory
-	
-	
+		
 //autostart	
+	device = getDeviceSettings();
 	currentStation = device->currentstation;
 	VS1053_I2SRate(device->i2sspeed);
 	clientIvol = device->vol;
@@ -401,14 +412,8 @@ void uartInterfaceTask(void *pvParameters) {
 //
 	ledStatus = ((device->options & T_LED)== 0);
 //
-	
-	free(info);
-	free(device);
-	free(device1);
-	free(config);
-	
+	free(device);	
 
-	
 	while(1) {
 		while(1) {
 			int c = uart_getchar_ms(100);
@@ -427,7 +432,6 @@ void uartInterfaceTask(void *pvParameters) {
 /*	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
 	printf("watermark uartInterfaceTask: %d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 */		
-		
 		for(t = 0; t<sizeof(tmp); t++) tmp[t] = 0;
 		t = 0;
 	}
@@ -553,15 +557,14 @@ void user_init(void)
 	free(device);
 	uspeed = checkUart(uspeed);	
 	uart_div_modify(0, UART_CLK_FREQ / uspeed);//UART_SetBaudrate(0,uspeed);
+	uart_rx_init();
 	
 	VS1053_HW_init(); // init spi
-//	test_upgrade();
 	extramInit();
 	printf(PSTR("\nuart speed: %d\n"),uspeed);
 	initBuffer();
 
-	wifi_set_opmode_current(STATION_MODE);
-//	Delay(10);	
+	
 	printf(PSTR("Release %s, Revision %s\n"),RELEASE,REVISION);
 	printf(PSTR("SDK %s\n"),system_get_sdk_version());
 	system_print_meminfo();
@@ -572,16 +575,16 @@ void user_init(void)
     flash_size_map size_map = system_get_flash_size_map();
 	printf (PSTR("size_map: %d\n"),size_map);
 	printf(PSTR("Flash size: %d\n"),getFlashChipRealSize());
-	
+
 	xTaskCreate(testtask, "t0", 140, NULL, 1, &pxCreatedTask); // DEBUG/TEST 130
 	printf(striTASK,"t0",pxCreatedTask);
 	xTaskCreate(uartInterfaceTask, "t1", 370, NULL, 2, &pxCreatedTask); // 350
 	printf(striTASK, "t1",pxCreatedTask);
 	xTaskCreate(vsTask, "t2", 240, NULL,5, &pxCreatedTask); //380 230
 	printf(striTASK,"t2",pxCreatedTask);
-	xTaskCreate(clientTask, "t3", 520, NULL, 6, &pxCreatedTask); // 340
+	xTaskCreate(clientTask, "t3", 500, NULL, 6, &pxCreatedTask); // 340
 	printf(striTASK,"t3",pxCreatedTask);	
-	xTaskCreate(serversTask, "t4", 360, NULL, 4, &pxCreatedTask); //380
+	xTaskCreate(serversTask, "t4", 370, NULL, 4, &pxCreatedTask); //380
 	printf(striTASK,"t4",pxCreatedTask);
 
 	printf (striHEAP,xPortGetFreeHeapSize( ));

@@ -10,15 +10,29 @@
 #define NT_PATCH	0xFD
 #define T_LED		4
 #define NT_LED		0xFB
+#define T_LEDPOL	8
+#define NT_LEDPOL	0xF7
+#define T_LOGTEL	0x10
+#define NT_LOGTEL	0xEF
+#define T_PROTECT	0x20
+#define NT_PROTECT	0xDF
 
+
+#define APMODE		0
+#define STA1		1
+#define STA2		2
+#define SSIDLEN		32
+#define PASSLEN		64
+#define HOSTLEN		24
+#define USERAGLEN	39
 struct device_settings {
 	uint8_t dhcpEn;
 	uint8_t ipAddr[4];
 	uint8_t mask[4];
 	uint8_t gate[4];
-	char ssid[32]; 
-	char ssid2[32]; 
-	char pass[64];
+	char ssid[SSIDLEN]; 
+	char ssid2[SSIDLEN]; 
+	char pass[PASSLEN];
 	uint8_t vol;
 	int8_t treble;
 	uint8_t bass;
@@ -30,7 +44,7 @@ struct device_settings {
 	uint8_t i2sspeed; // 0 = 48kHz, 1 = 96kHz, 2 = 128kHz
 	uint32_t uartspeed; // serial baud
 	uint8_t options;  // bit0:0 theme ligth blue, 1 Dark brown, bit1: 0 patch load  1 no patch, bit2: O blink led  1 led on On play
-	char ua[39]; // user agent
+	char ua[USERAGLEN]; // user agent
 	int8_t tzoffset; //timezone offset
 	uint8_t pass2[60];
 };
@@ -43,7 +57,7 @@ struct device_settings1 {
 	uint8_t ipAddr[4];		//15
 	uint8_t mask[4];		//19
 	uint8_t gate[4];		//23	
-	uint8_t pass2[64];
+	uint8_t pass2[PASSLEN];
 	char hostname[HOSTLEN];	
 	uint8_t fill[169-HOSTLEN-1];
 };
@@ -81,4 +95,8 @@ void saveDeviceSettings1(struct device_settings1 *settings);
 struct device_settings* getDeviceSettings();
 struct device_settings* getDeviceSettingsSilent();
 struct device_settings1* getDeviceSettings1(void);
-//struct device_settings* getOldDeviceSettings();
+
+
+// Protect: html page is password protected.
+void setProtect(bool);
+bool getProtect();

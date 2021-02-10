@@ -208,7 +208,7 @@ ICACHE_FLASH_ATTR void serversTask(void* pvParams) {
 								"t10",
 								stack,
 								(void *) client_sock,
-								4, 
+								6, 
 								NULL ) != pdPASS) 
 							{								
 								kprintf(PSTR("Low mem. Retrying...\n%c"),0x0d);
