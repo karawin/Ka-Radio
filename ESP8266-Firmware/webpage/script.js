@@ -755,17 +755,18 @@ function fixedEncodeURIComponent (str) {
 }
 function saveStation() {
 	var file = document.getElementById('add_path').value,
-		url = document.getElementById('add_url').value,jfile;
+		url = document.getElementById('add_url').value,jfile,jname;
 	if (!(file.substring(0, 1) === "/")) file = "/" + file;
 	console.log("Path: "+file);
     jfile = fixedEncodeURIComponent (file);
+	jname = encodeURIComponent (name);								   
 	console.log("JSON: "+jfile);
 	url = url.replace(/^https?:\/\//,'');
 	try{
 		xhr = new XMLHttpRequest();
 		xhr.open("POST","setStation",false);
 		xhr.setRequestHeader(content,ctype);
-		xhr.send("nb=" + 1+"&id=" + document.getElementById('add_slot').value + "&url=" + url + "&name=" + document.getElementById('add_name').value + "&file=" + jfile + "&ovol=" + document.getElementById('ovol').value+"&port=" + document.getElementById('add_port').value+"&&");
+		xhr.send("nb=" + 1+"&id=" + document.getElementById('add_slot').value + "&url=" + url + "&name=" + jname + "&file=" + jfile + "&ovol=" + document.getElementById('ovol').value+"&port=" + document.getElementById('add_port').value+"&&");
 		localStorage.setItem(document.getElementById('add_slot').value,"{\"Name\":\""+document.getElementById('add_name').value+"\",\"URL\":\""+url+"\",\"File\":\""+file+"\",\"Port\":\""+document.getElementById('add_port').value+"\",\"ovol\":\""+document.getElementById('ovol').value+"\"}");
 	} catch(e){console.log("error save "+e);}
 	abortStation(); // to erase the edit field

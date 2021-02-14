@@ -286,119 +286,113 @@ ICACHE_FLASH_ATTR void removePartOfString(char* origine, char* remove)
 // A metadata found. Extract the Stream title
 ICACHE_FLASH_ATTR void clientSaveMetadata(char* s,int len)
 {
-		char* t_end = NULL;
-		char* t ,*tt;
-		bool found = false;
-		if ((len == 0)||(s==NULL)) printf("clientSaveMetadata:  len:%d\n",len); 
-		if ((len > 256) ||(s == NULL) || (len == 0))
-		{
-			if (header.members.mArr[METADATA] != NULL)
-			incfree(header.members.mArr[METADATA],"metad");
-			header.members.mArr[METADATA] = NULL;
-			return;
-		}
-		t = s;
-		len = strlen(t);
+	char* t_end = NULL;
+	char* t ;
+	bool found = false;
+	if ((len == 0)||(s==NULL)) printf("clientSaveMetadata:  len:%d\n",len); 
+	if ((len > 256) ||(s == NULL) || (len == 0))
+	{
+		if (header.members.mArr[METADATA] != NULL)
+		incfree(header.members.mArr[METADATA],"metad");
+		header.members.mArr[METADATA] = NULL;
+		return;
+	}
+	t = s;
+	len = strlen(t);
 //printf("clientSaveMetadata:  len:%d   char:%s\n",len,s);
-		t_end = strstr(t,"song_spot=");
-		if (t_end != NULL)
-		{ 
-			*t_end = 0;
-			found = true;
-			removePartOfString(t, "text=");
-			removePartOfString(t, "\"");
-		}
-		else
+	t_end = strstr(t,"song_spot=");
+	if (t_end != NULL)
+	{ 
+		*t_end = 0;
+		found = true;
+		removePartOfString(t, "text=");
+		removePartOfString(t, "\"");
+	}
+	else
+	{
+		t_end = strstr(t,";StreamUrl='");
+		if (t_end != NULL) 
 		{
-			t_end = strstr(t,";StreamUrl='");
-			if (t_end != NULL) 
-			{
-				*t_end = 0;found = true;
-			} 
-		}			
-		t = strstr(t,"StreamTitle='");
-		if (t!= NULL) {t += 13;found = true;} else t = s;
-		len = strlen(t);
-		if ((t_end != NULL)&&(len >=3)) t_end -= 3;
-		else {
-			if (t_end != NULL) t_end -=1;
-			else
-			if (len >=2) {t_end = t+len-2;found = true;} 
-			else t_end = t+len;
-		}
-
-		if (found)
-		{	
-			t_end = strstr(t_end,"'");
+			*t_end = 0;found = true;
+		} 
+	}			
+	t = strstr(t,"StreamTitle='");
+	if (t!= NULL) {t += 13;found = true;} else t = s;
+	len = strlen(t);
+	if ((t_end != NULL)&&(len >=3)) t_end -= 3;
+	else {
+		if (t_end != NULL) t_end -=1;
+		else
+		if (len >=2) {t_end = t+len-2;found = true;} 
+		else t_end = t+len;
+	}
+	if (found)
+	{	
+		t_end = strstr(t_end,"'");
+		if (t_end !=NULL)
+		*t_end = 0;
+	
+		if (t!=NULL)
+		{
+			t_end = strstr(t,"||");
 			if (t_end !=NULL)
 			*t_end = 0;
-		
-			if (t!=NULL)
-			{
-				t_end = strstr(t,"||");
-				if (t_end !=NULL)
-				*t_end = 0;
-			}
+		}
 			
-		}
-		else
-		{
-			if (len >=2) len-=2; 
-		}
+	}
+	else
+	{
+		if (len >=2) len-=2; 
+	}
 
 //printf("clientSaveMetadata0:  len:%d   char:%s\n",strlen(t),t);
-
 // see if it is !=
-		tt = NULL;
-		if (t != NULL) 
-		{ 
-			tt = incmalloc((len+3)*sizeof(char));
-			if (tt != NULL)
-			{
-				strcpy(tt,t);
-				tt = stringify(tt,len); 
-			}
+	char* tt;
+	tt = incmalloc((len+5)*sizeof(char));
+	if (tt != NULL)
+	{
+		strcpy(tt,t);
+		tt = stringify(tt,len); // to compare we need to stringify
+	}
+	if  ((header.members.mArr[METADATA] == NULL)||((header.members.mArr[METADATA] != NULL)&&(t!= NULL)&&(strcmp(tt,header.members.mArr[METADATA]) != 0)))
+	{
+		if (header.members.mArr[METADATA] != NULL)
+			incfree(header.members.mArr[METADATA],"metad");
+		header.members.mArr[METADATA] = (char*)incmalloc((len+3)*sizeof(char));
+		if(header.members.mArr[METADATA] == NULL) 
+		{	printf(strcMALLOC1);
+			return;
 		}
-		if  ((header.members.mArr[METADATA] == NULL)||((header.members.mArr[METADATA] != NULL)&&(t!= NULL)&&(strcmp(tt,header.members.mArr[METADATA]) != 0)))
-		{
-			incfree(tt,"");		
-			if (header.members.mArr[METADATA] != NULL)
-				incfree(header.members.mArr[METADATA],"metad");
-			header.members.mArr[METADATA] = (char*)incmalloc((len+3)*sizeof(char));
-			if(header.members.mArr[METADATA] == NULL) 
-			{	printf(strcMALLOC1);
-				return;
-			}
 
-			strcpy(header.members.mArr[METADATA], t);
+		strcpy(header.members.mArr[METADATA], t);
 //			dump((uint8_t*)(header.members.mArr[METADATA]),strlen(header.members.mArr[METADATA]));
-			header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],len);
-			clientPrintMeta(); 
-			while ((header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == ' ')||
-				(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\r')||
-			(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\n')
-			)
-			{
-				header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] = 0; // avoid blank at end
-			}
+		header.members.mArr[METADATA] = stringify(header.members.mArr[METADATA],len);
+		clientPrintMeta(); 
+		while ((header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == ' ')||
+			(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\r')||
+		(header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] == '\n')
+		)
+		{
+			header.members.mArr[METADATA][strlen(header.members.mArr[METADATA])-1] = 0; // avoid blank at end
+		}
 
 // send station name if no metadata
-			if (strlen(header.members.mArr[METADATA])!=0)
-				t_end = header.members.mArr[METADATA];
-			else
-				t_end = (header.members.single.name ==NULL)?"":header.members.single.name;
-		
-			char* title = incmalloc(strlen(t_end)+15);
-			if (title != NULL)
-			{
+		if (strlen(header.members.mArr[METADATA])!=0)
+			t_end = header.members.mArr[METADATA];
+		else
+			t_end = (header.members.single.name ==NULL)?"":header.members.single.name;
+
+		char* title = incmalloc(strlen(t_end)+15);
+		if (title != NULL)
+		{
 //printf("sprint%d\n",1);
-				if(kasprintf(title,PSTR("{\"meta\":\"%s\"}"),t_end))
-					websocketbroadcast(title, strlen(title));
-				incfree(title,"title");
-			} else printf(strcMALLOC1,"Title"); 
-		}
-		
-//		printf("clientSaveMetadata: %s\n",header.members.mArr[METADATA]);
+			if(kasprintf(title,PSTR("{\"meta\":\"%s\"}"),t_end))
+				websocketbroadcast(title, strlen(title));
+			incfree(title,"title");
+		} else printf(strcMALLOC1,"Title"); 
+	}
+	incfree(tt,"");		
+//	printf("clientSaveMetadata: %s\n",header.members.mArr[METADATA]);
 }	
 
 // websocket: next station
