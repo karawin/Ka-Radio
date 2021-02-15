@@ -756,6 +756,7 @@ function fixedEncodeURIComponent (str) {
 function saveStation() {
 	var file = document.getElementById('add_path').value,
 		url = document.getElementById('add_url').value,jfile,jname;
+		name = document.getElementById('add_name').value;
 	if (!(file.substring(0, 1) === "/")) file = "/" + file;
 	console.log("Path: "+file);
     jfile = fixedEncodeURIComponent (file);
