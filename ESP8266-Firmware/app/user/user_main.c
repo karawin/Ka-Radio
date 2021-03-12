@@ -42,7 +42,7 @@ const char striDEF1[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Erase the database and 
 const char striAP[] ICACHE_RODATA_ATTR STORE_ATTR  = {"AP1: %s, AP2: %s\n"};
 const char striSTA1[] ICACHE_RODATA_ATTR STORE_ATTR  = {" AP1:Station Ip: %d.%d.%d.%d\n"};
 const char striSTA2[] ICACHE_RODATA_ATTR STORE_ATTR  = {" AP2:Station Ip: %d.%d.%d.%d\n"};
-const char striTRY[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Trying %s ,  I: %d status: %d\n"};
+const char striTRY[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Trying AP%d %s ,  I: %d status: %d\n"};
 const char striTASK[] ICACHE_RODATA_ATTR STORE_ATTR  = {"%s task: %x\n"};
 const char striHEAP[] ICACHE_RODATA_ATTR STORE_ATTR  = {"Heap size: %d\n"};
 const char striUART[] ICACHE_RODATA_ATTR STORE_ATTR  = {"UART READY%c"};
@@ -211,7 +211,7 @@ void initWifi()
 		memcpy(device1->pass2,device->pass2, 64);
 		saveDeviceSettings1(device1);	
 	}		
-
+	wifi_set_opmode_current(STATION_MODE);
 	wifi_station_set_auto_connect(false);
 	wifi_get_ip_info(STATION_IF, info); // ip netmask gw
 	wifi_station_get_config_default(config); //ssid passwd
@@ -261,7 +261,7 @@ void initWifi()
 		
 	while ((wifi_station_get_connect_status() != STATION_GOT_IP))
 	{	
-		printf(striTRY,config->ssid,i,wifi_station_get_connect_status());
+		printf(striTRY,ap+1,config->ssid,i,wifi_station_get_connect_status());
 		FlashOn = FlashOff = 40;
 
 		vTaskDelay(400);//  ms
@@ -315,7 +315,7 @@ void initWifi()
 			if(wifi_softap_set_config(apconfig) != true)printf(PSTR("softap failed%c%c"),0x0d,0x0d);
 			vTaskDelay(1);
 			wifi_get_ip_info(1, info);
-//					printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
+//printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
 			vTaskDelay(10);
 //			conn = true; 
 			free(apconfig);
@@ -332,8 +332,6 @@ void initWifi()
 	IPADDR2_COPY(&device->ipAddr, &info->ip);
 	IPADDR2_COPY(&device->mask, &info->netmask);
 	IPADDR2_COPY(&device->gate, &info->gw);
-	strcpy(device->ssid,config->ssid);
-	strcpy(device->pass,config->password);
 	saveDeviceSettings(device);	
 
 	printf(striSTA1,(info->ip.addr&0xff), ((info->ip.addr>>8)&0xff), ((info->ip.addr>>16)&0xff), ((info->ip.addr>>24)&0xff));
