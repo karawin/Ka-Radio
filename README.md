@@ -39,7 +39,7 @@ See also https://hackaday.io/project/11570-wifi-webradio-with-esp8266-and-vs1053
 The binaries are on ESP8266-Firmware/bin/upgrade/
 
 #### First use
-- If the acces point of your router is not known, the webradio inits itself as an AP. Connect the wifi of your computer to the ssid "WifiWebRadio",  
+- If the access point of your router is not known, the webradio inits itself as an AP. Connect the wifi of your computer to the ssid "WifiWebRadio",  
 - Browse to 192.168.4.1 to display the page, got to "setting" "Wifi" and configure your ssid ap, the password if any, the wanted IP or use dhcp if you know how to retrieve the dhcp given ip (terminal or scan of the network).
 - In the gateway field, enter the ip address of your router.
 - Validate. The equipment restart to the new configuration. Connect your wifi to your AP and browse to the ip given in configuration.
@@ -47,9 +47,8 @@ The binaries are on ESP8266-Firmware/bin/upgrade/
 - if the AP is already know by the esp8266, the default ip is given by dhcp.
 - a sample of stations list is on https://github.com/karawin/Ka-Radio/blob/master/ESP8266-Firmware/WebStations.txt . Can be uploaded via the web page.   
 - Karadio can be controlled by the web interface or by the uart interface or by telnet. List of commands: type help  
-- See the list of command at http://karadio.karawin.fr/Interface.txt
-
-g src="https://github.com/karawin/ESP8266-WebRadio/blob/master/Images/webradio3mini.jpg" alt="screenshot" border=0> 
+- See the list of command at http://karadio.karawin.fr/Interface.txt  
+<img src="https://github.com/karawin/ESP8266-WebRadio/blob/master/Images/webradio3mini.jpg" alt="screenshot" border=0> 
 
 ### Generate Ka-Radio
 see the http://karadio.karawin.fr/readme.txt file.
